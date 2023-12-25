@@ -1,0 +1,173 @@
+//
+//VOID BeforeFunctionCall(ADDRINT address, ADDRINT* message) {
+//	PIN_LockClient();
+//	RTN rtn = RTN_FindByAddress(address);
+//	if (RTN_Valid(rtn)) {
+//		string funcName = RTN_Name(rtn);
+//		TraceFile << "MessageBoxW interceptada: " << funcName << " - Mensagem original: " << (wchar_t*)*message << endl;
+//		TraceFile << "Mensagem substituída: " << newText << endl;
+//		//*message = (ADDRINT)newMessage;
+//		//wchar_t** messageArg = reinterpret_cast<wchar_t**>(&message); // O segundo argumento é o texto da mensagem
+//		//*messageArg = const_cast<wchar_t*>(newText);
+//		//*message = (ADDRINT)messageArg;
+//	}
+//	PIN_UnlockClient();
+//}
+
+//VOID BeforeFunctionCall(ADDRINT address, const wchar_t* message) {
+//    PIN_LockClient();
+//    RTN rtn = RTN_FindByAddress(address);
+//    if (RTN_Valid(rtn)) {
+//        string funcName = RTN_Name(rtn);
+//        wstring wsMessage(message); // Converte wchar_t* para wstring
+//        std::cerr << " - Mensagem: " << std::string(wsMessage.begin(), wsMessage.end()) << std::endl;
+//    }
+//    PIN_UnlockClient();
+//}
+
+
+//VOID BeforeFunctionCall(ADDRINT* args) {
+//    PIN_LockClient();
+//
+//    // Presumindo que args[1] é um ponteiro para wchar_t (string wide)
+//    wchar_t* messageArg = reinterpret_cast<wchar_t*>(args[1]);
+//
+//    // Criar wstring a partir do ponteiro wchar_t
+//    if (messageArg != nullptr) {
+//        std::wstring wsMessage(messageArg);
+//        // Aqui você precisará de uma função de conversão adequada para imprimir
+//        // A conversão direta pode não funcionar corretamente para caracteres Unicode
+//        std::wcerr << L" - Mensagem: " << wsMessage << std::endl;
+//    }
+//
+//    PIN_UnlockClient();
+//}
+
+
+
+//VOID BeforeFunctionCall(ADDRINT* args) {
+    //wchar_t* message = reinterpret_cast<wchar_t*>(args[3]); // Cast para wchar_t*
+    //wcerr << L"Mensagem interceptada: " << message << endl;
+
+    //char buffer[256]; // Ajuste o tamanho conforme necessário
+    //if (PIN_SafeCopy(buffer, reinterpret_cast<void*>(args[2]), sizeof(buffer)) > 0) {
+    //    cerr << "Mensagem interceptada: " << buffer << endl;
+    //}
+
+//}
+
+
+//
+//VOID CallbackAfterMessageBoxW(ADDRINT returnValue)
+//{
+//    // Processa o valor de retorno aqui
+//    std::cout << "Valor de retorno: " << returnValue << std::endl;
+//    returnValue = 0;
+//}
+
+//
+//VOID CallbackBeforeGetModuleHandleA(ADDRINT lpModuleName)
+//{
+//    std::cout << "lpModuleName Textzzz: " << reinterpret_cast<LPCWSTR*>(lpModuleName) << std::endl;
+//    std::cout << "lpModuleName Textzz: " << reinterpret_cast<LPCWSTR>(lpModuleName) << std::endl;
+//    std::cout << "lpModuleName Textzzzz: " << reinterpret_cast<void*>(lpModuleName) << std::endl;
+//    std::cout << "lpModuleName Textzzzz: " << lpModuleName << std::endl;
+//    std::cout << "lpModuleName Textzzzz: " << &lpModuleName << std::endl;
+//    
+//    LPCWSTR originalText = reinterpret_cast<LPCWSTR>(lpModuleName);
+//    wstring wsOriginalText(originalText);
+//    cout << "Original Text ---------------: " << std::string(wsOriginalText.begin(), wsOriginalText.end()) << std::endl;
+//
+//
+//    LPCWSTR* originalText3 = reinterpret_cast<LPCWSTR*>(lpModuleName);
+//    cout << "Original Text ---------------: " << *originalText3 << std::endl;
+//
+//}
+//
+//
+//
+//
+//VOID CallbackAfterGetModuleHandleA(ADDRINT returnValue, ADDRINT lpModuleName)
+//{
+//    if (lpModuleName != 0) {
+//        std::cout << "lpModuleName Text: " << reinterpret_cast<LPCWSTR*>(lpModuleName) << std::endl;
+//        std::cout << "lpModuleName Text: " << reinterpret_cast<LPCWSTR>(lpModuleName) << std::endl;
+//        std::cout << "lpModuleName Text: " << reinterpret_cast<void*>(lpModuleName) << std::endl;
+//        char moduleName[256] = { 0 };
+//        PIN_SafeCopy(moduleName, reinterpret_cast<void*>(lpModuleName), sizeof(moduleName));
+//        std::cout << "lpModuleName Text: " << moduleName << std::endl;
+//    }
+//    else {
+//        std::cout << "lpModuleName é NULL" << std::endl;
+//    }
+//
+//    std::cout << "GetModuleHandleA chamada com lpModuleName: " << lpModuleName << " (Endereço)" << std::endl;
+//    std::cout << "Valor de retorno: " << returnValue << std::endl;
+//}
+
+
+//
+//VOID CallbackAfterGetModuleHandleA(ADDRINT returnValue, ADDRINT lpModuleName)
+//{
+//    const char* moduleNameStr = reinterpret_cast<const char*>(lpModuleName);
+//
+//    if (lpModuleName != 0) {
+//        char moduleNameBuffer[256] = { 0 };
+//        PIN_SafeCopy(moduleNameBuffer, moduleNameStr, sizeof(moduleNameBuffer));
+//        std::cout << "GetModuleHandleA foi chamada com lpModuleName: " << moduleNameBuffer << std::endl;
+//    }
+//    else {
+//        std::cout << "GetModuleHandleA foi chamada com lpModuleName: NULL" << std::endl;
+//    }
+//
+//    std::cout << "GetModuleHandleA retornou: " << returnValue << std::endl;
+//}
+
+
+//VOID CallbackAfterGetModuleHandleA(ADDRINT returnValue)
+//{
+//    std::cout << "GetModuleHandleA retornou returnValue: " << returnValue << std::endl;
+//}
+
+
+
+/*RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfterMessageBoxW),
+                        IARG_PROTOTYPE, protoMessageBoxW,
+                        IARG_FUNCRET_EXITPOINT_VALUE, IARG_END);*/
+
+
+                    //PROTO protoGetModuleHandleA = PROTO_Allocate(PIN_PARG(INT32), CALLINGSTD_STDCALL,
+                    //    "GetModuleHandleA",
+                    //    PIN_PARG(ADDRINT),  // LPCSTR é tratado como ADDRINT (ponteiro)
+                    //    PIN_PARG_END());
+
+
+                    //RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBeforeGetModuleHandleA),
+                    //    IARG_FUNCARG_ENTRYPOINT_REFERENCE, 0, // Passa todos os argumentos
+                    ////    IARG_END);
+
+                    //RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBeforeGetModuleHandleA),
+                    //    IARG_PROTOTYPE, protoGetModuleHandleA,
+                    //    IARG_REG_REFERENCE, REG_GAX, // ou outro registrador conforme a convenção de chamada
+                    //    IARG_END);
+
+                    //RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfterGetModuleHandleA),
+                    //    IARG_PROTOTYPE, protoGetModuleHandleA,
+                    //    IARG_FUNCRET_EXITPOINT_VALUE, // Para capturar o valor de retorno
+                    //    IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
+                    //    IARG_END);
+
+
+
+                    // Antes da função ser chamada
+                    //RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBeforeGetModuleHandleA),
+                    //    IARG_PROTOTYPE, protoGetModuleHandleA,
+                    //    IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
+                    //    IARG_END);
+
+                    // Após a função retornar
+                    //RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfterGetModuleHandleA),
+                    //    IARG_PROTOTYPE, protoGetModuleHandleA,
+                    //    IARG_FUNCRET_EXITPOINT_VALUE, // Para capturar o valor de retorno
+                    //    IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
+                    //    IARG_END);
