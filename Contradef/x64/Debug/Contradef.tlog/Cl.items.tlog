@@ -1,1 +1,15 @@
 C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Contradef.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstBlockInput.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstBlockInput.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCheckRemoteDebuggerPresent.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetAsyncKeyState.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetAsyncKeyState.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetForegroundWindow.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetModuleHandleA.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetModuleHandleW.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetTickCount.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetTickCount.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstIsDebuggerPresent.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstIsDebuggerPresent.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQuerySystemInformation.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugString.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstOutputDebugString.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstQueryPerformanceCounter.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegOpenKeyEx.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueEx.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationProcess.obj

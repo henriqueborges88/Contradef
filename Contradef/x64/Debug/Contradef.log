@@ -4,35 +4,109 @@ cl : linha de comando  warning D9002: ignorando opção desconhecida '/FP:strict
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstBlockInput.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstCheckRemoteDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstGetAsyncKeyState.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstGetForegroundWindow.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstGetModuleHandleA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstGetModuleHandleW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstGetTickCount.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstIsDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstNtQuerySystemInformation.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstOutputDebugString.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstQueryPerformanceCounter.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstRegOpenKeyEx.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstRegQueryValueEx.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueEx.cpp(61,21): warning C4477: 'wprintf': a cadeia de formato '%ls' requer um argumento do tipo 'wchar_t *', mas um argumento variadic 1 tem o tipo 'const ADDRINT'
+  InstNtQueryInformationProcess.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  Gerando Código...
      Criando biblioteca C:\Users\henri\source\repos\Contradef\x64\Debug\Contradef.lib e objeto C:\Users\henri\source\repos\Contradef\x64\Debug\Contradef.exp
 LINK : warning LNK4281: endereço básico 0xC5000000 indesejável para imagem x64. Defina o endereço básico acima de 4 GB para melhor otimização de ASLR
 crtbeginS.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 Contradef.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstBlockInput.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstCheckRemoteDebuggerPresent.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstGetAsyncKeyState.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstGetModuleHandleA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstGetModuleHandleW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstNtQuerySystemInformation.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstOutputDebugString.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstQueryPerformanceCounter.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstRegOpenKeyEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstRegQueryValueEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstNtQueryInformationProcess.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(ms_dllcrt.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(message.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_api_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(pin_client.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(opin_client.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(image.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(util_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(message.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(util.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(knob.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(version.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(sysfuncs_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(reg_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(reg_partial_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(bbl.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(comment.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_syscall_ia32_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(operand_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_inits_api_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(rel.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(stat.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(bigarray.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(parser.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(reg_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(version.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(base_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(sysfuncs_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(exception.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(stripe.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(ext.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(bbl.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(calling_standard_ia32e.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(operand_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_api_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(vmtool.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(thread_client.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(debugger_client.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
@@ -52,19 +126,15 @@ pin.lib(img.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inici
 pin.lib(symbol_elf.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(edg.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(util_unicode_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(tool_mmap.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(cpu_info_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(chunk.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(rel.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(val.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(comment.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(cfg.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(ins_map_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_inits_api_xed_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(val.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(ins_reuse_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(flags_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(tool_mmap.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(regset_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(reg_partial_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_syscall_ia32_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(child_process.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(elf_parser.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(sm_client.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
@@ -74,8 +144,7 @@ pin.lib(modules_win.cpp.obj) : warning LNK4210: seção .CRT existe; podem exist
 pin.lib(sm_dbginfo.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(sm_ipc.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(elf_windows.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(reg.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(cfg_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-pin.lib(ins_reuse_ia32.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+pin.lib(reg.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 crtbeginS.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
   Contradef.vcxproj -> C:\Users\henri\source\repos\Contradef\x64\Debug\Contradef.dll

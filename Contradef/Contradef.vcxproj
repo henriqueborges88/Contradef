@@ -176,6 +176,36 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Contradef.cpp" />
+    <ClCompile Include="InstBlockInput.cpp" />
+    <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
+    <ClCompile Include="InstGetAsyncKeyState.cpp" />
+    <ClCompile Include="InstGetForegroundWindow.cpp" />
+    <ClCompile Include="InstGetModuleHandleA.cpp" />
+    <ClCompile Include="InstGetModuleHandleW.cpp" />
+    <ClCompile Include="InstGetTickCount.cpp" />
+    <ClCompile Include="InstIsDebuggerPresent.cpp" />
+    <ClCompile Include="InstNtQuerySystemInformation.cpp" />
+    <ClCompile Include="InstOutputDebugString.cpp" />
+    <ClCompile Include="InstQueryPerformanceCounter.cpp" />
+    <ClCompile Include="InstRegOpenKeyEx.cpp" />
+    <ClCompile Include="InstRegQueryValueEx.cpp" />
+    <ClCompile Include="InstNtQueryInformationProcess.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="InstBlockInput.h" />
+    <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
+    <ClInclude Include="InstGetAsyncKeyState.h" />
+    <ClInclude Include="InstGetForegroundWindow.h" />
+    <ClInclude Include="InstGetModuleHandleA.h" />
+    <ClInclude Include="InstGetModuleHandleW.h" />
+    <ClInclude Include="InstGetTickCount.h" />
+    <ClInclude Include="InstIsDebuggerPresent.h" />
+    <ClInclude Include="InstNtQuerySystemInformation.h" />
+    <ClInclude Include="InstOutputDebugString.h" />
+    <ClInclude Include="InstQueryPerformanceCounter.h" />
+    <ClInclude Include="InstRegOpenKeyEx.h" />
+    <ClInclude Include="InstRegQueryValueEx.h" />
+    <ClInclude Include="InstNtQueryInformationProcess.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
