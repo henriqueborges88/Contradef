@@ -3,6 +3,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstBlockInput.cpp;C:\Users\henr
 C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCheckRemoteDebuggerPresent.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetAsyncKeyState.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetAsyncKeyState.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetForegroundWindow.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetModuleFileNameA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetModuleHandleA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetModuleHandleW.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetTickCount.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetTickCount.obj

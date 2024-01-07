@@ -15,7 +15,7 @@ VOID InstNtQuerySystemInformation::CallbackBefore(ADDRINT instrPtr, ADDRINT Syst
 
     argsMap[instrPtr] = args;
 
-    std::cout << "[Contradef] NtQuerySystemInformation será chamada com os seguintes parâmetros:" << std::endl;
+    // std::cout << "[Contradef] NtQuerySystemInformation será chamada com os seguintes parâmetros:" << std::endl;
     // Impressão dos parâmetros
 }
 
@@ -26,7 +26,7 @@ VOID InstNtQuerySystemInformation::CallbackAfter(ADDRINT instrPtr, ADDRINT* retV
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 
-    std::cout << "[Contradef] Valor de retorno de NtQuerySystemInformation: " << *retValAddr << std::endl;
+    // std::cout << "[Contradef] Valor de retorno de NtQuerySystemInformation: " << *retValAddr << std::endl;
 }
 
 VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
@@ -38,7 +38,9 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         PIN_PARG(ADDRINT), // ReturnLength
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoNtQuerySystemInformation,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
@@ -47,7 +49,7 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoNtQuerySystemInformation,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
@@ -56,6 +58,8 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoNtQuerySystemInformation);
 }

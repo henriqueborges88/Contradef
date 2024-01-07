@@ -63,146 +63,13 @@ https://ntdoc.m417z.com/processinfoclass
 
 Outras estruturas: https://www.cin.ufpe.br/~frsn/arquivos/GnuWin32/include/ddk/ntapi.h
 */
-typedef enum _PROCESSINFOCLASS
-{
-    ProcessBasicInformation, // q: PROCESS_BASIC_INFORMATION, PROCESS_EXTENDED_BASIC_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessQuotaLimits, // qs: QUOTA_LIMITS, QUOTA_LIMITS_EX // Themida antianalisys, é antidebug?
-    ProcessIoCounters, // q: IO_COUNTERS
-    ProcessVmCounters, // q: VM_COUNTERS, VM_COUNTERS_EX, VM_COUNTERS_EX2 // Themida antianalisys, é antidebug?
-    ProcessTimes, // q: KERNEL_USER_TIMES
-    ProcessBasePriority, // s: KPRIORITY
-    ProcessRaisePriority, // s: ULONG
-    ProcessDebugPort, // q: HANDLE // Debug present
-    ProcessExceptionPort, // s: PROCESS_EXCEPTION_PORT (requires SeTcbPrivilege)
-    ProcessAccessToken, // s: PROCESS_ACCESS_TOKEN
-    ProcessLdtInformation, // qs: PROCESS_LDT_INFORMATION // 10
-    ProcessLdtSize, // s: PROCESS_LDT_SIZE
-    ProcessDefaultHardErrorMode, // qs: ULONG
-    ProcessIoPortHandlers, // (kernel-mode only) // s: PROCESS_IO_PORT_HANDLER_INFORMATION
-    ProcessPooledUsageAndLimits, // q: POOLED_USAGE_AND_LIMITS
-    ProcessWorkingSetWatch, // q: PROCESS_WS_WATCH_INFORMATION[]; s: void
-    ProcessUserModeIOPL, // qs: ULONG (requires SeTcbPrivilege)
-    ProcessEnableAlignmentFaultFixup, // s: BOOLEAN
-    ProcessPriorityClass, // qs: PROCESS_PRIORITY_CLASS
-    ProcessWx86Information, // qs: ULONG (requires SeTcbPrivilege) (VdmAllowed)
-    ProcessHandleCount, // q: ULONG, PROCESS_HANDLE_INFORMATION // 20
-    ProcessAffinityMask, // (q >WIN7)s: KAFFINITY, qs: GROUP_AFFINITY
-    ProcessPriorityBoost, // qs: ULONG
-    ProcessDeviceMap, // qs: PROCESS_DEVICEMAP_INFORMATION, PROCESS_DEVICEMAP_INFORMATION_EX
-    ProcessSessionInformation, // q: PROCESS_SESSION_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessForegroundInformation, // s: PROCESS_FOREGROUND_BACKGROUND
-    ProcessWow64Information, // q: ULONG_PTR // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessImageFileName, // q: UNICODE_STRING // Themida antianalisys, é antidebug? Pesquisar mais e ver o processamento posterior se tem algum tratamento para nomes de arquivos ou processos 
-    ProcessLUIDDeviceMapsEnabled, // q: ULONG
-    ProcessBreakOnTermination, // qs: ULONG
-    ProcessDebugObjectHandle, // q: HANDLE // 30 // Debug present
-    ProcessDebugFlags, // qs: ULONG // Debug present
-    ProcessHandleTracing, // q: PROCESS_HANDLE_TRACING_QUERY; s: PROCESS_HANDLE_TRACING_ENABLE[_EX] or void to disable
-    ProcessIoPriority, // qs: IO_PRIORITY_HINT
-    ProcessExecuteFlags, // qs: ULONG (MEM_EXECUTE_OPTION_*)
-    ProcessTlsInformation, // PROCESS_TLS_INFORMATION // ProcessResourceManagement
-    ProcessCookie, // q: ULONG
-    ProcessImageInformation, // q: SECTION_IMAGE_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessCycleTime, // q: PROCESS_CYCLE_TIME_INFORMATION // since VISTA
-    ProcessPagePriority, // qs: PAGE_PRIORITY_INFORMATION
-    ProcessInstrumentationCallback, // s: PVOID or PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION // 40  // Debug present
-    ProcessThreadStackAllocation, // s: PROCESS_STACK_ALLOCATION_INFORMATION, PROCESS_STACK_ALLOCATION_INFORMATION_EX
-    ProcessWorkingSetWatchEx, // q: PROCESS_WS_WATCH_INFORMATION_EX[]; s: void
-    ProcessImageFileNameWin32, // q: UNICODE_STRING
-    ProcessImageFileMapping, // q: HANDLE (input)
-    ProcessAffinityUpdateMode, // qs: PROCESS_AFFINITY_UPDATE_MODE
-    ProcessMemoryAllocationMode, // qs: PROCESS_MEMORY_ALLOCATION_MODE
-    ProcessGroupInformation, // q: USHORT[]
-    ProcessTokenVirtualizationEnabled, // s: ULONG  // pode ser antidebug? Pesquisar mais
-    ProcessConsoleHostProcess, // qs: ULONG_PTR // ProcessOwnerInformation
-    ProcessWindowInformation, // q: PROCESS_WINDOW_INFORMATION // 50
-    ProcessHandleInformation, // q: PROCESS_HANDLE_SNAPSHOT_INFORMATION // since WIN8
-    ProcessMitigationPolicy, // s: PROCESS_MITIGATION_POLICY_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessDynamicFunctionTableInformation, // s: PROCESS_DYNAMIC_FUNCTION_TABLE_INFORMATION
-    ProcessHandleCheckingMode, // qs: ULONG; s: 0 disables, otherwise enables
-    ProcessKeepAliveCount, // q: PROCESS_KEEPALIVE_COUNT_INFORMATION
-    ProcessRevokeFileHandles, // s: PROCESS_REVOKE_FILE_HANDLES_INFORMATION
-    ProcessWorkingSetControl, // s: PROCESS_WORKING_SET_CONTROL (requires SeDebugPrivilege)
-    ProcessHandleTable, // q: ULONG[] // since WINBLUE
-    ProcessCheckStackExtentsMode, // qs: ULONG // KPROCESS->CheckStackExtents (CFG)
-    ProcessCommandLineInformation, // q: UNICODE_STRING // 60
-    ProcessProtectionInformation, // q: PS_PROTECTION
-    ProcessMemoryExhaustion, // s: PROCESS_MEMORY_EXHAUSTION_INFO // since THRESHOLD
-    ProcessFaultInformation, // s: PROCESS_FAULT_INFORMATION
-    ProcessTelemetryIdInformation, // q: PROCESS_TELEMETRY_ID_INFORMATION
-    ProcessCommitReleaseInformation, // qs: PROCESS_COMMIT_RELEASE_INFORMATION
-    ProcessDefaultCpuSetsInformation, // qs: SYSTEM_CPU_SET_INFORMATION[5]
-    ProcessAllowedCpuSetsInformation, // qs: SYSTEM_CPU_SET_INFORMATION[5]
-    ProcessSubsystemProcess,
-    ProcessJobMemoryInformation, // q: PROCESS_JOB_MEMORY_INFO
-    ProcessInPrivate, // q: BOOLEAN; s: void // ETW // since THRESHOLD2 // 70
-    ProcessRaiseUMExceptionOnInvalidHandleClose, // qs: ULONG; s: 0 disables, otherwise enables
-    ProcessIumChallengeResponse,
-    ProcessChildProcessInformation, // q: PROCESS_CHILD_PROCESS_INFORMATION
-    ProcessHighGraphicsPriorityInformation, // qs: BOOLEAN (requires SeTcbPrivilege)
-    ProcessSubsystemInformation, // q: SUBSYSTEM_INFORMATION_TYPE // since REDSTONE2
-    ProcessEnergyValues, // q: PROCESS_ENERGY_VALUES, PROCESS_EXTENDED_ENERGY_VALUES
-    ProcessPowerThrottlingState, // qs: POWER_THROTTLING_PROCESS_STATE
-    ProcessReserved3Information, // ProcessActivityThrottlePolicy // PROCESS_ACTIVITY_THROTTLE_POLICY
-    ProcessWin32kSyscallFilterInformation, // q: WIN32K_SYSCALL_FILTER
-    ProcessDisableSystemAllowedCpuSets, // s: BOOLEAN // 80
-    ProcessWakeInformation, // q: PROCESS_WAKE_INFORMATION
-    ProcessEnergyTrackingState, // qs: PROCESS_ENERGY_TRACKING_STATE
-    ProcessManageWritesToExecutableMemory, // MANAGE_WRITES_TO_EXECUTABLE_MEMORY // since REDSTONE3
-    ProcessCaptureTrustletLiveDump,
-    ProcessTelemetryCoverage, // q: TELEMETRY_COVERAGE_HEADER; s: TELEMETRY_COVERAGE_POINT
-    ProcessEnclaveInformation, // Themida antianalisys, é antidebug? Pesquisar mais <-----------------
-    ProcessEnableReadWriteVmLogging, // qs: PROCESS_READWRITEVM_LOGGING_INFORMATION
-    ProcessUptimeInformation, // q: PROCESS_UPTIME_INFORMATION
-    ProcessImageSection, // q: HANDLE
-    ProcessDebugAuthInformation, // since REDSTONE4 // 90
-    ProcessSystemResourceManagement, // s: PROCESS_SYSTEM_RESOURCE_MANAGEMENT
-    ProcessSequenceNumber, // q: ULONGLONG
-    ProcessLoaderDetour, // since REDSTONE5
-    ProcessSecurityDomainInformation, // q: PROCESS_SECURITY_DOMAIN_INFORMATION
-    ProcessCombineSecurityDomainsInformation, // s: PROCESS_COMBINE_SECURITY_DOMAINS_INFORMATION
-    ProcessEnableLogging, // qs: PROCESS_LOGGING_INFORMATION
-    ProcessLeapSecondInformation, // qs: PROCESS_LEAP_SECOND_INFORMATION
-    ProcessFiberShadowStackAllocation, // s: PROCESS_FIBER_SHADOW_STACK_ALLOCATION_INFORMATION // since 19H1
-    ProcessFreeFiberShadowStackAllocation, // s: PROCESS_FREE_FIBER_SHADOW_STACK_ALLOCATION_INFORMATION
-    ProcessAltSystemCallInformation, // s: PROCESS_SYSCALL_PROVIDER_INFORMATION // since 20H1 // 100
-    ProcessDynamicEHContinuationTargets, // s: PROCESS_DYNAMIC_EH_CONTINUATION_TARGETS_INFORMATION
-    ProcessDynamicEnforcedCetCompatibleRanges, // s: PROCESS_DYNAMIC_ENFORCED_ADDRESS_RANGE_INFORMATION // since 20H2
-    ProcessCreateStateChange, // since WIN11
-    ProcessApplyStateChange,
-    ProcessEnableOptionalXStateFeatures, // s: ULONG64 // optional XState feature bitmask
-    ProcessAltPrefetchParam, // since 22H1
-    ProcessAssignCpuPartitions,
-    ProcessPriorityClassEx, // s: PROCESS_PRIORITY_CLASS_EX
-    ProcessMembershipInformation, // q: PROCESS_MEMBERSHIP_INFORMATION
-    ProcessEffectiveIoPriority, // q: IO_PRIORITY_HINT
-    ProcessEffectivePagePriority, // q: ULONG
-    MaxProcessInfoClass
-} PROCESSINFOCLASS;
-
-/*
-classes usadas para detecção de debug e antianalise:
-    ProcessBasicInformation, // q: PROCESS_BASIC_INFORMATION, PROCESS_EXTENDED_BASIC_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessQuotaLimits, // qs: QUOTA_LIMITS, QUOTA_LIMITS_EX // Themida antianalisys, é antidebug?
-    ProcessVmCounters, // q: VM_COUNTERS, VM_COUNTERS_EX, VM_COUNTERS_EX2 // Themida antianalisys, é antidebug?
-    ProcessDebugPort, // q: HANDLE // Debug present
-    ProcessSessionInformation, // q: PROCESS_SESSION_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessWow64Information, // q: ULONG_PTR // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessImageFileName, // q: UNICODE_STRING // Themida antianalisys, é antidebug? Pesquisar mais e ver o processamento posterior se tem algum tratamento para nomes de arquivos ou processos
-    ProcessDebugObjectHandle, // q: HANDLE // 30 // Debug present
-    ProcessDebugFlags, // qs: ULONG // Debug present
-    ProcessImageInformation, // q: SECTION_IMAGE_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessInstrumentationCallback, // s: PVOID or PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION // 40  // Debug present
-    ProcessTokenVirtualizationEnabled, // s: ULONG  // pode ser antidebug? Pesquisar mais
-    ProcessMitigationPolicy, // s: PROCESS_MITIGATION_POLICY_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessEnclaveInformation, // Themida antianalisys, é antidebug? Pesquisar mais <-----------------
-
-*/
-
 
 std::map<ADDRINT, NtQueryInformationProcessArgs> InstNtQueryInformationProcess::argsMap;
+ADDRINT InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS;
+DWORD InstNtQueryInformationProcess::NtGlobalFlag = -1;
 
 VOID InstNtQueryInformationProcess::CallbackBefore(ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
+
     NtQueryInformationProcessArgs args;
     args.ProcessHandle = ProcessHandle;
     args.ProcessInformationClass = ProcessInformationClass;
@@ -211,31 +78,289 @@ VOID InstNtQueryInformationProcess::CallbackBefore(ADDRINT instrPtr, ADDRINT Pro
     args.ReturnLength = ReturnLength;
 
     argsMap[instrPtr] = args;
-
+    /*
     std::cout << "[Contradef] NtQueryInformationProcess será chamada com os seguintes parâmetros:" << std::endl;
     std::cout << "[Contradef] ProcessHandle: " << ProcessHandle << std::endl;
     std::cout << "[Contradef] ProcessInformationClass: " << ProcessInformationClass << std::endl;
     std::cout << "[Contradef] ProcessInformation: " << ProcessInformation << std::endl;
     std::cout << "[Contradef] ProcessInformationLength: " << ProcessInformationLength << std::endl;
     std::cout << "[Contradef] ReturnLength (Endereço): " << ReturnLength << std::endl;
+    */
 
 }
 
 VOID InstNtQueryInformationProcess::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
-    auto it = argsMap.find(instrPtr);
+    auto it = argsMap.find(instrPtr-20);
     if (it != argsMap.end()) {
         const NtQueryInformationProcessArgs& args = it->second;
 
         // Utilizar os valores armazenados
-        std::cout << "[Contradef] NtQueryInformationProcess foi chamada com ProcessInformationClass: " << args.ProcessInformationClass << std::endl;
+        //std::cout << "[Contradef] NtQueryInformationProcess foi chamada com ProcessInformationClass: " << args.ProcessInformationClass << std::endl;
+        //std::cout << "[Contradef] NtQueryInformationProcess foi chamada com ProcessInformation: " << args.ProcessInformation << std::endl;
+        
+        // ADDRINT ProcessInformation é alterado no retorno, posivelmente por alguma manipulação do registrador durante a execução da funçaõ.
+
+        if (ProcessInformationClass == ProcessBasicInformation) {
+            // Verifica se ProcessInformation é um ponteiro válido
+            if (args.ProcessInformation != NULL) {
+                PROCESS_BASIC_INFORMATION* pbi = reinterpret_cast<PROCESS_BASIC_INFORMATION*>(args.ProcessInformation);
+
+                // 32 bits
+                // DWORD ptr = (DWORD)pbi->PebBaseAddress;
+                // ptr |= 0x68;
+                // DWORD* NtGlobalFlagPtr = reinterpret_cast<DWORD*>(ptr);
+
+                // 64 bits
+                DWORD_PTR pebBaseAddress = reinterpret_cast<DWORD_PTR>(pbi->PebBaseAddress);
+                if (PIN_CheckReadAccess(reinterpret_cast<void*>(pebBaseAddress))) {
+                    // Considerando que 0xBC é o offset para NtGlobalFlag no PEB
+                    DWORD_PTR NtGlobalFlagPtrAddress = pebBaseAddress + 0xBC;
+                    DWORD* NtGlobalFlagPtr = reinterpret_cast<DWORD*>(NtGlobalFlagPtrAddress);
+
+                    if (PIN_CheckReadAccess(reinterpret_cast<void*>(NtGlobalFlagPtr))) {
+                        TARGET_MEMORY_ADDRESS = reinterpret_cast<ADDRINT>(NtGlobalFlagPtr);
+                        NtGlobalFlag = *NtGlobalFlagPtr; // Salvar o valor de NtGlobalFlag
+
+                        //std::cout << "[Contradef] NtGlobalFlagPtr (Endereço): " << std::hex << TARGET_MEMORY_ADDRESS << std::endl;
+                        //std::cout << "[Contradef] NtGlobalFlagPtr (Valor): " << std::hex << *NtGlobalFlagPtr << std::endl;
+                    }
+                }
+
+            }
+        }
 
         // Limpeza após o uso
         argsMap.erase(it);
     }
 
-    std::cout << "[Contradef] Valor de retorno de NtQueryInformationProcess: " << *retValAddr << std::endl;
+    //std::cout << "[Contradef] Valor de retorno de NtQueryInformationProcess: " << *retValAddr << std::endl;
 
 }
+
+
+/// transferir funçoes para o main
+// Variável de estado para rastrear o progresso na identificação da sequência
+
+
+
+
+// Lista de registradores permitidos para instrumentação
+REG init[] = {
+    REG_GAX,
+    REG_GBX,
+    REG_GCX,
+    REG_GDX,
+    REG_GSI,
+    REG_GDI,
+    REG_GBP,
+    REG_SEG_SS,
+    REG_SEG_CS,
+    REG_SEG_DS,
+    REG_SEG_ES,
+    REG_SEG_FS,
+    REG_SEG_GS,
+    REG_R8,
+    REG_R9,
+    REG_R10,
+    REG_R11,
+    REG_R12,
+    REG_R13,
+    REG_R14,
+    REG_R15,
+};
+std::set<REG> permittedRegisters(init, init + sizeof(init) / sizeof(init[0]));
+
+// Função para verificar se um registrador está na lista permitida
+bool InstNtQueryInformationProcess::IsRegisterPermitted(const REG& regName) {
+    return permittedRegisters.find(regName) != permittedRegisters.end();
+}
+
+VOID FetchInsCode(INS ins) {
+    
+    PIN_LockClient();
+
+    // Obter o endereço da instrução
+    ADDRINT address = INS_Address(ins);
+
+    // Definir um buffer para armazenar o código binário da instrução
+    std::vector<UINT8> buffer(15); //15 bytes -> x64bits Tamanho máximo para uma instrução x86/64
+
+    EXCEPTION_INFO exceptInfo;
+
+    // Buscar o código binário da instrução
+    if (PIN_FetchCode(reinterpret_cast<UINT8*>(&buffer[0]), (VOID*)address, 15, &exceptInfo)) {
+        std::cout << "Instrução em 0x" << std::hex << address << ": ";
+        for (UINT8 byte : buffer) {
+            std::cout << std::hex << static_cast<unsigned>(byte);
+        }
+        std::cout << std::endl;
+    }
+    //else {
+    //    std::cout << "Falha ao buscar o código da instrução em 0x" << std::hex << address << std::endl;
+    //}
+
+    PIN_UnlockClient();
+
+}
+
+// Callback de análise para ler um valor de memória
+VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDRINT instAddress, ADDRINT memoryAddress, UINT32 readSize) {
+    /*std::cout << "instAddress" << instAddress << std::endl;
+    //std::cout << "memoryAddress" << memoryAddress << std::endl;
+    //std::cout << "readSize" << readSize << std::endl;*/
+        
+    if (InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS != 0 && InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS == memoryAddress) {
+        if (INS_Opcode(ins) != XED_ICLASS_CMP && INS_Opcode(ins) != XED_ICLASS_CMOVZ && INS_Opcode(ins) != XED_ICLASS_CMOVNZ) {
+            //return;
+        }
+        
+        
+        int numOperands = INS_OperandCount(ins);
+        for (int i = 0; i < numOperands; ++i) {
+            // Verificar se o operando é imediato
+            // O valor de memória procurado é dinamico, então não pode estar como valor imediato (constante)
+            // Porem, o operando a ser comparado com o valor em memoria pode conter o valor 0
+            if (INS_OperandIsImmediate(ins, i)) {
+                ADDRINT imm = INS_OperandImmediate(ins, i);
+                //std::cout << "Valor do operando imediato: " << imm << std::endl;
+            }
+
+            // Verificar se o operando é do tipo registrador
+            //if (INS_OperandIsReg(ins, i)) {
+            //    REG reg = INS_OperandReg(ins, i);
+            //    ADDRINT regValue = PIN_GetContextReg(ctxt, reg);
+
+            //    // Imprimir o valor do registrador em hexadecimal
+            //    //std::cout << std::hex << std::showbase;  // Configurar o fluxo de saída para hexadecimal
+            //    std::cout << "Valor do registrador " << REG_StringShort(reg) << ": " << regValue << std::endl;
+            //    //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
+            //}
+
+            // Verificar se o operando é do tipo memória
+            if (INS_OperandIsMemory(ins, i)) {
+                // Se necessário inserir alguma rotina de verificação
+            }
+
+        }
+
+
+        //FetchInsCode(ins);
+                
+
+        // Realizar a leitura do valor em memoria
+        int valueAtNtGlobalFlagAddress = *reinterpret_cast<int*>(TARGET_MEMORY_ADDRESS);
+
+        if (valueAtNtGlobalFlagAddress != NtGlobalFlag) {
+            return;
+        }
+
+
+        PIN_LockClient();
+        
+        
+        IMG img = IMG_FindByAddress(instAddress);
+        if (!IMG_IsMainExecutable(img)) {
+            // Se a leitura não ocorre na imagem principal (executavel)
+            return;
+        }
+
+        // Caso seja necessário verificar instruções em outra imagem
+        //if (IMG_Valid(img)) {
+        //    std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
+        //        << " pertence à imagem " << IMG_Name(img) << std::endl;
+        //}
+        //else {
+        //    std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
+        //        << " não está em nenhuma imagem mapeada." << std::endl;
+        //}
+        //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
+
+        
+        // Obter a disassemblagem da instrução
+        std::string disassembledInstruction = INS_Disassemble(ins);
+
+        // Obter a RTN da instrução atual
+        RTN rtn = INS_Rtn(ins);
+        // Verificar se a RTN é válida
+        if (RTN_Valid(rtn)) {
+            // Obter o nome da rotina
+            std::string rtnName = RTN_Name(rtn);
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << std::endl;
+        }
+        else {
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << std::endl;
+        }
+        PIN_UnlockClient();
+
+        InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS = 0;
+
+    }
+}
+
+// Callback de análise para ler um valor de um registrador
+VOID InstNtQueryInformationProcess::RegContentAnalysisRoutine(CONTEXT* ctxt, REG regToInspect) {
+    ADDRINT regValue = PIN_GetContextReg(ctxt, regToInspect);
+    //std::cout << "Valor do registrador: " << REG_StringShort(regToInspect) << " = " << regValue << std::endl;
+    if (InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS != 0 && InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS == regValue) {
+        std::cout << "-----Endereço de memória para o NtGlobalFlagPtr foi acessado em uma instrução CMP por meio do registrador " << REG_StringShort(regToInspect) << "com valor " << regValue << std::endl;
+    }
+}
+
+VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
+    /*
+    Procurar em qual registrador é armazenado o valor NtGlobalFlagPtr e logo se tem um CMP com 0 na sequencia (cmp dword ptr [rbx], 0)
+    */
+    if (INS_IsMemoryRead(ins) ) { // 
+        // CMP identificado
+
+        // Obter a disassemblagem da instrução
+        //std::string disassembledInstruction = INS_Disassemble(ins);
+        // Imprimir a disassemblagem
+        //std::cout << disassembledInstruction << std::endl;
+
+        // Verificar se tem ao menos dois operandos
+        if (INS_OperandCount(ins) > 1) {
+            // Obter o número de operandos
+            int numOperands = INS_OperandCount(ins);
+
+            for (int i = 0; i < numOperands; ++i) {
+                // Verificar se o operando é imediato
+                // O valor de memória procurado é dinamico, então não pode estar como valor imediato (constante)
+                // Porem, o operando a ser comparado com o valor em memoria pode conter o valor 0
+                if (INS_OperandIsImmediate(ins, i)) {
+                    ADDRINT imm = INS_OperandImmediate(ins, i);
+                }
+
+                // Verificar se o operando é do tipo registrador
+                if (INS_OperandIsReg(ins, i)) {
+                    REG reg = INS_OperandReg(ins, i);
+                    if (IsRegisterPermitted(reg)) {
+                        // Inserir o callback de análise antes da execução da instrução
+                        // Habilitar no cado de uma verificação mais exaustiva. Pode reduzir a acuracia pois a verificação é aplicada sob o endereço de memoria como valor do registrador
+                        /*INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)RegContentAnalysisRoutine,
+                            IARG_CONTEXT,
+                            IARG_UINT32, reg,
+                            IARG_END);*/
+                    }
+                }
+
+                // Verificar se o operando é do tipo memória
+                if (INS_OperandIsMemory(ins, i)) {
+                    // Inserir um callback de análise antes da instrução
+                    INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)ReadMemoryValue,
+                        IARG_CONTEXT,
+                        IARG_PTR, ins,
+                        IARG_INST_PTR,
+                        IARG_MEMORYREAD_EA,
+                        IARG_MEMORYREAD_SIZE,
+                        IARG_END);
+                }
+            }
+        }
+    }
+}
+
+// Fin transferir
 
 VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
     PROTO protoNtQueryInformationProcess = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
@@ -247,7 +372,9 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
         PIN_PARG(ADDRINT),   // ReturnLength
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoNtQueryInformationProcess,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
@@ -257,7 +384,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // ReturnLength
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoNtQueryInformationProcess,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
@@ -267,6 +394,11 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // ProcessInformationLength
         IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // ReturnLength
         IARG_END);
+
+    // Criar a função de instrumentação apenas uma vez e enviar o ponteiro para o endereço de memoria dque deve ser verificado. En
+    INS_AddInstrumentFunction(Instruction, 0);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoNtQueryInformationProcess);
 }

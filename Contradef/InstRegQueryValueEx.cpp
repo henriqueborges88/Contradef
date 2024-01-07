@@ -88,7 +88,9 @@ VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
         PIN_PARG(ADDRINT),   // LPDWORD é tratado como ADDRINT (ponteiro)
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoRegQueryValueEx,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
@@ -100,7 +102,7 @@ VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
         IARG_END);
 
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoRegQueryValueEx,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
@@ -111,6 +113,8 @@ VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // lpData
         IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // lpcbData
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoRegQueryValueEx);
 }

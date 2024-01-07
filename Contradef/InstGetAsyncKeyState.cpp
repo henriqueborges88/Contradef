@@ -31,18 +31,22 @@ VOID InstGetAsyncKeyState::InstrumentFunction(RTN rtn) {
         PIN_PARG(int), // vKey
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoGetAsyncKeyState,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // vKey
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoGetAsyncKeyState,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // vKey
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoGetAsyncKeyState);
 }

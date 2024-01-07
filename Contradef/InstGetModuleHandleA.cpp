@@ -38,19 +38,16 @@ VOID InstGetModuleHandleA::CallbackBefore(ADDRINT instrPtr, ADDRINT lpModuleName
     args.lpModuleName = lpModuleName;
 
     argsMap[instrPtr] = args;
-
     const char* moduleNameStr = reinterpret_cast<const char*>(lpModuleName);
-    std::cout << "[Contradef] GetModuleHandleA será chamada com o seguinte parâmetro:" << std::endl;
-    std::cout << "[Contradef] lpModuleName (Endereço): " << lpModuleName << std::endl;
-    std::cout << "[Contradef] Texto do lpModuleName: " << moduleNameStr << std::endl;
+    std::cout << "[Contradef] GetModuleHandleA invocada com lpModuleName: " << moduleNameStr << std::endl;
 }
 
 VOID InstGetModuleHandleA::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT lpModuleName) {
     auto it = argsMap.find(instrPtr);
     if (it != argsMap.end()) {
         const GetModuleHandleAArgs& args = it->second;
-        // Utilização dos valores armazenados
-        // ...
+        const char* moduleNameStr = reinterpret_cast<const char*>(args.lpModuleName);
+       // Usar moduleNameStr
     }
 
     std::cout << "[Contradef] Valor de retorno de GetModuleHandleA: " << *retValAddr << std::endl;
@@ -62,18 +59,22 @@ VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn) {
         PIN_PARG(ADDRINT),   // lpModuleName
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoGetModuleHandleA,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoGetModuleHandleA,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoGetModuleHandleA);
 }

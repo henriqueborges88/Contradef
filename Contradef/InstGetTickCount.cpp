@@ -5,11 +5,11 @@ A função GetTickCount não possui argumentos de entrada. Ela retorna o número de 
 */
 
 VOID InstGetTickCount::CallbackBefore(ADDRINT instrPtr) {
-    std::cout << "GetTickCount será chamada." << std::endl;
+    //std::cout << "GetTickCount será chamada." << std::endl;
 }
 
 VOID InstGetTickCount::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
-    std::cout << "Valor de retorno de GetTickCount: " << *retValAddr << std::endl;
+    std::cout << "[Contradef] GetTickCount foi chamada, o valor de retorno eh: " << *retValAddr << std::endl;
 }
 
 VOID InstGetTickCount::InstrumentFunction(RTN rtn) {
@@ -17,16 +17,20 @@ VOID InstGetTickCount::InstrumentFunction(RTN rtn) {
         "GetTickCount",
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoGetTickCount,
         IARG_INST_PTR,
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoGetTickCount,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoGetTickCount);
 }

@@ -180,6 +180,7 @@
     <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
     <ClCompile Include="InstGetAsyncKeyState.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
+    <ClCompile Include="InstGetModuleFileNameA.cpp" />
     <ClCompile Include="InstGetModuleHandleA.cpp" />
     <ClCompile Include="InstGetModuleHandleW.cpp" />
     <ClCompile Include="InstGetTickCount.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
     <ClInclude Include="InstGetAsyncKeyState.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
+    <ClInclude Include="InstGetModuleFileNameA.h" />
     <ClInclude Include="InstGetModuleHandleA.h" />
     <ClInclude Include="InstGetModuleHandleW.h" />
     <ClInclude Include="InstGetTickCount.h" />

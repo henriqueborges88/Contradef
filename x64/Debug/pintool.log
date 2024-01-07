@@ -1,3 +1,4 @@
 Pin: pin-3.28-98749-6643ecee5
 Copyright 2002-2023 Intel Corporation.
-E:  JIT mode callback can be used only with PIN_StartProgram().
+A:  C:\tmp_proj\pin_jenkins\workspace\pypl-pin-nightly\GitPin\Source\pin\pin\image.cpp: LEVEL_PINCLIENT::RTN_InsHeadOnly: 3468: Call RTN_Open(rtn) before inspecting the instructions of an RTN.
+

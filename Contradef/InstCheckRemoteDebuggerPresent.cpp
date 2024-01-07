@@ -13,9 +13,7 @@ VOID InstCheckRemoteDebuggerPresent::CallbackBefore(ADDRINT instrPtr, ADDRINT hP
 
     argsMap[instrPtr] = args;
 
-    std::cout << "[Contradef] CheckRemoteDebuggerPresent será chamada com os seguintes parâmetros:" << std::endl;
-    std::cout << "[Contradef] hProcess (Endereço): " << hProcess << std::endl;
-    std::cout << "[Contradef] pbDebuggerPresent (Endereço): " << pbDebuggerPresent << std::endl;
+    std::cout << "[Contradef] CheckRemoteDebuggerPresent será chamada com hProcess (Endereço): " << hProcess << " e pbDebuggerPresent (Endereço): " << pbDebuggerPresent << std::endl;
 }
 
 VOID InstCheckRemoteDebuggerPresent::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
@@ -35,20 +33,24 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn) {
         PIN_PARG(ADDRINT), // pbDebuggerPresent
         PIN_PARG_END());
 
-    RTN_InsertCallProbed(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+    RTN_Open(rtn);
+
+    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_PROTOTYPE, protoCheckRemoteDebuggerPresent,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // pbDebuggerPresent
         IARG_END);
 
-    RTN_InsertCallProbed(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_PROTOTYPE, protoCheckRemoteDebuggerPresent,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // pbDebuggerPresent
         IARG_END);
+
+    RTN_Close(rtn);
 
     PROTO_Free(protoCheckRemoteDebuggerPresent);
 }
