@@ -1,9 +1,9 @@
-#include "InstRegQueryValueEx.h"
+#include "InstRegQueryValueExW.h"
 
-std::map<ADDRINT, RegQueryValueExArgs> InstRegQueryValueEx::argsMap;
+std::map<ADDRINT, RegQueryValueExWArgs> InstRegQueryValueExW::argsMap;
 
-VOID InstRegQueryValueEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
-    RegQueryValueExArgs args;
+VOID InstRegQueryValueExW::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
+    RegQueryValueExWArgs args;
     args.hKey = hKey;
     args.lpReserved = lpReserved;
     args.lpType = lpType;
@@ -33,7 +33,7 @@ VOID InstRegQueryValueEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT
 
     argsMap[instrPtr] = args;
 
-    //std::cout << "RegQueryValueExW será chamada com os seguintes parâmetros:" << std::endl;
+    //std::cout << "RegQueryValueExWW será chamada com os seguintes parâmetros:" << std::endl;
     //std::cout << "HKEY: " << hKey << std::endl;
     //std::cout << "lpValueName (Endereço): " << lpValueName << std::endl;
     //std::cout << "lpReserved (Endereço): " << lpReserved << std::endl;
@@ -43,25 +43,25 @@ VOID InstRegQueryValueEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT
    
 }
 
-VOID InstRegQueryValueEx::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
+VOID InstRegQueryValueExW::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
     //*retValAddr = 2;
     auto it = argsMap.find(instrPtr);
     if (it != argsMap.end()) {
-        const RegQueryValueExArgs& args = it->second;
+        const RegQueryValueExWArgs& args = it->second;
 
         // Utilizar os valores armazenados
         if (!args.lpValueName.empty()) {
-            wprintf(L"[Contradef] RegQueryValueEx foi chamada com lpValueName: %ls\n", args.lpValueName.c_str());
+            wprintf(L"[Contradef] RegQueryValueExW foi chamada com lpValueName: %ls\n", args.lpValueName.c_str());
         }
         else {
-            wprintf(L"[Contradef] RegQueryValueEx foi chamada com lpValueName: NULL\n");
+            wprintf(L"[Contradef] RegQueryValueExW foi chamada com lpValueName: NULL\n");
         }
 
         if (args.lpData != NULL) {
-            wprintf(L"[Contradef] RegQueryValueEx foi chamada com lpData: %ls\n", args.lpData);
+            wprintf(L"[Contradef] RegQueryValueExW foi chamada com lpData: %ls\n", args.lpData);
         }
         else {
-            wprintf(L"[Contradef] RegQueryValueEx foi chamada com lpData: NULL\n");
+            wprintf(L"[Contradef] RegQueryValueExW foi chamada com lpData: NULL\n");
         }
 
         /*std::wstring wsMessage(reinterpret_cast<wchar_t*>(args.lpData));
@@ -77,21 +77,11 @@ VOID InstRegQueryValueEx::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, A
 
 }
 
-VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
-    PROTO protoRegQueryValueEx = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "RegQueryValueExW",
-        PIN_PARG(ADDRINT),   // HKEY é tratado como ADDRINT
-        PIN_PARG(ADDRINT),   // LPCWSTR é tratado como ADDRINT (ponteiro)
-        PIN_PARG(ADDRINT),   // LPDWORD é tratado como ADDRINT (ponteiro)
-        PIN_PARG(ADDRINT),   // LPDWORD é tratado como ADDRINT (ponteiro)
-        PIN_PARG(ADDRINT),   // LPBYTE é tratado como ADDRINT (ponteiro)
-        PIN_PARG(ADDRINT),   // LPDWORD é tratado como ADDRINT (ponteiro)
-        PIN_PARG_END());
+VOID InstRegQueryValueExW::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoRegQueryValueEx,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName
@@ -103,7 +93,6 @@ VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
 
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoRegQueryValueEx,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
@@ -116,5 +105,4 @@ VOID InstRegQueryValueEx::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoRegQueryValueEx);
 }

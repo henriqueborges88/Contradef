@@ -5,12 +5,13 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstQueryPerformanceCounterArgs {
     ADDRINT lpPerformanceCount;
 };
 
-class InstQueryPerformanceCounter {
+class InstQueryPerformanceCounter : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

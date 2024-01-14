@@ -5,12 +5,13 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstBlockInputArgs {
     ADDRINT fBlockIt;
 };
 
-class InstBlockInput {
+class InstBlockInput : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

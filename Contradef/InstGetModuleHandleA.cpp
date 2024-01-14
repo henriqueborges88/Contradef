@@ -54,27 +54,22 @@ VOID InstGetModuleHandleA::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, 
 }
 
 VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn) {
-    PROTO protoGetModuleHandleA = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "GetModuleHandleA",
-        PIN_PARG(ADDRINT),   // lpModuleName
-        PIN_PARG_END());
+    if (RTN_Name(rtn) == "GetModuleHandleA") {
+        std::cout << "Instrumentando GetModuleHandleA" << std::endl;
 
-    RTN_Open(rtn);
+        RTN_Open(rtn);
 
-    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoGetModuleHandleA,
-        IARG_INST_PTR,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
-        IARG_END);
+        RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+            IARG_INST_PTR,
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
+            IARG_END);
 
-    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoGetModuleHandleA,
-        IARG_INST_PTR,
-        IARG_REG_REFERENCE, REG_GAX,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
-        IARG_END);
+        RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+            IARG_INST_PTR,
+            IARG_REG_REFERENCE, REG_GAX,
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
+            IARG_END);
 
-    RTN_Close(rtn);
-
-    PROTO_Free(protoGetModuleHandleA);
+        RTN_Close(rtn);
+    }
 }

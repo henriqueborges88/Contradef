@@ -21,26 +21,19 @@ VOID InstOutputDebugString::CallbackAfter(ADDRINT instrPtr, ADDRINT lpOutputStri
 }
 
 VOID InstOutputDebugString::InstrumentFunction(RTN rtn) {
-    PROTO protoOutputDebugString = PROTO_Allocate(PIN_PARG(void), CALLINGSTD_STDCALL,
-        "OutputDebugString",
-        PIN_PARG(ADDRINT), // lpOutputString
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoOutputDebugString,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpOutputString
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoOutputDebugString,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpOutputString
         IARG_END);
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoOutputDebugString);
 }

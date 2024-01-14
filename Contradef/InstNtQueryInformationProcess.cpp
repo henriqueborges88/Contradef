@@ -260,19 +260,22 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         
         IMG img = IMG_FindByAddress(instAddress);
         if (!IMG_IsMainExecutable(img)) {
-            // Se a leitura não ocorre na imagem principal (executavel)
-            return;
+            // Se a leitura não ocorre na imagem principal (executavel). Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
+            //return;
         }
 
         // Caso seja necessário verificar instruções em outra imagem
-        //if (IMG_Valid(img)) {
-        //    std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
-        //        << " pertence à imagem " << IMG_Name(img) << std::endl;
-        //}
-        //else {
-        //    std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
-        //        << " não está em nenhuma imagem mapeada." << std::endl;
-        //}
+        std::string imgMapped = "";
+        if (IMG_Valid(img)) {
+            imgMapped = " pertence à imagem " + IMG_Name(img);
+           /* std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
+                << " pertence à imagem " << IMG_Name(img) << std::endl;*/
+        }
+        else {
+            imgMapped = " não está em nenhuma imagem mapeada.";
+           /* std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
+                << " não está em nenhuma imagem mapeada." << std::endl;*/
+        }
         //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
 
         
@@ -285,10 +288,10 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         if (RTN_Valid(rtn)) {
             // Obter o nome da rotina
             std::string rtnName = RTN_Name(rtn);
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << std::endl;
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << " " << imgMapped << std::endl;
         }
         else {
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << std::endl;
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " " << imgMapped << std::endl;
         }
         PIN_UnlockClient();
 
@@ -363,19 +366,10 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
 // Fin transferir
 
 VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
-    PROTO protoNtQueryInformationProcess = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "NtQueryInformationProcess",
-        PIN_PARG(ADDRINT),   // ProcessHandle
-        PIN_PARG(ADDRINT),   // ProcessInformationClass
-        PIN_PARG(ADDRINT),   // ProcessInformation
-        PIN_PARG(ADDRINT),   // ProcessInformationLength
-        PIN_PARG(ADDRINT),   // ReturnLength
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoNtQueryInformationProcess,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
@@ -385,7 +379,6 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoNtQueryInformationProcess,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
@@ -400,5 +393,4 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoNtQueryInformationProcess);
 }

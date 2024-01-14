@@ -27,23 +27,16 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(ADDRINT instrPtr, ADDRINT* re
 }
 
 VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn) {
-    PROTO protoCheckRemoteDebuggerPresent = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "CheckRemoteDebuggerPresent",
-        PIN_PARG(ADDRINT), // hProcess
-        PIN_PARG(ADDRINT), // pbDebuggerPresent
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoCheckRemoteDebuggerPresent,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // pbDebuggerPresent
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoCheckRemoteDebuggerPresent,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
@@ -52,5 +45,4 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoCheckRemoteDebuggerPresent);
 }

@@ -13,24 +13,18 @@ VOID InstGetTickCount::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
 }
 
 VOID InstGetTickCount::InstrumentFunction(RTN rtn) {
-    PROTO protoGetTickCount = PROTO_Allocate(PIN_PARG(DWORD), CALLINGSTD_STDCALL,
-        "GetTickCount",
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoGetTickCount,
         IARG_INST_PTR,
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoGetTickCount,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_END);
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoGetTickCount);
 }

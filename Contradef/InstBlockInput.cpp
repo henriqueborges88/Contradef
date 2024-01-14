@@ -26,21 +26,15 @@ VOID InstBlockInput::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRIN
 }
 
 VOID InstBlockInput::InstrumentFunction(RTN rtn) {
-    PROTO protoBlockInput = PROTO_Allocate(PIN_PARG(BOOL), CALLINGSTD_STDCALL,
-        "BlockInput",
-        PIN_PARG(BOOL), // fBlockIt
-        PIN_PARG_END());
 
     RTN_Open(rtn);
     
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoBlockInput,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // fBlockIt
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoBlockInput,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // fBlockIt
@@ -48,5 +42,4 @@ VOID InstBlockInput::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoBlockInput);
 }

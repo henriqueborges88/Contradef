@@ -5,6 +5,7 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstGetModuleFileNameAArgs {
     ADDRINT hModule;
@@ -12,7 +13,7 @@ struct InstGetModuleFileNameAArgs {
     ADDRINT nSize;
 };
 
-class InstGetModuleFileNameA {
+class InstGetModuleFileNameA : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

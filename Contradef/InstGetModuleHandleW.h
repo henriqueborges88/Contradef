@@ -6,12 +6,13 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "InstrumentationStrategy.h"
 
 struct InstGetModuleHandleWArgs {
     ADDRINT lpModuleName;
 };
 
-class InstGetModuleHandleW {
+class InstGetModuleHandleW : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

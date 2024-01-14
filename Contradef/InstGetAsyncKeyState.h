@@ -5,12 +5,13 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstGetAsyncKeyStateArgs {
     ADDRINT vKey;
 };
 
-class InstGetAsyncKeyState {
+class InstGetAsyncKeyState : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

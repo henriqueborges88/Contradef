@@ -3,21 +3,7 @@
 #include <fstream>
 #include <set>
 #include <cctype>
-#include "InstRegQueryValueEx.h"
-#include "InstRegOpenKeyEx.h"
-#include "InstNtQueryInformationProcess.h"
-#include "InstGetModuleHandleA.h"
-#include "InstGetModuleHandleW.h"
-#include "InstIsDebuggerPresent.h"
-#include "InstCheckRemoteDebuggerPresent.h"
-#include "InstOutputDebugString.h"
-#include "InstQueryPerformanceCounter.h"
-#include "InstBlockInput.h"
-#include "InstGetAsyncKeyState.h"
-#include "InstGetForegroundWindow.h"
-#include "InstGetTickCount.h"
-#include "InstNtQuerySystemInformation.h"
-#include "InstGetModuleFileNameA.h"
+#include "InstrumentationContext.h"
 
 //extern "C" __declspec(dllimport) void __stdcall Sleep(unsigned long dwMilliseconds);
 
@@ -41,23 +27,28 @@ std::ofstream TraceFile;
 set<string> functionsToIntercept;  // Lista de funções a serem interceptadas
 
 VOID FillInterceptSet() {
-    functionsToIntercept.insert("USER32.dll:MessageBoxW");
-    functionsToIntercept.insert("ADVAPI32.DLL:RegOpenKeyExW");
-    functionsToIntercept.insert("ADVAPI32.DLL:RegQueryValueExW");
-    functionsToIntercept.insert("KERNEL32.DLL:GetModuleHandleA");
-    functionsToIntercept.insert("KERNEL32.DLL:GetModuleHandleW");
-    functionsToIntercept.insert("KERNEL32.DLL:GetModuleFileNameA"); 
-    functionsToIntercept.insert("KERNEL32.DLL:IsDebuggerPresent");
-    functionsToIntercept.insert("KERNEL32.DLL:CheckRemoteDebuggerPresent");
-    functionsToIntercept.insert("KERNEL32.DLL:OutputDebugString");
-    functionsToIntercept.insert("KERNEL32.DLL:QueryPerformanceCounter");
-    functionsToIntercept.insert("NTDLL.DLL:NtQueryInformationProcess");
-    functionsToIntercept.insert("NTDLL.DLL:NtQuerySystemInformation");
-    functionsToIntercept.insert("NTDLL.DLL:NtGlobalFlag");
-    functionsToIntercept.insert("USER32.dll:BlockInput");
-    functionsToIntercept.insert("USER32.dll:GetAsyncKeyState");
-    functionsToIntercept.insert("USER32.dll:GetForegroundWindow");
-    functionsToIntercept.insert("KERNEL32.DLL:GetTickCount");
+    functionsToIntercept.insert("RegOpenKeyExW");
+    functionsToIntercept.insert("RegOpenKeyA");
+    functionsToIntercept.insert("RegOpenKeyW");
+    functionsToIntercept.insert("RegQueryValueExW");
+    functionsToIntercept.insert("BaseRegOpenKey");
+    functionsToIntercept.insert("GetModuleHandleA");
+    functionsToIntercept.insert("GetModuleHandleW");
+    functionsToIntercept.insert("GetModuleFileNameA"); 
+    functionsToIntercept.insert("GetModuleFileNameW");
+    functionsToIntercept.insert("IsDebuggerPresent");
+    functionsToIntercept.insert("CheckRemoteDebuggerPresent");
+    functionsToIntercept.insert("OutputDebugString");
+    functionsToIntercept.insert("QueryPerformanceCounter");
+    functionsToIntercept.insert("NtQueryInformationProcess");
+    functionsToIntercept.insert("NtQuerySystemInformation");
+    functionsToIntercept.insert("NtOpenKey");
+    functionsToIntercept.insert("BlockInput");
+    functionsToIntercept.insert("GetAsyncKeyState");
+    functionsToIntercept.insert("GetForegroundWindow");
+    functionsToIntercept.insert("GetTickCount");
+    functionsToIntercept.insert("EnumProcessModules");
+    functionsToIntercept.insert("EnumProcessModulesEx");
     /*
     * Incluir InstRegQueryValue se o Ex, pode ter o InstRegQueryValueA e o InstRegQueryValueW
     * 
@@ -78,24 +69,24 @@ VOID FillInterceptSet() {
     System Service Descriptor Table (SSDT) Hooking: Verificar alterações no SSDT, pois os DBIs podem modificar esta tabela para interceptar chamadas de sistema.
     */
 }
-
-std::string toUpperCase(const std::string& str) {
-    std::string upperCaseStr = str; // Cria uma cópia da string original
-    for (char& c : upperCaseStr) {
-        c = std::toupper(static_cast<unsigned char>(c));
-    }
-    return upperCaseStr;
-}
-
-std::set<std::string> GetFunctionsOfModule(const std::string& moduleName) {
-    std::set<std::string> moduleFunctions;
-    for (const auto& func : functionsToIntercept) {
-        if (func.find(moduleName + ":") == 0) {
-            moduleFunctions.insert(func.substr(moduleName.size() + 1));
-        }
-    }
-    return moduleFunctions;
-}
+//Inativo
+//std::string toUpperCase(const std::string& str) {
+//    std::string upperCaseStr = str; // Cria uma cópia da string original
+//    for (char& c : upperCaseStr) {
+//        c = std::toupper(static_cast<unsigned char>(c));
+//    }
+//    return upperCaseStr;
+//}
+//
+//std::set<std::string> GetFunctionsOfModule(const std::string& moduleName) {
+//    std::set<std::string> moduleFunctions;
+//    for (const auto& func : functionsToIntercept) {
+//        if (func.find(moduleName + ":") == 0) {
+//            moduleFunctions.insert(func.substr(moduleName.size() + 1));
+//        }
+//    }
+//    return moduleFunctions;
+//}
 
 string ExtractModuleName(const std::string& fullPath) {
     size_t lastSlashPos = fullPath.find_last_of("\\/");
@@ -126,89 +117,120 @@ Para detectar Instrumentadores Binários Dinâmicos (DBI, na sigla em inglês) em s
 
     System Service Descriptor Table (SSDT) Hooking: Verificar alterações no SSDT, pois os DBIs podem modificar esta tabela para interceptar chamadas de sistema.
 
-Lembre-se de que a eficácia dessas técnicas pode variar dependendo do tipo específico de instrumentador binário e das técnicas de evasão que ele emprega. Além disso, essas funções requerem um entendimento profundo do funcionamento interno do Windows e do desenvolvimento de software de baixo nível.
-*/
+    Lembre-se de que a eficácia dessas técnicas pode variar dependendo do tipo específico de instrumentador binário e das técnicas de evasão que ele emprega. Além disso, essas funções requerem um entendimento profundo do funcionamento interno do Windows e do desenvolvimento de software de baixo nível.
+
+    
+            "module": "KERNEL32.DLL",
+            "function": "GetProcAddress",
+            "address": "0x7ffc3e4c3c10"
+        },
+        {
+            "module": "KERNEL32.DLL",
+            "function": "GetCurrentProcess",
+            "address": "0x7ffc3e4d0160"
+        },
+
+        Themida
+         {
+            "module": "KERNEL32.DLL",
+            "function": "GetProcessHeap",
+            "address": "0x7ffc3e4c0dd0"
+        },
+        {
+            "module": "KERNEL32.DLL",
+            "function": "GetModuleFileNameW",
+            "address": "0x7ffc3e4c7030"
+        },
+         {
+            "module": "KERNEL32.DLL",
+            "function": "GetCurrentThreadId",
+            "address": "0x7ffc3e4b2750"
+        },
+        {
+            "module": "KERNEL32.DLL",
+            "function": "GetCommandLineA",
+            "address": "0x7ffc3e4c8ad0"
+        },
+           {
+            "module": "KERNEL32.DLL",
+            "function": "LoadLibraryExW",
+            "address": "0x7ffc3e4c3d90"
+        },
+        ZwQueryInformationThread
+        ZwOpenProcess
+        NtOpenProcess
+        kernelbase.IsDebuggerPresent
+        kernelbase.DebugBreak
+        kernelbase.IsDBCSLeadByte
+        kernelbase.GetEnvironmentStringsW <- envs do DBI?
+        kernelbase.ExpandEnvironmentStringsW
+        kernel32.ProcessIdToSessionId
+        kernel32.GetProcessTimes
+        kernel32.GetCurrentThreadId
+        kernel32.GetCurrentProcess
+        kernel32.GetCurrentProcessId
+        ntdll.QueryPerformanceCounter
+        kernelbase.RegCloseKey
+        kernelbase.RegOpenKeyExW
+
+        obsedium:
+        Export OptionalHeader.AddressOfEntryPoint <_ verificar isso
+        shell32.ShellAboutW
+        user32.CharNextA
+        advapi32.RegisterEventSourceA
+
+        EtwLogTraceEvent de ntdll.dll
+    */
+//TODO: Ver todas as funçoes importadas e procurar as do registro do windows, usar o monitor de registro se necessário
+
+InstrumentationContext context; // As estratégias já estão adicionadas no contexto
 
 VOID InstrumentFunctions(IMG img, VOID* v) {
-    string moduleName = ExtractModuleName(IMG_Name(img)); ;
-    for (SYM sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
-        RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
-        if (RTN_Valid(rtn)) {
-            const auto& func = RTN_Name(rtn);
-            string fullFunctionName = toUpperCase(moduleName) + ":" + func;
-            if (fullFunctionName == "ADVAPI32.DLL:RegQueryValueExW") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstRegQueryValueEx::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "NTDLL.DLL:NtQueryInformationProcess") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstNtQueryInformationProcess::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "ADVAPI32.DLL:RegOpenKeyExW") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstRegOpenKeyEx::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:GetModuleHandleA") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstGetModuleHandleA::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:GetModuleHandleW") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                //InstGetModuleHandleW::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:GetModuleFileNameA") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstGetModuleFileNameA::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:IsDebuggerPresent") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstIsDebuggerPresent::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:CheckRemoteDebuggerPresent") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstCheckRemoteDebuggerPresent::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:OutputDebugString") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstOutputDebugString::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:QueryPerformanceCounter") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstQueryPerformanceCounter::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "USER32.dll:BlockInput") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstBlockInput::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "USER32.dll:GetAsyncKeyState") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstGetAsyncKeyState::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "USER32.dll:GetForegroundWindow") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstGetForegroundWindow::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "KERNEL32.DLL:GetTickCount") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstGetTickCount::InstrumentFunction(rtn);
-            }
-            else if (fullFunctionName == "NTDLL.DLL:NtQuerySystemInformation") {
-                cout << "Instrumentando " << fullFunctionName << endl;
-                InstNtQuerySystemInformation::InstrumentFunction(rtn);
-            }
-        }
-    }
+    string moduleName = ExtractModuleName(IMG_Name(img)); 
+    context.ExecuteAllStrategies(img);
+    //RTN myFunctionRtn = RTN_FindByName(img, "GetModuleHandleA");
+    //if (RTN_Valid(myFunctionRtn)) {
+
+    //    // Em algum ponto, você decide qual estratégia executar
+    //    context.ExecuteStrategy("GetModuleHandleA", myFunctionRtn);
+
+    //}
+    
+
+
+    //for (SYM sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
+    //    RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
+    //    if (RTN_Valid(rtn)) {
+    //        const auto& func = RTN_Name(rtn);
+    //        string fullFunctionName = toUpperCase(moduleName) + ":" + func;
+    //        
+    //        if (fullFunctionName == "KERNEL32.DLL:GetModuleHandleA") {
+    //            cout << "Instrumentando " << fullFunctionName << endl;
+    //            //InstGetModuleHandleA::InstrumentFunction(rtn);
+    //            Routine(rtn);
+    //        }
+    //        
+
+    //        if (IMG_IsMainExecutable(img)) {
+    //            // Se a carga ocorre na imagem principal (executavel)
+    //            std::cout << "Func: " << fullFunctionName << std::endl;
+    //        }
+    //        
+    //    }
+    //}
 
 }
 
+
 int main(int argc, char* argv[]) {
     FillInterceptSet();
-    
     PIN_Init(argc, argv);
     TraceFile.open("TraceFile.txt");
     PIN_InitSymbols();
     IMG_AddInstrumentFunction(InstrumentFunctions, 0);
     PIN_StartProgram();
     
+
+
     return 0;
 }

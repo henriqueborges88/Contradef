@@ -5,8 +5,9 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
-class InstGetForegroundWindow {
+class InstGetForegroundWindow : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

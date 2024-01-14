@@ -1,9 +1,9 @@
-#include "InstRegOpenKeyEx.h"
+#include "InstRegOpenKeyExW.h"
 
-std::map<ADDRINT, RegOpenKeyExArgs> InstRegOpenKeyEx::argsMap;
+std::map<ADDRINT, RegOpenKeyExWArgs> InstRegOpenKeyExW::argsMap;
 
-VOID InstRegOpenKeyEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
-    RegOpenKeyExArgs args;
+VOID InstRegOpenKeyExW::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
+    RegOpenKeyExWArgs args;
     args.hKey = hKey;
     args.ulOptions = ulOptions;
     args.samDesired = samDesired;
@@ -29,10 +29,10 @@ VOID InstRegOpenKeyEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lp
 
 }
 
-VOID InstRegOpenKeyEx::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
+VOID InstRegOpenKeyExW::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
     auto it = argsMap.find(instrPtr);
     if (it != argsMap.end()) {
-        const RegOpenKeyExArgs& args = it->second;
+        const RegOpenKeyExWArgs& args = it->second;
 
         // Utilizar os valores armazenados
         wprintf(L"[Contradef] RegOpenKeyExW foi chamada com lpSubKey: %ls\n", args.lpSubKey.c_str());
@@ -44,20 +44,11 @@ VOID InstRegOpenKeyEx::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDR
     std::cout << "[Contradef] Valor de retorno de RegOpenKeyExW: " << *retValAddr << std::endl;
 }
 
-VOID InstRegOpenKeyEx::InstrumentFunction(RTN rtn) {
-    PROTO protoRegOpenKeyEx = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "RegOpenKeyExW",
-        PIN_PARG(ADDRINT),   // HKEY é tratado como ADDRINT
-        PIN_PARG(ADDRINT),   // LPCWSTR é tratado como ADDRINT (ponteiro)
-        PIN_PARG(ADDRINT),   // DWORD para ulOptions
-        PIN_PARG(ADDRINT),   // REGSAM para samDesired
-        PIN_PARG(ADDRINT),   // PHKEY para phkResult
-        PIN_PARG_END());
+VOID InstRegOpenKeyExW::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoRegOpenKeyEx,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpSubKey
@@ -67,7 +58,6 @@ VOID InstRegOpenKeyEx::InstrumentFunction(RTN rtn) {
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoRegOpenKeyEx,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
@@ -79,6 +69,5 @@ VOID InstRegOpenKeyEx::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoRegOpenKeyEx);
 }
 

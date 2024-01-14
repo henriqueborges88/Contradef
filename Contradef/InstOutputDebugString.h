@@ -6,12 +6,13 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include "InstrumentationStrategy.h"
 
 struct InstOutputDebugStringArgs {
     ADDRINT lpOutputString;
 };
 
-class InstOutputDebugString {
+class InstOutputDebugString : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

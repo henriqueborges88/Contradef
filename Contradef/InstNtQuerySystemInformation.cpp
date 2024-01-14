@@ -30,18 +30,10 @@ VOID InstNtQuerySystemInformation::CallbackAfter(ADDRINT instrPtr, ADDRINT* retV
 }
 
 VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
-    PROTO protoNtQuerySystemInformation = PROTO_Allocate(PIN_PARG(LONG), CALLINGSTD_STDCALL,
-        "NtQuerySystemInformation",
-        PIN_PARG(ADDRINT), // SystemInformationClass
-        PIN_PARG(ADDRINT), // SystemInformation
-        PIN_PARG(ADDRINT), // SystemInformationLength
-        PIN_PARG(ADDRINT), // ReturnLength
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoNtQuerySystemInformation,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
@@ -50,7 +42,6 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoNtQuerySystemInformation,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
@@ -61,5 +52,4 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoNtQuerySystemInformation);
 }

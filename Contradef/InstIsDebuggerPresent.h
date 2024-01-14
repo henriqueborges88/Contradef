@@ -5,8 +5,9 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
-class InstIsDebuggerPresent {
+class InstIsDebuggerPresent : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

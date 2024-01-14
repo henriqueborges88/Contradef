@@ -26,21 +26,15 @@ VOID InstQueryPerformanceCounter::CallbackAfter(ADDRINT instrPtr, ADDRINT* retVa
 }
 
 VOID InstQueryPerformanceCounter::InstrumentFunction(RTN rtn) {
-    PROTO protoQueryPerformanceCounter = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "QueryPerformanceCounter",
-        PIN_PARG(ADDRINT), // lpPerformanceCount
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoQueryPerformanceCounter,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpPerformanceCount
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoQueryPerformanceCounter,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpPerformanceCount
@@ -48,5 +42,4 @@ VOID InstQueryPerformanceCounter::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoQueryPerformanceCounter);
 }

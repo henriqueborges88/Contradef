@@ -26,21 +26,15 @@ VOID InstGetAsyncKeyState::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, 
 }
 
 VOID InstGetAsyncKeyState::InstrumentFunction(RTN rtn) {
-    PROTO protoGetAsyncKeyState = PROTO_Allocate(PIN_PARG(SHORT), CALLINGSTD_STDCALL,
-        "GetAsyncKeyState",
-        PIN_PARG(int), // vKey
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoGetAsyncKeyState,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // vKey
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoGetAsyncKeyState,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // vKey
@@ -48,5 +42,4 @@ VOID InstGetAsyncKeyState::InstrumentFunction(RTN rtn) {
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoGetAsyncKeyState);
 }

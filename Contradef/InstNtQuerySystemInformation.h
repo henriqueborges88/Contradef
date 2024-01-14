@@ -5,6 +5,7 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstNtQuerySystemInformationArgs {
     ADDRINT SystemInformationClass;
@@ -13,7 +14,7 @@ struct InstNtQuerySystemInformationArgs {
     ADDRINT ReturnLength;
 };
 
-class InstNtQuerySystemInformation {
+class InstNtQuerySystemInformation : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

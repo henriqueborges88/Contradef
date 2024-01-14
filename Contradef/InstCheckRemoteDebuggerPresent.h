@@ -5,13 +5,14 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
+#include "InstrumentationStrategy.h"
 
 struct InstCheckRemoteDebuggerPresentArgs {
     ADDRINT hProcess;
     ADDRINT pbDebuggerPresent;
 };
 
-class InstCheckRemoteDebuggerPresent {
+class InstCheckRemoteDebuggerPresent : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn);
 

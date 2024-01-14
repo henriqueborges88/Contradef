@@ -12,24 +12,18 @@ VOID InstIsDebuggerPresent::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr)
 }
 
 VOID InstIsDebuggerPresent::InstrumentFunction(RTN rtn) {
-    PROTO protoIsDebuggerPresent = PROTO_Allocate(PIN_PARG(ADDRINT), CALLINGSTD_STDCALL,
-        "IsDebuggerPresent",
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoIsDebuggerPresent,
         IARG_INST_PTR,
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoIsDebuggerPresent,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_END);
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoIsDebuggerPresent);
 }

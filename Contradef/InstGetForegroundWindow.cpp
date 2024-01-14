@@ -13,24 +13,18 @@ VOID InstGetForegroundWindow::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAdd
 }
 
 VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn) {
-    PROTO protoGetForegroundWindow = PROTO_Allocate(PIN_PARG(HWND), CALLINGSTD_STDCALL,
-        "GetForegroundWindow",
-        PIN_PARG_END());
 
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_PROTOTYPE, protoGetForegroundWindow,
         IARG_INST_PTR,
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_PROTOTYPE, protoGetForegroundWindow,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_END);
 
     RTN_Close(rtn);
 
-    PROTO_Free(protoGetForegroundWindow);
 }
