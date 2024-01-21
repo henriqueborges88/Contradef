@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct InstNtQuerySystemInformationArgs {
     ADDRINT SystemInformationClass;
@@ -19,11 +20,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstNtQuerySystemInformationArgs> argsMap;
-
-    typedef long LONG;
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength);
+    static std::map<CallContextKey, InstNtQuerySystemInformationArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength);
 };
 
 #endif // INST_NT_QUERY_SYSTEM_INFORMATION_H

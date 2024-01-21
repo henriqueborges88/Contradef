@@ -12,6 +12,41 @@
 #ifndef BASETYPES
 #define BASETYPES
 
+#ifndef FALSE
+#define FALSE               0
+#endif
+
+#ifndef TRUE
+#define TRUE                1
+#endif
+
+#ifndef IN
+#define IN
+#endif
+
+#ifndef OUT
+#define OUT
+#endif
+
+#ifndef OPTIONAL
+#define OPTIONAL
+#endif
+
+#undef far
+#undef near
+#undef pascal
+
+#define far
+#define near
+
+#undef FAR
+#undef  NEAR
+#define FAR                 far
+#define NEAR                near
+#ifndef CONST
+#define CONST               const
+#endif
+
 typedef int LONG;
 typedef void* PVOID;
 typedef unsigned short USHORT;
@@ -197,6 +232,9 @@ classes usadas para detecção de debug e antianalise:
     ProcessEnclaveInformation, // Themida antianalisys, é antidebug? Pesquisar mais <-----------------
 
 */
+
+typedef CHAR* PCHAR, * LPCH, * PCH;
+
 typedef wchar_t WCHAR;
 typedef WCHAR* PWCHAR, * LPWCH, * PWCH;
 
@@ -255,5 +293,47 @@ typedef struct _PROCESS_BASIC_INFORMATION {
     ULONG_PTR UniqueProcessId;
     ULONG_PTR InheritedFromUniqueProcessId;
 } PROCESS_BASIC_INFORMATION;
+
+
+
+#if defined(_MAC) && defined(_MAC_INT_64)
+typedef __int64 LONGLONG;
+typedef unsigned __int64 ULONGLONG;
+
+#define MAXLONGLONG                      (0x7fffffffffffffff)
+
+
+#else
+typedef double LONGLONG;
+typedef double ULONGLONG;
+#endif //_MAC and int64
+
+typedef LONGLONG* PLONGLONG;
+typedef ULONGLONG* PULONGLONG;
+
+// Update Sequence Number
+
+typedef LONGLONG USN;
+
+#if defined(MIDL_PASS)
+typedef struct _LARGE_INTEGER {
+    LONGLONG QuadPart;
+} LARGE_INTEGER;
+#else // MIDL_PASS
+typedef union _LARGE_INTEGER {
+    struct {
+        DWORD LowPart;
+        LONG HighPart;
+    } DUMMYSTRUCTNAME;
+    struct {
+        DWORD LowPart;
+        LONG HighPart;
+    } u;
+    LONGLONG QuadPart;
+} LARGE_INTEGER;
+#endif //MIDL_PASS
+
+typedef LARGE_INTEGER* PLARGE_INTEGER;
+
 
 #endif // NT_STRUCTURES_H

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct InstEnumProcessModulesArgs {
     ADDRINT hProcess;
@@ -19,10 +20,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstEnumProcessModulesArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded);
+    static std::map<CallContextKey, InstEnumProcessModulesArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded);
 };
 
 #endif // INST_ENUM_PROCESS_MODULES_H

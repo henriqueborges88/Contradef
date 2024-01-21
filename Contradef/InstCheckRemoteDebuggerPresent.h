@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct InstCheckRemoteDebuggerPresentArgs {
     ADDRINT hProcess;
@@ -17,10 +18,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstCheckRemoteDebuggerPresentArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
+    static std::map<CallContextKey, InstCheckRemoteDebuggerPresentArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
 };
 
 #endif // INST_CHECK_REMOTE_DEBUGGER_PRESENT_H

@@ -6,6 +6,8 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
+#include "utils.h"
 
 struct InstQueryPerformanceCounterArgs {
     ADDRINT lpPerformanceCount;
@@ -16,10 +18,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstQueryPerformanceCounterArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT lpPerformanceCount);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT lpPerformanceCount);
+    static std::map<CallContextKey, InstQueryPerformanceCounterArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpPerformanceCount);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT lpPerformanceCount);
 };
 
 #endif // INST_QUERY_PERFORMANCE_COUNTER_H

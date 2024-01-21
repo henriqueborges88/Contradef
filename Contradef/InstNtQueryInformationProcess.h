@@ -7,8 +7,10 @@
 #include <string>
 #include <set>
 #include <vector>
+#include "utils.h"
 #include "NtStructures.h"
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct NtQueryInformationProcessArgs {
     ADDRINT ProcessHandle;
@@ -24,12 +26,14 @@ public:
 
 private:
 
-    static std::map<ADDRINT, NtQueryInformationProcessArgs> argsMap;
+    static std::map<CallContextKey, NtQueryInformationProcessArgs> argsMap;
     static ADDRINT TARGET_MEMORY_ADDRESS;
+    static ADDRINT nextCallId;
+
     static DWORD InstNtQueryInformationProcess::NtGlobalFlag;
 
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
 
     static VOID ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDRINT instAddress, ADDRINT memoryAddress, UINT32 readSize);
     static bool IsRegisterPermitted(const REG& regName);

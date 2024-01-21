@@ -5,8 +5,9 @@
 #include "pin.H"
 #include <iostream>
 #include <map>
-#include <string>
 #include "InstrumentationStrategy.h"
+#include "utils.h"
+#include  "CallContextKey.h"
 
 struct GetModuleHandleAArgs {
     ADDRINT lpModuleName;
@@ -17,10 +18,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, GetModuleHandleAArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT lpModuleName);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT lpModuleName);
+    static std::map<CallContextKey, GetModuleHandleAArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpModuleName);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT lpModuleName);
 };
 
 #endif // INST_GET_MODULE_HANDLE_A_H

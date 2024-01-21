@@ -1,7 +1,3 @@
-#include "InstGetModuleHandleA.h"
-
-std::map<ADDRINT, GetModuleHandleAArgs> InstGetModuleHandleA::argsMap;
-
 /*
 Para o Themida:
 ------> kernel32.dll
@@ -13,63 +9,48 @@ Para o Themida:
 ------> SbieDll.dll -> Relacionado com sandboxie -> https://sandboxie-website-archive.github.io/www.sandboxie.com/index.html
 ------> KERNEL32.DLL
 */
+#include "InstGetModuleHandleA.h"
 
-// Esta versão com PIN_SafeCopy crasha a aplicação analisada
-//VOID CallbackBeforeGetModuleHandleA(ADDRINT lpModuleName)
-//{
-//    // Verificar se o ponteiro não é NULL
-//    if (lpModuleName != 0) {
-//        // Converter de ADDRINT para LPCSTR
-//        const char* moduleNameStr = reinterpret_cast<const char*>(lpModuleName);
-//
-//        // Acessar a string com segurança
-//        char moduleNameBuffer[256] = { 0 };
-//        PIN_SafeCopy(moduleNameBuffer, moduleNameStr, sizeof(moduleNameBuffer));
-//
-//        std::cout << "GetModuleHandleA será chamada com lpModuleName: " << moduleNameBuffer << std::endl;
-//    }
-//    else {
-//        std::cout << "GetModuleHandleA será chamada com lpModuleName: NULL" << std::endl;
-//    }
-//}
+std::map<CallContextKey, GetModuleHandleAArgs> InstGetModuleHandleA::argsMap;
+ADDRINT InstGetModuleHandleA::nextCallId = 0;
 
-VOID InstGetModuleHandleA::CallbackBefore(ADDRINT instrPtr, ADDRINT lpModuleName) {
+VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpModuleName) {
     GetModuleHandleAArgs args;
     args.lpModuleName = lpModuleName;
 
-    argsMap[instrPtr] = args;
-    const char* moduleNameStr = reinterpret_cast<const char*>(lpModuleName);
-    std::cout << "[Contradef] GetModuleHandleA invocada com lpModuleName: " << moduleNameStr << std::endl;
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
 }
 
-VOID InstGetModuleHandleA::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT lpModuleName) {
-    auto it = argsMap.find(instrPtr);
+VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT lpModuleName) {
+    CallContextKey key = { callId, tid };
+    auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         const GetModuleHandleAArgs& args = it->second;
-        const char* moduleNameStr = reinterpret_cast<const char*>(args.lpModuleName);
-       // Usar moduleNameStr
+        std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args.lpModuleName);
+        std::cout << "[Contradef] GetModuleHandleA invocada com lpModuleName: " << ansiStringLpModuleName << std::endl;
+        std::cout << "[Contradef] Valor de retorno de GetModuleHandleA: " << *retValAddr << std::endl;
+        argsMap.erase(it); // Limpar a entrada após o uso
     }
-
-    std::cout << "[Contradef] Valor de retorno de GetModuleHandleA: " << *retValAddr << std::endl;
 }
 
 VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn) {
     if (RTN_Name(rtn) == "GetModuleHandleA") {
-        std::cout << "Instrumentando GetModuleHandleA" << std::endl;
-
         RTN_Open(rtn);
-
         RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-            IARG_INST_PTR,
+            IARG_THREAD_ID,
+            IARG_ADDRINT, &nextCallId,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
             IARG_END);
 
         RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-            IARG_INST_PTR,
+            IARG_THREAD_ID,
+            IARG_ADDRINT, &nextCallId,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpModuleName
             IARG_END);
 
         RTN_Close(rtn);
     }
+
 }

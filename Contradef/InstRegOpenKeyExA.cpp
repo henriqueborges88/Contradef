@@ -1,8 +1,9 @@
 #include "InstRegOpenKeyExA.h"
 
-std::map<ADDRINT, InstRegOpenKeyExAArgs> InstRegOpenKeyExA::argsMap;
+std::map<CallContextKey, InstRegOpenKeyExAArgs> InstRegOpenKeyExA::argsMap;
+ADDRINT InstRegOpenKeyExA::nextCallId = 0;
 
-VOID InstRegOpenKeyExA::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
+VOID InstRegOpenKeyExA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
     InstRegOpenKeyExAArgs args;
     args.hKey = hKey;
     args.lpSubKey = lpSubKey;
@@ -10,45 +11,47 @@ VOID InstRegOpenKeyExA::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT l
     args.samDesired = samDesired;
     args.phkResult = phkResult;
 
-    argsMap[instrPtr] = args;
-
-    std::cout << "RegOpenKeyExA será chamada com os seguintes parâmetros:" << std::endl;
-    // Impressão dos parâmetros
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
 }
 
-VOID InstRegOpenKeyExA::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
-    auto it = argsMap.find(instrPtr);
+VOID InstRegOpenKeyExA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
+    CallContextKey key = { callId, tid };
+    auto it = argsMap.find(key);
     if (it != argsMap.end()) {
-        // Operações com args, se necessário
+        const InstRegOpenKeyExAArgs& args = it->second;
+        if (args.lpSubKey != 0) {
+            std::string ansiStringLpSubKey = ConvertAddrToAnsiString(args.lpSubKey);
+            std::cout << "[Contradef] RegOpenKeyExA invocada com lpSubKey: " << ansiStringLpSubKey << std::endl;
+        }
+        std::cout << "[Contradef] Valor de retorno de RegOpenKeyExA: " << *retValAddr << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
-
-    std::cout << "Valor de retorno de RegOpenKeyExA: " << *retValAddr << std::endl;
 }
 
 VOID InstRegOpenKeyExA::InstrumentFunction(RTN rtn) {
-
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_INST_PTR,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4,
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpSubKey
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ulOptions
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // samDesired
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // phkResult
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_INST_PTR,
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
         IARG_REG_REFERENCE, REG_GAX,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4,
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpSubKey
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ulOptions
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // samDesired
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // phkResult
         IARG_END);
 
     RTN_Close(rtn);
-
 }

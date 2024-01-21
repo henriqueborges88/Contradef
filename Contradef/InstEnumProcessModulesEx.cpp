@@ -1,8 +1,9 @@
 #include "InstEnumProcessModulesEx.h"
 
-std::map<ADDRINT, InstEnumProcessModulesExArgs> InstEnumProcessModulesEx::argsMap;
+std::map<CallContextKey, InstEnumProcessModulesExArgs> InstEnumProcessModulesEx::argsMap;
+ADDRINT InstEnumProcessModulesEx::nextCallId = 0;
 
-VOID InstEnumProcessModulesEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag) {
+VOID InstEnumProcessModulesEx::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag) {
     InstEnumProcessModulesExArgs args;
     args.hProcess = hProcess;
     args.lphModule = lphModule;
@@ -10,43 +11,41 @@ VOID InstEnumProcessModulesEx::CallbackBefore(ADDRINT instrPtr, ADDRINT hProcess
     args.lpcbNeeded = lpcbNeeded;
     args.dwFilterFlag = dwFilterFlag;
 
-    argsMap[instrPtr] = args;
-
-    std::cout << "EnumProcessModulesEx será chamada com os seguintes parâmetros:" << std::endl;
-    // Impressão dos parâmetros
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
 }
 
-VOID InstEnumProcessModulesEx::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag) {
-    auto it = argsMap.find(instrPtr);
+VOID InstEnumProcessModulesEx::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag) {
+    CallContextKey key = { callId, tid };
+    auto it = argsMap.find(key);
     if (it != argsMap.end()) {
-        // Operações com args, se necessário
+        //Enumera os handles dos modulos do processo, pode estar seguido de GetModuleFileName
+        std::cout << "[Contradef] EnumProcessModulesEx foi chamada, valor de retorno: " << *retValAddr << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
-
-    std::cout << "Valor de retorno de EnumProcessModulesEx: " << *retValAddr << std::endl;
 }
 
 VOID InstEnumProcessModulesEx::InstrumentFunction(RTN rtn) {
-
     RTN_Open(rtn);
-
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_INST_PTR,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4,
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lphModule
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // cb
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // lpcbNeeded
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // dwFilterFlag
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_INST_PTR,
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
         IARG_REG_REFERENCE, REG_GAX,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4,
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lphModule
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // cb
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // lpcbNeeded
+        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // dwFilterFlag
         IARG_END);
 
     RTN_Close(rtn);

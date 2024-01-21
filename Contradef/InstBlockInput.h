@@ -6,6 +6,7 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct InstBlockInputArgs {
     ADDRINT fBlockIt;
@@ -16,10 +17,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstBlockInputArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT fBlockIt);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT fBlockIt);
+    static std::map<CallContextKey, InstBlockInputArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT fBlockIt);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT fBlockIt);
 };
 
 #endif // INST_BLOCK_INPUT_H

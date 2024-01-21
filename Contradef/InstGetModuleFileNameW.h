@@ -6,6 +6,8 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
+#include "utils.h"
+#include  "CallContextKey.h"
 
 struct InstGetModuleFileNameWArgs {
     ADDRINT hModule;
@@ -18,10 +20,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstGetModuleFileNameWArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize);
+    static std::map<CallContextKey, InstGetModuleFileNameWArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize);
 };
 
 #endif // INST_GET_MODULE_FILE_NAME_W_H

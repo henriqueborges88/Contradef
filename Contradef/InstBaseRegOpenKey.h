@@ -6,7 +6,8 @@
 #include <iostream>
 #include <map>
 #include "InstrumentationStrategy.h"
-
+#include "utils.h"
+#include  "CallContextKey.h"
 
 struct InstBaseRegOpenKeyArgs {
     ADDRINT hKey;
@@ -19,10 +20,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstBaseRegOpenKeyArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
+    static std::map<CallContextKey, InstBaseRegOpenKeyArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
 };
 
 #endif // INST_BASE_REG_OPEN_KEY_H

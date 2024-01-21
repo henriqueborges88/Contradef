@@ -1,6 +1,5 @@
 #include "InstNtQueryInformationProcess.h"
 
-
 /*
 A função NtQueryInformationProcess é uma chamada de sistema do Windows, e a instrumentação para ela pode ser mais complexa do que para funções de API padrão.
 
@@ -64,11 +63,13 @@ https://ntdoc.m417z.com/processinfoclass
 Outras estruturas: https://www.cin.ufpe.br/~frsn/arquivos/GnuWin32/include/ddk/ntapi.h
 */
 
-std::map<ADDRINT, NtQueryInformationProcessArgs> InstNtQueryInformationProcess::argsMap;
+std::map<CallContextKey, NtQueryInformationProcessArgs> InstNtQueryInformationProcess::argsMap;
+ADDRINT InstNtQueryInformationProcess::nextCallId = 0;
+
 ADDRINT InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS;
 DWORD InstNtQueryInformationProcess::NtGlobalFlag = -1;
 
-VOID InstNtQueryInformationProcess::CallbackBefore(ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
+VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
 
     NtQueryInformationProcessArgs args;
     args.ProcessHandle = ProcessHandle;
@@ -77,7 +78,8 @@ VOID InstNtQueryInformationProcess::CallbackBefore(ADDRINT instrPtr, ADDRINT Pro
     args.ProcessInformationLength = ProcessInformationLength;
     args.ReturnLength = ReturnLength;
 
-    argsMap[instrPtr] = args;
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
     /*
     std::cout << "[Contradef] NtQueryInformationProcess será chamada com os seguintes parâmetros:" << std::endl;
     std::cout << "[Contradef] ProcessHandle: " << ProcessHandle << std::endl;
@@ -89,8 +91,10 @@ VOID InstNtQueryInformationProcess::CallbackBefore(ADDRINT instrPtr, ADDRINT Pro
 
 }
 
-VOID InstNtQueryInformationProcess::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
-    auto it = argsMap.find(instrPtr-20);
+VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
+    CallContextKey key = { callId, tid };
+    
+    auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         const NtQueryInformationProcessArgs& args = it->second;
 
@@ -257,8 +261,13 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
 
         PIN_LockClient();
         
-        
         IMG img = IMG_FindByAddress(instAddress);
+        std::string moduleName = ExtractModuleName(IMG_Name(img));
+        if (toUpperCase(moduleName) == "NTDLL.DLL") {
+            // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
+            return;
+        }
+
         if (!IMG_IsMainExecutable(img)) {
             // Se a leitura não ocorre na imagem principal (executavel). Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
             //return;
@@ -278,7 +287,24 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         }
         //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
 
-        
+
+
+        // Obter o ponteiro para a pilha atual
+        ADDRINT* stackPtr;
+        PIN_GetContextRegval(ctxt, REG_STACK_PTR, reinterpret_cast<UINT8*>(&stackPtr));
+
+        // Obter o endereço de retorno da pilha
+        ADDRINT returnAddr = *stackPtr;
+
+        // Encontrar a RTN que contém esse endereço
+        RTN callerRTN = RTN_FindByAddress(returnAddr);
+        std::string callerFcn = "";
+        if (RTN_Valid(callerRTN)) {
+            callerFcn = " rotina chamadora (possível): " + RTN_Name(callerRTN);
+        }
+
+
+
         // Obter a disassemblagem da instrução
         std::string disassembledInstruction = INS_Disassemble(ins);
 
@@ -288,10 +314,10 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         if (RTN_Valid(rtn)) {
             // Obter o nome da rotina
             std::string rtnName = RTN_Name(rtn);
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << " " << imgMapped << std::endl;
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << " " << imgMapped << callerFcn << std::endl;
         }
         else {
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " " << imgMapped << std::endl;
+            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " " << imgMapped << callerFcn << std::endl;
         }
         PIN_UnlockClient();
 
@@ -370,6 +396,8 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
         IARG_INST_PTR,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
@@ -379,6 +407,8 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
         IARG_END);
 
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+        IARG_THREAD_ID,
+        IARG_ADDRINT, &nextCallId,
         IARG_INST_PTR,
         IARG_REG_REFERENCE, REG_GAX,
         IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle

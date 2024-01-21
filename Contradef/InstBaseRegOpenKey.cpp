@@ -1,49 +1,52 @@
 #include "InstBaseRegOpenKey.h"
 
-std::map<ADDRINT, InstBaseRegOpenKeyArgs> InstBaseRegOpenKey::argsMap;
+std::map<CallContextKey, InstBaseRegOpenKeyArgs> InstBaseRegOpenKey::argsMap;
+ADDRINT InstBaseRegOpenKey::nextCallId = 0;
 
-VOID InstBaseRegOpenKey::CallbackBefore(ADDRINT instrPtr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult) {
+VOID InstBaseRegOpenKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult) {
     InstBaseRegOpenKeyArgs args;
     args.hKey = hKey;
     args.lpSubKey = lpSubKey;
     args.phkResult = phkResult;
-
-    argsMap[instrPtr] = args;
-
-    std::cout << "BaseRegOpenKey será chamada com os seguintes parâmetros:" << std::endl;
-    // Impressão dos parâmetros
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
 }
 
-VOID InstBaseRegOpenKey::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult) {
-    auto it = argsMap.find(instrPtr);
+VOID InstBaseRegOpenKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult) {
+    CallContextKey key = { callId, tid };
+    auto it = argsMap.find(key);
     if (it != argsMap.end()) {
-        // Operações com args, se necessário
+        const InstBaseRegOpenKeyArgs& args = it->second;
+        if (args.lpSubKey != 0) {
+            std::wstring wslpSubKey = ConvertAddrToWideString(args.lpSubKey);
+            wprintf(L"[Contradef] BaseRegOpenKey foi chamada com lpSubKey: %ls\n", wslpSubKey.c_str());
+        }
+        std::cout << "[Contradef] Valor de retorno de BaseRegOpenKey: " << *retValAddr << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
-
-    std::cout << "Valor de retorno de BaseRegOpenKey: " << *retValAddr << std::endl;
 }
 
 VOID InstBaseRegOpenKey::InstrumentFunction(RTN rtn) {
     if (RTN_Name(rtn) == "BaseRegOpenKey") {
-        
         RTN_Open(rtn);
-
         RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-            IARG_INST_PTR,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
+            IARG_THREAD_ID,
+            IARG_ADDRINT, &nextCallId,
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpSubKey
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // phkResult
             IARG_END);
 
         RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-            IARG_INST_PTR,
+            IARG_THREAD_ID,
+            IARG_ADDRINT, &nextCallId,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 1,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 2,
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpSubKey
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // phkResult
             IARG_END);
 
         RTN_Close(rtn);
     }
+
 }

@@ -7,6 +7,7 @@
 #include <map>
 #include "NtStructures.h"
 #include "InstrumentationStrategy.h"
+#include  "CallContextKey.h"
 
 struct InstNtOpenKeyArgs {
     ADDRINT KeyHandle;
@@ -19,10 +20,10 @@ public:
     static VOID InstrumentFunction(RTN rtn);
 
 private:
-    static std::map<ADDRINT, InstNtOpenKeyArgs> argsMap;
-
-    static VOID CallbackBefore(ADDRINT instrPtr, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
-    static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
+    static std::map<CallContextKey, InstNtOpenKeyArgs> argsMap;
+    static ADDRINT nextCallId;
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
 };
 
 #endif // INST_NT_OPEN_KEY_H

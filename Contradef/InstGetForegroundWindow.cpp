@@ -5,11 +5,12 @@ A função GetForegroundWindow não possui argumentos. Ela simplesmente retorna o i
 */
 
 VOID InstGetForegroundWindow::CallbackBefore(ADDRINT instrPtr) {
-    std::cout << "GetForegroundWindow será chamada." << std::endl;
+    std::cout << "[Contradef] GetForegroundWindow será chamada." << std::endl;
 }
 
 VOID InstGetForegroundWindow::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
-    std::cout << "Valor de retorno de GetForegroundWindow: " << *retValAddr << std::endl;
+    // Esta função não esta sendo chamada, verificar o motivo
+    std::cout << "[Contradef] GetForegroundWindow foi chamado, o valor de retorno eh: " << *retValAddr << std::endl;
 }
 
 VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn) {

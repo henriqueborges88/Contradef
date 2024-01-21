@@ -1,3 +1,4 @@
 Pin: pin-3.28-98749-6643ecee5
 Copyright 2002-2023 Intel Corporation.
-E:  IARG_PROTOTYPE must be provided when using IPOINT_AFTER instrumentation.
+A:  C:\tmp_proj\pin_jenkins\workspace\pypl-pin-nightly\GitPin\Source\pin\pin\image.cpp: LEVEL_PINCLIENT::RTN_OpenAndFetch: 2641: Must use RTN_Close on previous rtn before opening a new rtn
+
