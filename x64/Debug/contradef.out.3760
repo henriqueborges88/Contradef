@@ -1,0 +1,20 @@
+Executando estratégia: GetModuleHandleA no modulo C:\WINDOWS\System32\KERNELBASE.dll
+Executando estratégia: GetModuleHandleA no modulo C:\WINDOWS\System32\KERNEL32.DLL
+
+[+] GetModuleHandleA...
+    lpModuleName (parámetro): gdi32full.dll
+    Valor de retorno: 140736271089664
+[*] Concluído
+
+
+[+] GetModuleHandleA...
+    lpModuleName (parámetro): rpcrt4.dll
+    Valor de retorno: 140736280461312
+[*] Concluído
+
+
+[+] GetModuleHandleA...
+    lpModuleName (parámetro): prdtest.exe
+    Valor de retorno: 0
+[*] Concluído
+

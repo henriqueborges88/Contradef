@@ -83,9 +83,10 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction; 
     strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction; 
     strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
+    strategyMap["DebugActiveProcess"] = &InstDebugActiveProcess::InstrumentFunction;
     */
     
-    strategyMap["DebugActiveProcess"] = &InstDebugActiveProcess::InstrumentFunction;
+    strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
 }
 
 InstrumentationContext::~InstrumentationContext() {

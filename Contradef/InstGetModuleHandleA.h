@@ -22,8 +22,8 @@ private:
     static std::map<CallContextKey, GetModuleHandleAArgs> argsMap;
     static ADDRINT nextCallId;
     static std::ofstream* outStream;
-    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpModuleName);
-    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT lpModuleName);
+    static VOID CallbackBefore(THREADID tid, ADDRINT callId, RTN* rtn, ADDRINT lpModuleName);
+    static VOID CallbackAfter(THREADID tid, ADDRINT callId, RTN* rtn, ADDRINT* retValAddr, ADDRINT lpModuleName);
 };
 
 #endif // INST_GET_MODULE_HANDLE_A_H
