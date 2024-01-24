@@ -1,16 +1,23 @@
 #include "InstIsDebuggerPresent.h"
 
 ADDRINT InstIsDebuggerPresent::nextCallId = 0;
+std::ofstream* InstIsDebuggerPresent::outStream;
 
 VOID InstIsDebuggerPresent::CallbackBefore(THREADID tid, ADDRINT callId) {
-    //std::cout << "[Contradef] IsDebuggerPresent será chamada." << std::endl;
+    //*outStream << "IsDebuggerPresent" << std::endl;
 }
 
 VOID InstIsDebuggerPresent::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr) {
-    std::cout << "[Contradef] Valor de retorno de IsDebuggerPresent: " << *retValAddr << std::endl;
+    
+    *outStream << std::endl << "[+] IsDebuggerPresent..." << std::endl;
+    *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+    *outStream << "[*] Concluído" << std::endl << std::endl;
+
 }
 
-VOID InstIsDebuggerPresent::InstrumentFunction(RTN rtn) {
+VOID InstIsDebuggerPresent::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
@@ -24,5 +31,4 @@ VOID InstIsDebuggerPresent::InstrumentFunction(RTN rtn) {
         IARG_END);
 
     RTN_Close(rtn);
-
 }

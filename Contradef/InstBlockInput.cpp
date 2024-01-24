@@ -5,6 +5,7 @@ Verificar se está relacionada com detecção de Debug ou DBI
 */
 std::map<CallContextKey, InstBlockInputArgs> InstBlockInput::argsMap;
 ADDRINT InstBlockInput::nextCallId = 0;
+std::ofstream* InstBlockInput::outStream;
 
 VOID InstBlockInput::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT fBlockIt) {
     InstBlockInputArgs args;
@@ -19,13 +20,17 @@ VOID InstBlockInput::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retVal
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         long* fBlockItPtr = reinterpret_cast<long*>(it->second.fBlockIt);
-        std::cout << "[Contradef] BlockInput foi chamado com fBlockIt: " << *fBlockItPtr << std::endl;
-        std::cout << "[Contradef] Valor de retorno de BlockInput: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] BlockInput..." << std::endl;
+        *outStream << "    fBlockIt (parámetro): " << *fBlockItPtr << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstBlockInput::InstrumentFunction(RTN rtn) {
+VOID InstBlockInput::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

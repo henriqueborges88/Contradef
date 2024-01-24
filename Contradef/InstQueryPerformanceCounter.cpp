@@ -2,14 +2,15 @@
 
 std::map<CallContextKey, InstQueryPerformanceCounterArgs> InstQueryPerformanceCounter::argsMap;
 ADDRINT InstQueryPerformanceCounter::nextCallId = 0;
+std::ofstream* InstQueryPerformanceCounter::outStream;
 
 VOID InstQueryPerformanceCounter::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpPerformanceCount) {
+    
     InstQueryPerformanceCounterArgs args;
     args.lpPerformanceCount = lpPerformanceCount;
 
     CallContextKey key = { callId, tid };
     argsMap[key] = args;
-    //std::cout << "[Contradef] QueryPerformanceCounter foi chamado com lpPerformanceCount (Endereço): " << args.lpPerformanceCount << std::endl;
 
 }
 
@@ -20,14 +21,17 @@ VOID InstQueryPerformanceCounter::CallbackAfter(THREADID tid, ADDRINT callId, AD
     if (it != argsMap.end()) {
         const InstQueryPerformanceCounterArgs& args = it->second;
         std::string ansiStringlpPerformanceCount = ConvertAddrToAnsiString(args.lpPerformanceCount);
-
-        std::cout << "[Contradef] QueryPerformanceCounter foi chamado com lpPerformanceCount: " << ansiStringlpPerformanceCount << std::endl;
-        std::cout << "[Contradef] Valor de retorno de QueryPerformanceCounter: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] QueryPerformanceCounter..." << std::endl;
+        *outStream << "    lpPerformanceCount (parámetro): " << ansiStringlpPerformanceCount << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstQueryPerformanceCounter::InstrumentFunction(RTN rtn) {
+VOID InstQueryPerformanceCounter::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

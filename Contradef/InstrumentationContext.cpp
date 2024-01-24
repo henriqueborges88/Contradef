@@ -1,4 +1,4 @@
-// InstrumentationContext.cpp
+#include <iostream>
 #include "InstrumentationContext.h"
 #include "InstIsDebuggerPresent.h"
 #include "InstCheckRemoteDebuggerPresent.h"
@@ -31,15 +31,33 @@
 #include "InstQueryPerformanceCounter.h"
 #include "InstQueryPerformanceFrequency.h"
 #include "InstGetTickCount.h"
+#include "InstVirtualQuery.h"
+#include "InstVirtualQueryEx.h"
+#include "InstVirtualProtect.h"
+#include "InstVirtualProtectEx.h"
+#include "InstDebugActiveProcess.h"
 
 
 InstrumentationContext::InstrumentationContext() {
-    //strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
-    //strategyMap["EnumProcessModulesEx"] = &InstEnumProcessModulesEx::InstrumentFunction;
-    //strategyMap["EnumProcessModules"] = &InstEnumProcessModules::InstrumentFunction;
-    //strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
-    //strategyMap["QueryPerformanceCounter"] = &InstQueryPerformanceCounter::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado. O CB After funciona no modo Probed
+    //TODO: Alterar para o modo de instrumentação Probed (sonda)
+
+    /*
+    * Falta implementar a lógica de detecção
+    strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["EnumProcessModulesEx"] = &InstEnumProcessModulesEx::InstrumentFunction;
+    strategyMap["EnumProcessModules"] = &InstEnumProcessModules::InstrumentFunction;
+    strategyMap["VirtualQuery"] = &InstVirtualQuery::InstrumentFunction;
+    strategyMap["VirtualQueryEx"] = &InstVirtualQueryEx::InstrumentFunction;
+    strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
+    strategyMap["VirtualProtectEx"] = &InstVirtualProtectEx::InstrumentFunction;
+
     
+    * Com Problema
+    strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
+    strategyMap["QueryPerformanceCounter"] = &InstQueryPerformanceCounter::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado. O CB After funciona no modo Probed
+    strategyMap["QueryPerformanceFrequency"] = &InstQueryPerformanceFrequency::InstrumentFunction;  // <-----Verificar, o CB after não está sendo invocado. O CB After funciona no modo Probed
+
+    * OK
     strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
     strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
     strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
@@ -65,7 +83,9 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction; 
     strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction; 
     strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
-    strategyMap["QueryPerformanceFrequency"] = &InstQueryPerformanceFrequency::InstrumentFunction;
+    */
+    
+    strategyMap["DebugActiveProcess"] = &InstDebugActiveProcess::InstrumentFunction;
 }
 
 InstrumentationContext::~InstrumentationContext() {
@@ -74,11 +94,11 @@ InstrumentationContext::~InstrumentationContext() {
     strategyMap.clear();  // Opcional, limpa o mapa
 }
 
-void InstrumentationContext::ExecuteStrategy(const std::string& name, RTN rtn) {
+void InstrumentationContext::ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out) {
     auto it = strategyMap.find(name);
     if (it != strategyMap.end()) {
-        std::cout << "[Contradef] Instrumentando a função " << name << std::endl;
-        (*it->second)(rtn);
+        out << "Instrumentando a função " << name << std::endl;
+        (*it->second)(rtn, out);
     }
 }
 
@@ -86,14 +106,14 @@ bool InstrumentationContext::HasStrategy(const std::string& name) const {
     return strategyMap.find(name) != strategyMap.end();
 }
 
-void InstrumentationContext::ExecuteAllStrategies(IMG img) {
+void InstrumentationContext::ExecuteAllStrategies(IMG img, std::ofstream& out) {
     std::string moduleName = IMG_Name(img);
     for (const auto& pair : strategyMap) {
         RTN rtn = RTN_FindByName(img, pair.first.c_str());
         if (RTN_Valid(rtn)) {
-            std::cout << "Executando estratégia: " << pair.first << " no modulo " << moduleName << std::endl;
+            out << "Executando estratégia: " << pair.first << " no modulo " << moduleName << std::endl;
             RTNFunction func = pair.second;
-            func(rtn);
+            func(rtn, out);
         }
     }
 }

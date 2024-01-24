@@ -34,6 +34,12 @@ std::wstring ReadWideString(ADDRINT addr) {
     return str;
 }
 
+
+std::string WStringToString(const std::wstring& wstr) {
+    std::string str(wstr.begin(), wstr.end());
+    return str;
+}
+
 std::string ExtractModuleName(const std::string& fullPath) {
     size_t lastSlashPos = fullPath.find_last_of("\\/");
     if (lastSlashPos != std::string::npos) {

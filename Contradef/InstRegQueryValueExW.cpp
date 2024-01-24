@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, RegQueryValueExWArgs> InstRegQueryValueExW::argsMap;
 ADDRINT InstRegQueryValueExW::nextCallId = 0;
+std::ofstream* InstRegQueryValueExW::outStream;
 
 VOID InstRegQueryValueExW::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
     RegQueryValueExWArgs args;
@@ -21,16 +22,18 @@ VOID InstRegQueryValueExW::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* 
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         const RegQueryValueExWArgs& args = it->second;
-        if (args.lpValueName != 0) {
-            std::wstring wslpValueName = ConvertAddrToWideString(args.lpValueName);
-            wprintf(L"[Contradef] RegQueryValueExW será chamada com lpValueName: %ls\n", wslpValueName.c_str());
-        }
-        std::cout << "[Contradef] Valor de retorno de RegQueryValueExW: " << *retValAddr << std::endl;
+        std::wstring wslpValueName = ConvertAddrToWideString(args.lpValueName);
+        *outStream << std::endl << "[+] RegQueryValueExW..." << std::endl;
+        *outStream << "    lpValueName (parámetro): " << WStringToString(wslpValueName) << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstRegQueryValueExW::InstrumentFunction(RTN rtn) {
+VOID InstRegQueryValueExW::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

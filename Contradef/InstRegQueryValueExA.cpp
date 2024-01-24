@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstRegQueryValueExAArgs> InstRegQueryValueExA::argsMap;
 ADDRINT InstRegQueryValueExA::nextCallId = 0;
+std::ofstream* InstRegQueryValueExA::outStream;
 
 VOID InstRegQueryValueExA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpValueName, ADDRINT lpReserved, ADDRINT lpType, ADDRINT lpData, ADDRINT lpcbData) {
     InstRegQueryValueExAArgs args;
@@ -22,13 +23,18 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* 
     if (it != argsMap.end()) {
         const InstRegQueryValueExAArgs& args = it->second;
         std::string ansiStringlpValueName = ConvertAddrToAnsiString(args.lpValueName);
-        std::cout << "[Contradef] RegQueryValueExA invocada com lpValueName: " << ansiStringlpValueName << std::endl;
-        std::cout << "[Contradef] RegQueryValueExA completou a execução, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] RegQueryValueExA..." << std::endl;
+        *outStream << "    lpValueName (parámetro): " << ansiStringlpValueName << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
+
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn) {
+VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

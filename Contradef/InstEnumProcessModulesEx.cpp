@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstEnumProcessModulesExArgs> InstEnumProcessModulesEx::argsMap;
 ADDRINT InstEnumProcessModulesEx::nextCallId = 0;
+std::ofstream* InstEnumProcessModulesEx::outStream;
 
 VOID InstEnumProcessModulesEx::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag) {
     InstEnumProcessModulesExArgs args;
@@ -20,12 +21,16 @@ VOID InstEnumProcessModulesEx::CallbackAfter(THREADID tid, ADDRINT callId, ADDRI
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         //Enumera os handles dos modulos do processo, pode estar seguido de GetModuleFileName
-        std::cout << "[Contradef] EnumProcessModulesEx foi chamada, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] EnumProcessModulesEx..." << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstEnumProcessModulesEx::InstrumentFunction(RTN rtn) {
+VOID InstEnumProcessModulesEx::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

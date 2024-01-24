@@ -4,15 +4,20 @@
 A função GetTickCount não possui argumentos de entrada. Ela retorna o número de milissegundos desde que o sistema foi iniciado. Portanto, a estrutura InstGetTickCountArgs é mantida vazia.
 */
 
+std::ofstream* InstGetTickCount::outStream;
+
 VOID InstGetTickCount::CallbackBefore(ADDRINT instrPtr) {
     //std::cout << "GetTickCount será chamada." << std::endl;
 }
 
 VOID InstGetTickCount::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
-    std::cout << "[Contradef] GetTickCount foi chamada, o valor de retorno eh: " << *retValAddr << std::endl;
+    *outStream << std::endl << "[+] GetTickCount..." << std::endl;
+    *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+    *outStream << "[*] Concluído" << std::endl << std::endl;
 }
 
-VOID InstGetTickCount::InstrumentFunction(RTN rtn) {
+VOID InstGetTickCount::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
 
     RTN_Open(rtn);
 

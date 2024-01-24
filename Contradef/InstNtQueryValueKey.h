@@ -4,6 +4,7 @@
 
 #include "pin.H"
 #include <iostream>
+#include <fstream>
 #include <map>
 #include "InstrumentationStrategy.h"
 #include "NtStructures.h"
@@ -112,11 +113,12 @@ struct InstNtQueryValueKeyArgs {
 
 class InstNtQueryValueKey : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn);
+    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
 
 private:
     static std::map<CallContextKey, InstNtQueryValueKeyArgs> argsMap;
     static ADDRINT nextCallId;
+    static std::ofstream* outStream;
     static VOID InterpretKeyValueInformationFull(BYTE* keyValueInformation);
     static VOID InterpretKeyValueInformationPartial(BYTE* keyValueInformation);
     static VOID InterpretKeyValueInformationBasic(BYTE* keyValueInformation);

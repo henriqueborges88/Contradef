@@ -2,6 +2,8 @@
 
 std::map<CallContextKey, InstOutputDebugStringWArgs> InstOutputDebugStringW::argsMap;
 ADDRINT InstOutputDebugStringW::nextCallId = 0;
+std::ofstream* InstOutputDebugStringW::outStream;
+
 
 VOID InstOutputDebugStringW::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpOutputString) {
     InstOutputDebugStringWArgs args;
@@ -17,13 +19,17 @@ VOID InstOutputDebugStringW::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT
     if (it != argsMap.end()) {
         const InstOutputDebugStringWArgs& args = it->second;
         std::wstring wslpOutputString = ConvertAddrToWideString(args.lpOutputString);
-        wprintf(L"[Contradef] OutputDebugStringW foi chamada com lpOutputString: %ls\n", wslpOutputString.c_str());
-        std::cout << "[Contradef] Valor de retorno de OutputDebugStringW: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] OutputDebugStringW..." << std::endl;
+        *outStream << "    lpOutputString (parámetro): " << WStringToString(wslpOutputString) << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstOutputDebugStringW::InstrumentFunction(RTN rtn) {
+VOID InstOutputDebugStringW::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

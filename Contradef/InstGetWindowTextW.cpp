@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstGetWindowTextWArgs> InstGetWindowTextW::argsMap;
 ADDRINT InstGetWindowTextW::nextCallId = 0;
+std::ofstream* InstGetWindowTextW::outStream;
 
 VOID InstGetWindowTextW::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hWnd, ADDRINT lpString, ADDRINT nMaxCount) {
     InstGetWindowTextWArgs args;
@@ -19,14 +20,17 @@ VOID InstGetWindowTextW::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* re
     if (it != argsMap.end()) {
         const InstGetWindowTextWArgs& args = it->second;
         std::wstring wslpString = ConvertAddrToWideString(args.lpString);
-        wprintf(L"[Contradef] GetWindowTextW foi chamada com lpString: %ls\n", wslpString.c_str());
-
-        std::cout << "[Contradef] GetWindowTextW completou a execução, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] GetWindowTextW..." << std::endl;
+        *outStream << "    lpString (parámetro): " << WStringToString(wslpString) << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstGetWindowTextW::InstrumentFunction(RTN rtn) {
+VOID InstGetWindowTextW::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

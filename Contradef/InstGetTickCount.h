@@ -4,15 +4,16 @@
 
 #include "pin.H"
 #include <iostream>
+#include <fstream>
 #include "InstrumentationStrategy.h"
 
 class InstGetTickCount : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn);
+    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
 
 private:
     typedef unsigned long DWORD;
-
+    static std::ofstream* outStream;
     static VOID CallbackBefore(ADDRINT instrPtr);
     static VOID CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr);
 };

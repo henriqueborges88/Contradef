@@ -4,6 +4,7 @@
 
 #include "pin.H"
 #include <iostream>
+#include <fstream>
 #include <map>
 #include "InstrumentationStrategy.h"
 #include  "CallContextKey.h"
@@ -18,11 +19,12 @@ struct InstEnumProcessModulesExArgs {
 
 class InstEnumProcessModulesEx : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn);
+    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
 
 private:
     static std::map<CallContextKey, InstEnumProcessModulesExArgs> argsMap;
     static ADDRINT nextCallId;
+    static std::ofstream* outStream;
     static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag);
     static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT lphModule, ADDRINT cb, ADDRINT lpcbNeeded, ADDRINT dwFilterFlag);
 };

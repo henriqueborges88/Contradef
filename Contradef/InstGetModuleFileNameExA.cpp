@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstGetModuleFileNameExAArgs> InstGetModuleFileNameExA::argsMap;
 ADDRINT InstGetModuleFileNameExA::nextCallId = 0;
+std::ofstream* InstGetModuleFileNameExA::outStream;
 
 VOID InstGetModuleFileNameExA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
     InstGetModuleFileNameExAArgs args;
@@ -20,13 +21,17 @@ VOID InstGetModuleFileNameExA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRI
     if (it != argsMap.end()) {
         const InstGetModuleFileNameExAArgs& args = it->second;
         std::string ansiStringLpFilename = ConvertAddrToAnsiString(args.lpFilename);
-        std::cout << "[Contradef] GetModuleFileNameExA invocada com lpFilename: " << ansiStringLpFilename << std::endl;
-        std::cout << "[Contradef] GetModuleFileNameExA completou a execução, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] GetModuleFileNameExA..." << std::endl;
+        *outStream << "    lpPerformanceCount (parámetro): " << lpFilename << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstGetModuleFileNameExA::InstrumentFunction(RTN rtn) {
+VOID InstGetModuleFileNameExA::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

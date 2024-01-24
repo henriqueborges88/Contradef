@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstQueryPerformanceFrequencyArgs> InstQueryPerformanceFrequency::argsMap;
 ADDRINT InstQueryPerformanceFrequency::nextCallId = 0;
+std::ofstream* InstQueryPerformanceFrequency::outStream;
 
 VOID InstQueryPerformanceFrequency::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpFrequency) {
     InstQueryPerformanceFrequencyArgs args;
@@ -15,12 +16,16 @@ VOID InstQueryPerformanceFrequency::CallbackAfter(THREADID tid, ADDRINT callId, 
     CallContextKey key = { callId, tid };
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
-        std::cout << "[Contradef] QueryPerformanceFrequency completou a execução, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] QueryPerformanceFrequency..." << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstQueryPerformanceFrequency::InstrumentFunction(RTN rtn) {
+VOID InstQueryPerformanceFrequency::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

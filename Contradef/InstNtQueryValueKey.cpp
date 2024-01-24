@@ -32,6 +32,7 @@
 
 std::map<CallContextKey, InstNtQueryValueKeyArgs> InstNtQueryValueKey::argsMap;
 ADDRINT InstNtQueryValueKey::nextCallId = 0;
+std::ofstream* InstNtQueryValueKey::outStream;
 
 VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInformation) {
     //KEY_VALUE_PARTIAL_INFORMATION* info;
@@ -39,46 +40,46 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInforma
 
     auto info = reinterpret_cast<KEY_VALUE_FULL_INFORMATION*>(keyValueInformation);
 
-    std::cout << "Tipo do valor: " << info->Type << std::endl;
-    std::cout << "Tamanho do dado: " << info->DataLength << " bytes" << std::endl;
+    *outStream << "    Tipo do valor: " << info->Type << std::endl;
+    *outStream << "    Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
 
     BYTE* data = keyValueInformation + info->DataOffset;
 
     switch (info->Type) {
     case REG_NONE: {
-        std::cout << "Valor (REG_NONE): ";
+        *outStream << "    Valor (REG_NONE): ";
         if (info->DataLength > 100000) {
-            std::cout << "Tamanho excede o limite";
+            *outStream << "    Tamanho excede o limite";
         }
         else {
             for (ULONG i = 0; i < info->DataLength; ++i) {
-                printf("%02X ", data[i]);
+                *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        std::cout << " (dados binários brutos)" << std::endl;
+        *outStream << "     (dados binários brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        wprintf(L"Valor (string): %ls\n", stringValue.c_str());
+        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_EXPAND_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        wprintf(L"Valor (string): %ls\n", stringValue.c_str());
+        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_DWORD: {
         if (info->DataLength >= sizeof(DWORD)) {
             DWORD dwordValue = *reinterpret_cast<DWORD*>(data);
-            std::cout << "Valor (DWORD): " << dwordValue << std::endl;
+            *outStream << "    Valor (DWORD): " << dwordValue << std::endl;
         }
         break;
     }
     case REG_BINARY: {
-        std::cout << "Valor (binário): ";
+        *outStream << "    Valor (binário): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
-            printf("%02X ", data[i]);
+            *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
         std::cout << std::endl;
         break;
@@ -89,29 +90,29 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInforma
 
         while (*multiSz) {
             std::wstring str(multiSz);
-            wprintf(L"%ls | ", str.c_str());
+            *outStream << "    " << WStringToString(str) << " | ";
             multiSz += str.size() + 1;
         }
-        wprintf(L"\n");
+        *outStream << std::endl;
         break;
     }
     case REG_QWORD: {
         if (info->DataLength >= sizeof(ULONGLONG)) {
             ULONGLONG qwordValue = *reinterpret_cast<ULONGLONG*>(data);
-            std::cout << "Valor (QWORD): " << qwordValue << std::endl;
+            *outStream << "    Valor (QWORD): " << qwordValue << std::endl;
         }
         break;
     }
     default:
-        std::cout << "Tipo de dado não reconhecido ou não suportado." << std::endl;
+        *outStream << "    Tipo de dado não reconhecido ou não suportado." << std::endl;
     }
 }
 
 VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInformation) {
     auto info = reinterpret_cast<KEY_VALUE_PARTIAL_INFORMATION*>(keyValueInformation);
 
-    std::cout << "Tipo do valor: " << info->Type << std::endl;
-    std::cout << "Tamanho do dado: " << info->DataLength << " bytes" << std::endl;
+    *outStream << "    Tipo do valor: " << info->Type << std::endl;
+    *outStream << "    Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
 
     // O dado é armazenado diretamente na estrutura após os campos iniciais
     BYTE* data = info->Data;
@@ -119,39 +120,39 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
     // Exemplo de interpretação de dados, dependendo do tipo
     switch (info->Type) {
     case REG_NONE: {
-        std::cout << "Valor (REG_NONE): ";
+        *outStream << "    Valor (REG_NONE): ";
         if (info->DataLength > 100000) {
-            std::cout << "Tamanho excede o limite";
+            *outStream << "    Tamanho excede o limite";
         }
         else {
             for (ULONG i = 0; i < info->DataLength; ++i) {
-                printf("%02X ", data[i]);
+                *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        std::cout << " (dados binários brutos)" << std::endl;
+        *outStream << "     (dados binários brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        wprintf(L"Valor (string): %ls\n", stringValue.c_str());
+        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_EXPAND_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        wprintf(L"Valor (string): %ls\n", stringValue.c_str());
+        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_DWORD: {
         if (info->DataLength >= sizeof(DWORD)) {
             DWORD dwordValue = *reinterpret_cast<DWORD*>(data);
-            std::cout << "Valor (DWORD): " << dwordValue << std::endl;
+            *outStream << "    Valor (DWORD): " << dwordValue << std::endl;
         }
         break;
     }
     case REG_BINARY: {
-        std::cout << "Valor (binário): ";
+        *outStream << "    Valor (binário): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
-            printf("%02X ", data[i]);
+            *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
         std::cout << std::endl;
         break;
@@ -162,21 +163,21 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
 
         while (*multiSz) {
             std::wstring str(multiSz);
-            wprintf(L"%ls | ", str.c_str());
+            *outStream << "    " << WStringToString(str) << " | ";
             multiSz += str.size() + 1;
         }
-        wprintf(L"\n");
+        *outStream << std::endl;
         break;
     }
     case REG_QWORD: {
         if (info->DataLength >= sizeof(ULONGLONG)) {
             ULONGLONG qwordValue = *reinterpret_cast<ULONGLONG*>(data);
-            std::cout << "Valor (QWORD): " << qwordValue << std::endl;
+            *outStream << "    Valor (QWORD): " << qwordValue << std::endl;
         }
         break;
     }
     default:
-        std::cout << "Tipo de dado não reconhecido ou não suportado." << std::endl;
+        *outStream << "    Tipo de dado não reconhecido ou não suportado." << std::endl;
     }
 }
 
@@ -184,12 +185,13 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
 VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInformation) {
     auto info = reinterpret_cast<KEY_VALUE_BASIC_INFORMATION*>(keyValueInformation);
 
-    std::cout << "Tipo do valor: " << info->Type << std::endl;
-    std::cout << "Comprimento do nome do valor: " << info->NameLength << " bytes" << std::endl;
+    *outStream << "    Tipo do valor: " << info->Type << std::endl;
+    *outStream << "    Comprimento do nome do valor: " << std::dec << info->NameLength << " bytes" << std::endl;
 
     // O nome do valor é armazenado diretamente na estrutura após os campos iniciais
     std::wstring valueName(info->Name, info->NameLength / sizeof(WCHAR));
-    wprintf(L"Nome do valor: %ls\n", valueName.c_str());
+    *outStream << "    Nome do valor: " << WStringToString(valueName) << std::endl;
+
 }
 
 VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
@@ -211,12 +213,14 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* r
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         const InstNtQueryValueKeyArgs& args = it->second;
+        *outStream << std::endl << "[+] NtQueryValueKey..." << std::endl;
+        
 
         UNICODE_STRING* unicodeString = reinterpret_cast<UNICODE_STRING*>(args.ValueName);
         if (unicodeString && unicodeString->Buffer) {
             WCHAR* wideCharStr = reinterpret_cast<WCHAR*>(unicodeString->Buffer);
             std::wstring valueNameStr = std::wstring(wideCharStr);
-            wprintf(L"[Contradef] NtQueryValueKey ValueName: %ls\n", valueNameStr.c_str());
+            *outStream << "    ValueName (parámetro): " << WStringToString(valueNameStr) << std::endl;
         }
 
 
@@ -230,14 +234,15 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* r
         else if (args.KeyValueInformationClass == 2) {
             InterpretKeyValueInformationPartial(KeyValueInformationBuffer);
         }
-
-
-        std::cout << "[Contradef] NtQueryValueKey completou a execução, valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn) {
+VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

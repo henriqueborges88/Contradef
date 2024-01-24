@@ -179,6 +179,7 @@
     <ClCompile Include="InstBaseRegOpenKey.cpp" />
     <ClCompile Include="InstBlockInput.cpp" />
     <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
+    <ClCompile Include="InstDebugActiveProcess.cpp" />
     <ClCompile Include="InstEnumProcessModules.cpp" />
     <ClCompile Include="InstEnumProcessModulesEx.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
@@ -208,6 +209,10 @@
     <ClCompile Include="InstNtQueryInformationProcess.cpp" />
     <ClCompile Include="InstRegQueryValueW.cpp" />
     <ClCompile Include="InstrumentationContext.cpp" />
+    <ClCompile Include="InstVirtualProtect.cpp" />
+    <ClCompile Include="InstVirtualProtectEx.cpp" />
+    <ClCompile Include="InstVirtualQuery.cpp" />
+    <ClCompile Include="InstVirtualQueryEx.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -215,6 +220,7 @@
     <ClInclude Include="InstBaseRegOpenKey.h" />
     <ClInclude Include="InstBlockInput.h" />
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
+    <ClInclude Include="InstDebugActiveProcess.h" />
     <ClInclude Include="InstEnumProcessModules.h" />
     <ClInclude Include="InstEnumProcessModulesEx.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
@@ -245,6 +251,10 @@
     <ClInclude Include="InstRegQueryValueW.h" />
     <ClInclude Include="InstrumentationContext.h" />
     <ClInclude Include="InstrumentationStrategy.h" />
+    <ClInclude Include="InstVirtualProtect.h" />
+    <ClInclude Include="InstVirtualProtectEx.h" />
+    <ClInclude Include="InstVirtualQuery.h" />
+    <ClInclude Include="InstVirtualQueryEx.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>

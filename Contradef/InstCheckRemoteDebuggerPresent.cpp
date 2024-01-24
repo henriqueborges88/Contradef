@@ -2,6 +2,8 @@
 
 std::map<CallContextKey, InstCheckRemoteDebuggerPresentArgs> InstCheckRemoteDebuggerPresent::argsMap;
 ADDRINT InstCheckRemoteDebuggerPresent::nextCallId = 0;
+std::ofstream* InstCheckRemoteDebuggerPresent::outStream;
+
 
 VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
     InstCheckRemoteDebuggerPresentArgs args;
@@ -19,13 +21,18 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, ADDRINT callId,
     if (it != argsMap.end()) {
         const InstCheckRemoteDebuggerPresentArgs& args = it->second;
 
-        u_short* NtGlobalFlagPtr = reinterpret_cast<u_short*>(args.pbDebuggerPresent);
-        std::cout << "[Contradef] CheckRemoteDebuggerPresent foi chamada, o retorno de pbDebuggerPresent eh: " << *NtGlobalFlagPtr << std::endl;
-        std::cout << "[Contradef] Valor de retorno da função CheckRemoteDebuggerPresent: " << *retValAddr << std::endl;
+        u_short* pbDebuggerPresentPtr = reinterpret_cast<u_short*>(args.pbDebuggerPresent);
+        *outStream << std::endl << "[+] CheckRemoteDebuggerPresent..." << std::endl;
+        *outStream << "    pbDebuggerPresent (parámetro): " << *pbDebuggerPresentPtr << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
+        argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn) {
+VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

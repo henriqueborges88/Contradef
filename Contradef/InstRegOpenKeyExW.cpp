@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, RegOpenKeyExWArgs> InstRegOpenKeyExW::argsMap;
 ADDRINT InstRegOpenKeyExW::nextCallId = 0;
+std::ofstream* InstRegOpenKeyExW::outStream;
 
 VOID InstRegOpenKeyExW::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT ulOptions, ADDRINT samDesired, ADDRINT phkResult) {
     RegOpenKeyExWArgs args;
@@ -20,16 +21,18 @@ VOID InstRegOpenKeyExW::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* ret
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
         const RegOpenKeyExWArgs& args = it->second;
-        if (args.lpSubKey != 0) {
-            std::wstring wslpSubKey = ConvertAddrToWideString(args.lpSubKey);
-            wprintf(L"[Contradef] RegOpenKeyExW foi chamada com lpSubKey: %ls\n", wslpSubKey.c_str());
-        }
-        std::cout << "[Contradef] Valor de retorno de RegOpenKeyExW: " << *retValAddr << std::endl;
+        std::wstring wslpSubKey = ConvertAddrToWideString(args.lpSubKey);
+        *outStream << std::endl << "[+] RegOpenKeyExW..." << std::endl;
+        *outStream << "    lpSubKey (parámetro): " << WStringToString(wslpSubKey) << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstRegOpenKeyExW::InstrumentFunction(RTN rtn) {
+VOID InstRegOpenKeyExW::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

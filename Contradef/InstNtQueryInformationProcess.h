@@ -5,6 +5,7 @@
 #include "pin.H"
 #include <map>
 #include <string>
+#include <fstream>
 #include <set>
 #include <vector>
 #include "utils.h"
@@ -22,13 +23,15 @@ struct NtQueryInformationProcessArgs {
 
 class InstNtQueryInformationProcess : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn);
+    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
 
 private:
 
     static std::map<CallContextKey, NtQueryInformationProcessArgs> argsMap;
     static ADDRINT TARGET_MEMORY_ADDRESS;
     static ADDRINT nextCallId;
+    static std::ofstream* outStream;
+    static LONG retVal;
 
     static DWORD InstNtQueryInformationProcess::NtGlobalFlag;
 

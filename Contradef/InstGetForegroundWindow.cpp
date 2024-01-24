@@ -4,16 +4,21 @@
 A função GetForegroundWindow não possui argumentos. Ela simplesmente retorna o identificador da janela atualmente em primeiro plano. Por isso, o método CallbackBefore apenas registra a chamada da função, e o CallbackAfter registra o valor de retorno.
 */
 
+std::ofstream* InstGetForegroundWindow::outStream;
+
 VOID InstGetForegroundWindow::CallbackBefore(ADDRINT instrPtr) {
-    std::cout << "[Contradef] GetForegroundWindow será chamada." << std::endl;
+    //std::cout << "[Contradef] GetForegroundWindow será chamada." << std::endl;
 }
 
 VOID InstGetForegroundWindow::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
     // Esta função não esta sendo chamada, verificar o motivo
-    std::cout << "[Contradef] GetForegroundWindow foi chamado, o valor de retorno eh: " << *retValAddr << std::endl;
+    *outStream << std::endl << "[+] GetForegroundWindow..." << std::endl;
+    *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+    *outStream << "[*] Concluído" << std::endl << std::endl;
 }
 
-VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn) {
+VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
 
     RTN_Open(rtn);
 

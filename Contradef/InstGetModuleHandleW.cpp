@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstGetModuleHandleWArgs> InstGetModuleHandleW::argsMap;
 ADDRINT InstGetModuleHandleW::nextCallId = 0;
+std::ofstream* InstGetModuleHandleW::outStream;
 
 VOID InstGetModuleHandleW::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpModuleName) {
     InstGetModuleHandleWArgs args;
@@ -18,14 +19,18 @@ VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* 
         const InstGetModuleHandleWArgs& args = it->second;
         if (args.lpModuleName != 0) {
             std::wstring wslpModuleName = ConvertAddrToWideString(args.lpModuleName);
-            wprintf(L"[Contradef] GetModuleHandleW foi chamada com lpModuleName: %ls\n", wslpModuleName.c_str());
-            std::cout << "[Contradef] Valor de retorno de GetModuleHandleW: " << *retValAddr << std::endl;
+            *outStream << std::endl << "[+] GetModuleHandleW..." << std::endl;
+            *outStream << "    lpModuleName (parámetro): " << WStringToString(wslpModuleName) << std::endl;
+            *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+            *outStream << "[*] Concluído" << std::endl << std::endl;
         }
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstGetModuleHandleW::InstrumentFunction(RTN rtn) {
+VOID InstGetModuleHandleW::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

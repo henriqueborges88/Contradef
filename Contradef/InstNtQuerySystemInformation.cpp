@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstNtQuerySystemInformationArgs> InstNtQuerySystemInformation::argsMap;
 ADDRINT InstNtQuerySystemInformation::nextCallId = 0;
+std::ofstream* InstNtQuerySystemInformation::outStream;
 
 VOID InstNtQuerySystemInformation::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength) {
     InstNtQuerySystemInformationArgs args;
@@ -18,12 +19,16 @@ VOID InstNtQuerySystemInformation::CallbackAfter(THREADID tid, ADDRINT callId, A
     CallContextKey key = { callId, tid };
     auto it = argsMap.find(key);
     if (it != argsMap.end()) {
-        std::cout << "[Contradef] Valor de retorno de NtQuerySystemInformation: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] NtQuerySystemInformation..." << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
+VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
@@ -33,6 +38,7 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // SystemInformation
         IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // SystemInformationLength
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // ReturnLength
+        IARG_PTR, &out,
         IARG_END);
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_THREAD_ID,
@@ -42,6 +48,7 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // SystemInformation
         IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // SystemInformationLength
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // ReturnLength
+        IARG_PTR, &out,
         IARG_END);
 
     RTN_Close(rtn);

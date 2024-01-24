@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstNtOpenKeyArgs> InstNtOpenKey::argsMap;
 ADDRINT InstNtOpenKey::nextCallId = 0;
+std::ofstream* InstNtOpenKey::outStream;
 
 VOID InstNtOpenKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
     InstNtOpenKeyArgs args;
@@ -9,16 +10,18 @@ VOID InstNtOpenKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHand
     args.DesiredAccess = DesiredAccess;
     args.ObjectAttributes = ObjectAttributes;
 
-    CallContextKey key = { callId, tid };
-    argsMap[key] = args;
-
     // Acessando a estrutura OBJECT_ATTRIBUTES
     OBJECT_ATTRIBUTES* objAttr = reinterpret_cast<OBJECT_ATTRIBUTES*>(ObjectAttributes);
     if (objAttr != nullptr && objAttr->ObjectName != nullptr) {
         UNICODE_STRING* unicodeStr = objAttr->ObjectName;
         std::wstring keyPath(unicodeStr->Buffer, unicodeStr->Length / sizeof(WCHAR));
-        wprintf(L"[Contradef] NtOpenKey Caminho da chave: %ls\n", keyPath.c_str());
+        args.keyPathStr = WStringToString(keyPath);
     }
+
+    CallContextKey key = { callId, tid };
+    argsMap[key] = args;
+
+
 }
 
 VOID InstNtOpenKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
@@ -30,20 +33,18 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValA
         //// da estrutura OBJECT_ATTRIBUTES foi sobrescrita durante a execução, se necessário, 
         //// considerar copiar o valor do texto para outro espaço em memoria antes da execução, 
         //// logo resgatar esse valor copiado no lugar da estrutura original
-        //OBJECT_ATTRIBUTES* objAttr = reinterpret_cast<OBJECT_ATTRIBUTES*>(ObjectAttributes);
-        //if (objAttr != nullptr && objAttr->ObjectName != nullptr) {
-        //    UNICODE_STRING* unicodeStr = objAttr->ObjectName;
-        //    std::wstring keyPath(unicodeStr->Buffer, unicodeStr->Length / sizeof(WCHAR));
-        //    wprintf(L"[Contradef] NtOpenKey Caminho da chave: %ls\n", keyPath.c_str());
-        //}
-        //std::cout << "[Contradef] Valor de retorno de NtOpenKey: " << *retValAddr << std::endl;
-        //argsMap.erase(it); // Limpar a entrada após o uso
+        const InstNtOpenKeyArgs& args = it->second;
+        *outStream << std::endl << "[+] NtOpenKey..." << std::endl;
+        *outStream << "    Caminho da chave: " << args.keyPathStr << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
+        argsMap.erase(it); // Limpar a entrada após o uso
     }
-    std::cout << "[Contradef] Valor de retorno de NtOpenKey: " << *retValAddr << std::endl;
-
 }
 
-VOID InstNtOpenKey::InstrumentFunction(RTN rtn) {
+VOID InstNtOpenKey::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

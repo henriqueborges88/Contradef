@@ -4,6 +4,7 @@
 
 #include "pin.H"
 #include <iostream>
+#include <fstream>
 #include <map>
 #include "InstrumentationStrategy.h"
 #include  "CallContextKey.h"
@@ -15,11 +16,12 @@ struct InstCheckRemoteDebuggerPresentArgs {
 
 class InstCheckRemoteDebuggerPresent : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn);
+    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
 
 private:
     static std::map<CallContextKey, InstCheckRemoteDebuggerPresentArgs> argsMap;
     static ADDRINT nextCallId;
+    static std::ofstream* outStream;
     static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
     static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT hProcess, ADDRINT pbDebuggerPresent);
 };

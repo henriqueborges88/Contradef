@@ -2,6 +2,7 @@
 
 std::map<CallContextKey, InstRegOpenKeyAArgs> InstRegOpenKeyA::argsMap;
 ADDRINT InstRegOpenKeyA::nextCallId = 0;
+std::ofstream* InstRegOpenKeyA::outStream;
 
 VOID InstRegOpenKeyA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult) {
     InstRegOpenKeyAArgs args;
@@ -19,16 +20,24 @@ VOID InstRegOpenKeyA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retVa
     if (it != argsMap.end()) {
         const InstRegOpenKeyAArgs& args = it->second;
         std::string ansiStringLpSubKey = ConvertAddrToAnsiString(args.lpSubKey);
-        std::cout << "[Contradef] RegOpenKeyA invocada com lpSubKey: " << ansiStringLpSubKey << std::endl;
         if (ansiStringLpSubKey == "HARDWARE\ACPI\DSDT\VBOX__") {
+            // Contramedida pode ser alterando o valor de retorno para algumas chaves
             //*retValAddr = 0;
         }
-        std::cout << "[Contradef] Valor de retorno de RegOpenKeyA: " << *retValAddr << std::endl;
+        // TODO: criar includelist e excludelist
+        // mostrar todos menos exclude list caso esteja definido
+        // excluir todos menos includelist caso esteja definido
+        *outStream << std::endl << "[+] RegOpenKeyA..." << std::endl;
+        *outStream << "    lpSubKey (parámetro): " << ansiStringLpSubKey << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstRegOpenKeyA::InstrumentFunction(RTN rtn) {
+VOID InstRegOpenKeyA::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
+    
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
         IARG_THREAD_ID,

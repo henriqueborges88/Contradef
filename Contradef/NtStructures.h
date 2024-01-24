@@ -73,11 +73,31 @@ typedef unsigned int* PUINT;
 #include <cstdint>
 #if defined(_WIN64)
 typedef uint64_t ULONG_PTR;
+
+typedef __int64 INT_PTR, * PINT_PTR;
+typedef unsigned __int64 UINT_PTR, * PUINT_PTR;
+
+typedef __int64 LONG_PTR, * PLONG_PTR;
+typedef unsigned __int64 ULONG_PTR, * PULONG_PTR;
+
+#define __int3264   __int64
 #else
 typedef uint32_t ULONG_PTR;
+
+typedef _W64 int INT_PTR, * PINT_PTR;
+typedef _W64 unsigned int UINT_PTR, * PUINT_PTR;
+
+typedef _W64 long LONG_PTR, * PLONG_PTR;
+typedef _W64 unsigned long ULONG_PTR, * PULONG_PTR;
+
+#define __int3264   __int32
 #endif
 
 typedef ULONG_PTR DWORD_PTR, * PDWORD_PTR;
+
+typedef ULONG_PTR SIZE_T, * PSIZE_T;
+typedef LONG_PTR SSIZE_T, * PSSIZE_T;
+
 
 typedef struct _UNICODE_STRING {
     USHORT Length;
@@ -334,6 +354,136 @@ typedef union _LARGE_INTEGER {
 #endif //MIDL_PASS
 
 typedef LARGE_INTEGER* PLARGE_INTEGER;
+
+
+// Memory Basic Info
+
+#define SECTION_QUERY                0x0001
+#define SECTION_MAP_WRITE            0x0002
+#define SECTION_MAP_READ             0x0004
+#define SECTION_MAP_EXECUTE          0x0008
+#define SECTION_EXTEND_SIZE          0x0010
+#define SECTION_MAP_EXECUTE_EXPLICIT 0x0020 // not included in SECTION_ALL_ACCESS
+
+#define SECTION_ALL_ACCESS (STANDARD_RIGHTS_REQUIRED|SECTION_QUERY|\
+                            SECTION_MAP_WRITE |      \
+                            SECTION_MAP_READ |       \
+                            SECTION_MAP_EXECUTE |    \
+                            SECTION_EXTEND_SIZE)
+
+//
+// Session Specific Access Rights.
+//
+
+#define SESSION_QUERY_ACCESS  0x0001
+#define SESSION_MODIFY_ACCESS 0x0002
+
+#define SESSION_ALL_ACCESS (STANDARD_RIGHTS_REQUIRED |  \
+                            SESSION_QUERY_ACCESS |             \
+                            SESSION_MODIFY_ACCESS)
+
+// end_access
+#define PAGE_NOACCESS           0x01    
+#define PAGE_READONLY           0x02    
+#define PAGE_READWRITE          0x04    
+#define PAGE_WRITECOPY          0x08    
+#define PAGE_EXECUTE            0x10    
+#define PAGE_EXECUTE_READ       0x20    
+#define PAGE_EXECUTE_READWRITE  0x40    
+#define PAGE_EXECUTE_WRITECOPY  0x80    
+#define PAGE_GUARD             0x100    
+#define PAGE_NOCACHE           0x200    
+#define PAGE_WRITECOMBINE      0x400    
+#define PAGE_GRAPHICS_NOACCESS           0x0800    
+#define PAGE_GRAPHICS_READONLY           0x1000    
+#define PAGE_GRAPHICS_READWRITE          0x2000    
+#define PAGE_GRAPHICS_EXECUTE            0x4000    
+#define PAGE_GRAPHICS_EXECUTE_READ       0x8000    
+#define PAGE_GRAPHICS_EXECUTE_READWRITE 0x10000    
+#define PAGE_GRAPHICS_COHERENT          0x20000    
+#define PAGE_GRAPHICS_NOCACHE           0x40000    
+#define PAGE_ENCLAVE_THREAD_CONTROL 0x80000000  
+#define PAGE_REVERT_TO_FILE_MAP     0x80000000  
+#define PAGE_TARGETS_NO_UPDATE      0x40000000  
+#define PAGE_TARGETS_INVALID        0x40000000  
+#define PAGE_ENCLAVE_UNVALIDATED    0x20000000  
+#define PAGE_ENCLAVE_MASK           0x10000000  
+#define PAGE_ENCLAVE_DECOMMIT       (PAGE_ENCLAVE_MASK | 0) 
+#define PAGE_ENCLAVE_SS_FIRST       (PAGE_ENCLAVE_MASK | 1) 
+#define PAGE_ENCLAVE_SS_REST        (PAGE_ENCLAVE_MASK | 2) 
+#define MEM_COMMIT                      0x00001000  
+#define MEM_RESERVE                     0x00002000  
+#define MEM_REPLACE_PLACEHOLDER         0x00004000  
+#define MEM_RESERVE_PLACEHOLDER         0x00040000  
+#define MEM_RESET                       0x00080000  
+#define MEM_TOP_DOWN                    0x00100000  
+#define MEM_WRITE_WATCH                 0x00200000  
+#define MEM_PHYSICAL                    0x00400000  
+#define MEM_ROTATE                      0x00800000  
+#define MEM_DIFFERENT_IMAGE_BASE_OK     0x00800000  
+#define MEM_RESET_UNDO                  0x01000000  
+#define MEM_LARGE_PAGES                 0x20000000  
+#define MEM_4MB_PAGES                   0x80000000  
+#define MEM_64K_PAGES                   (MEM_LARGE_PAGES | MEM_PHYSICAL)  
+#define MEM_UNMAP_WITH_TRANSIENT_BOOST  0x00000001  
+#define MEM_COALESCE_PLACEHOLDERS       0x00000001  
+#define MEM_PRESERVE_PLACEHOLDER        0x00000002  
+#define MEM_DECOMMIT                    0x00004000  
+#define MEM_RELEASE                     0x00008000  
+#define MEM_FREE                        0x00010000  
+
+#define MEM_PRIVATE                 0x00020000  
+#define MEM_MAPPED                  0x00040000  
+#define MEM_IMAGE                   0x01000000  
+#define WRITE_WATCH_FLAG_RESET  0x01    
+
+#define ENCLAVE_TYPE_SGX            0x00000001
+#define ENCLAVE_TYPE_SGX2           0x00000002
+
+typedef struct _MEMORY_BASIC_INFORMATION {
+    PVOID BaseAddress;
+    PVOID AllocationBase;
+    DWORD AllocationProtect;
+#if defined (_WIN64)
+    WORD   PartitionId;
+#endif
+    SIZE_T RegionSize;
+    DWORD State;
+    DWORD Protect;
+    DWORD Type;
+} MEMORY_BASIC_INFORMATION, * PMEMORY_BASIC_INFORMATION;
+
+
+typedef struct _MEMORY_BASIC_INFORMATION32 {
+    DWORD BaseAddress;
+    DWORD AllocationBase;
+    DWORD AllocationProtect;
+    DWORD RegionSize;
+    DWORD State;
+    DWORD Protect;
+    DWORD Type;
+} MEMORY_BASIC_INFORMATION32, * PMEMORY_BASIC_INFORMATION32;
+
+#ifndef DECLSPEC_ALIGN
+#if (_MSC_VER >= 1300) && !defined(MIDL_PASS)
+#define DECLSPEC_ALIGN(x)   __declspec(align(x))
+#else
+#define DECLSPEC_ALIGN(x)
+#endif
+#endif
+
+typedef struct DECLSPEC_ALIGN(16) _MEMORY_BASIC_INFORMATION64 {
+    ULONGLONG BaseAddress;
+    ULONGLONG AllocationBase;
+    DWORD     AllocationProtect;
+    DWORD     __alignment1;
+    ULONGLONG RegionSize;
+    DWORD     State;
+    DWORD     Protect;
+    DWORD     Type;
+    DWORD     __alignment2;
+} MEMORY_BASIC_INFORMATION64, * PMEMORY_BASIC_INFORMATION64;
+// End Memory Basic Info
 
 
 #endif // NT_STRUCTURES_H

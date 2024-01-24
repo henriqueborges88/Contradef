@@ -13,6 +13,7 @@ Para o Themida:
 
 std::map<CallContextKey, GetModuleHandleAArgs> InstGetModuleHandleA::argsMap;
 ADDRINT InstGetModuleHandleA::nextCallId = 0;
+std::ofstream* InstGetModuleHandleA::outStream;
 
 VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpModuleName) {
     GetModuleHandleAArgs args;
@@ -28,14 +29,18 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* 
     if (it != argsMap.end()) {
         const GetModuleHandleAArgs& args = it->second;
         std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args.lpModuleName);
-        std::cout << "[Contradef] GetModuleHandleA invocada com lpModuleName: " << ansiStringLpModuleName << std::endl;
-        std::cout << "[Contradef] Valor de retorno de GetModuleHandleA: " << *retValAddr << std::endl;
+        *outStream << std::endl << "[+] GetModuleHandleA..." << std::endl;
+        *outStream << "    lpModuleName (parámetro): " << ansiStringLpModuleName << std::endl;
+        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        *outStream << "[*] Concluído" << std::endl << std::endl;
         argsMap.erase(it); // Limpar a entrada após o uso
     }
 }
 
-VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn) {
+VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn, std::ofstream& out) {
     if (RTN_Name(rtn) == "GetModuleHandleA") {
+        outStream = &out;
+
         RTN_Open(rtn);
         RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
             IARG_THREAD_ID,

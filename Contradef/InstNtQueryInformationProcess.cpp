@@ -65,6 +65,8 @@ Outras estruturas: https://www.cin.ufpe.br/~frsn/arquivos/GnuWin32/include/ddk/n
 
 std::map<CallContextKey, NtQueryInformationProcessArgs> InstNtQueryInformationProcess::argsMap;
 ADDRINT InstNtQueryInformationProcess::nextCallId = 0;
+std::ofstream* InstNtQueryInformationProcess::outStream;
+LONG InstNtQueryInformationProcess::retVal;
 
 ADDRINT InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS;
 DWORD InstNtQueryInformationProcess::NtGlobalFlag = -1;
@@ -80,15 +82,7 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, ADDRINT callId,
 
     CallContextKey key = { callId, tid };
     argsMap[key] = args;
-    /*
-    std::cout << "[Contradef] NtQueryInformationProcess será chamada com os seguintes parâmetros:" << std::endl;
-    std::cout << "[Contradef] ProcessHandle: " << ProcessHandle << std::endl;
-    std::cout << "[Contradef] ProcessInformationClass: " << ProcessInformationClass << std::endl;
-    std::cout << "[Contradef] ProcessInformation: " << ProcessInformation << std::endl;
-    std::cout << "[Contradef] ProcessInformationLength: " << ProcessInformationLength << std::endl;
-    std::cout << "[Contradef] ReturnLength (Endereço): " << ReturnLength << std::endl;
-    */
-
+ 
 }
 
 VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
@@ -124,9 +118,6 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, ADDRINT callId, 
                     if (PIN_CheckReadAccess(reinterpret_cast<void*>(NtGlobalFlagPtr))) {
                         TARGET_MEMORY_ADDRESS = reinterpret_cast<ADDRINT>(NtGlobalFlagPtr);
                         NtGlobalFlag = *NtGlobalFlagPtr; // Salvar o valor de NtGlobalFlag
-
-                        //std::cout << "[Contradef] NtGlobalFlagPtr (Endereço): " << std::hex << TARGET_MEMORY_ADDRESS << std::endl;
-                        //std::cout << "[Contradef] NtGlobalFlagPtr (Valor): " << std::hex << *NtGlobalFlagPtr << std::endl;
                     }
                 }
 
@@ -137,8 +128,8 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, ADDRINT callId, 
         argsMap.erase(it);
     }
 
-    //std::cout << "[Contradef] Valor de retorno de NtQueryInformationProcess: " << *retValAddr << std::endl;
-
+    retVal = *retValAddr;
+    
 }
 
 
@@ -276,16 +267,13 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         // Caso seja necessário verificar instruções em outra imagem
         std::string imgMapped = "";
         if (IMG_Valid(img)) {
-            imgMapped = " pertence à imagem " + IMG_Name(img);
-           /* std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
-                << " pertence à imagem " << IMG_Name(img) << std::endl;*/
+            imgMapped = "    Nome da imagem: " + IMG_Name(img);
+           /* 
+           std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
+                << " pertence à imagem " << IMG_Name(img) << std::endl;
+           std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
+           */
         }
-        else {
-            imgMapped = " não está em nenhuma imagem mapeada.";
-           /* std::cout << "Instrução em endereço " << std::hex << std::showbase << instAddress
-                << " não está em nenhuma imagem mapeada." << std::endl;*/
-        }
-        //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
 
 
 
@@ -300,25 +288,43 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDR
         RTN callerRTN = RTN_FindByAddress(returnAddr);
         std::string callerFcn = "";
         if (RTN_Valid(callerRTN)) {
-            callerFcn = " rotina chamadora (possível): " + RTN_Name(callerRTN);
+            callerFcn = "    Nome da rotina chamadora (possível): " + RTN_Name(callerRTN);
         }
-
 
 
         // Obter a disassemblagem da instrução
         std::string disassembledInstruction = INS_Disassemble(ins);
+        
 
         // Obter a RTN da instrução atual
         RTN rtn = INS_Rtn(ins);
-        // Verificar se a RTN é válida
+        std::string rtnName = "";
         if (RTN_Valid(rtn)) {
-            // Obter o nome da rotina
-            std::string rtnName = RTN_Name(rtn);
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao : \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " na rotina: " << rtnName << " " << imgMapped << callerFcn << std::endl;
+            rtnName = "    Nome da rotina: " + RTN_Name(rtn);
         }
-        else {
-            std::cout << "[Contradef] Endereço de memória " << memoryAddress << " com o valor " << valueAtNtGlobalFlagAddress << " para o NtGlobalFlagPtr foi acessado pela instrucao: \"" << disassembledInstruction << "\"" << " no endereco: " << instAddress << " " << imgMapped << callerFcn << std::endl;
+
+
+        *outStream << std::endl << "[+] NtQueryInformationProcess..." << std::endl;
+        *outStream << "    Valor de retorno da função NtQueryInformationProcess: " << retVal << std::endl;
+
+        if (!imgMapped.empty()) {
+            *outStream << imgMapped << std::endl;
         }
+        if (!rtnName.empty()) {
+            *outStream << rtnName << std::endl;
+        }
+        if (!callerFcn.empty()) {
+            *outStream << callerFcn << std::endl;
+        }
+        *outStream << "    Instrução: " << disassembledInstruction << std::endl;
+        *outStream << "    Endereço da instrução: " << std::hex << std::showbase << instAddress << std::dec << std::endl;
+
+        *outStream << "    Endereço do valor em memória: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
+        *outStream << "    Valor da flag NtGlobalFlag: " << valueAtNtGlobalFlagAddress << std::endl;
+
+
+        *outStream << "[*] Concluído" << std::endl << std::endl;
+
         PIN_UnlockClient();
 
         InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS = 0;
@@ -391,7 +397,8 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
 
 // Fin transferir
 
-VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn) {
+VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, std::ofstream& out) {
+    outStream = &out;
 
     RTN_Open(rtn);
 

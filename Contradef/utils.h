@@ -9,6 +9,7 @@
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
 std::wstring ReadWideString(ADDRINT addr);
+std::string WStringToString(const std::wstring& wstr);
 std::string ExtractModuleName(const std::string& fullPath);
 std::string toUpperCase(const std::string& str);
 
