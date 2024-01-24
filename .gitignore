@@ -1,3 +1,4 @@
 .vs/
-Debug/
+Contradef/x64/Debug/
+Contradef/x32/Debug/
 *.obj
