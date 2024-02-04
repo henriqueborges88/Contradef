@@ -5,7 +5,7 @@
 #include "pin.H"
 
 struct CallContextKey {
-    ADDRINT callId;
+    UINT32 callId;
     THREADID threadId;
     bool operator<(const CallContextKey& other) const {
         if (callId < other.callId) return true;

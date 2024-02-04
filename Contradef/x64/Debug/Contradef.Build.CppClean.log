@@ -19,7 +19,8 @@ c:\users\henri\source\repos\contradef\contradef\x64\debug\instcheckremotedebugge
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instblockinput.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instbaseregopenkey.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\contradef.obj
-c:\users\henri\source\repos\contradef\contradef\x64\debug\utils.obj
+c:\users\henri\source\repos\contradef\contradef\x64\debug\observer.obj
+c:\users\henri\source\repos\contradef\contradef\x64\debug\notifier.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instvirtualqueryex.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instvirtualquery.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instvirtualprotectex.obj
@@ -38,6 +39,7 @@ c:\users\henri\source\repos\contradef\contradef\x64\debug\instqueryperformancefr
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instqueryperformancecounter.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instoutputdebugstringw.obj
 c:\users\henri\source\repos\contradef\contradef\x64\debug\instntqueryvaluekey.obj
+c:\users\henri\source\repos\contradef\contradef\x64\debug\utils.obj
 c:\users\henri\source\repos\contradef\x64\debug\contradef.lib
 c:\users\henri\source\repos\contradef\x64\debug\contradef.exp
 c:\users\henri\source\repos\contradef\x64\debug\contradef.dll

@@ -7,8 +7,45 @@
 #include <map>
 #include <string>
 #include <functional>
+#include <deque>
+#include "InstIsDebuggerPresent.h"
+#include "InstCheckRemoteDebuggerPresent.h"
+#include "InstOutputDebugStringW.h"
+#include "InstBlockInput.h"
+#include "InstGetForegroundWindow.h"
+#include "InstNtQueryInformationProcess.h"
+#include "InstNtQuerySystemInformation.h"
+#include "InstEnumProcessModules.h"
+#include "InstEnumProcessModulesEx.h"
+#include "InstBaseRegOpenKey.h"
+#include "InstRegOpenKeyW.h"
+#include "InstRegOpenKeyA.h"
+#include "InstRegOpenKeyExW.h"
+#include "InstRegOpenKeyExA.h"
+#include "InstRegQueryValueW.h"
+#include "InstRegQueryValueA.h"
+#include "InstRegQueryValueExW.h"
+#include "InstRegQueryValueExA.h"
+#include "InstNtOpenKey.h"
+#include "InstNtQueryValueKey.h"
+#include "InstGetModuleHandleW.h"
+#include "InstGetModuleHandleA.h"
+#include "InstGetModuleFileNameW.h"
+#include "InstGetModuleFileNameA.h"
+#include "InstGetModuleFileNameExW.h"
+#include "InstGetModuleFileNameExA.h"
+#include "InstGetWindowTextW.h"
+#include "InstGetWindowTextA.h"
+#include "InstQueryPerformanceCounter.h"
+#include "InstQueryPerformanceFrequency.h"
+#include "InstGetTickCount.h"
+#include "InstVirtualQuery.h"
+#include "InstVirtualQueryEx.h"
+#include "InstVirtualProtect.h"
+#include "InstVirtualProtectEx.h"
+#include "InstDebugActiveProcess.h"
 
-typedef void (*RTNFunction)(RTN, std::ofstream&);
+typedef void (*RTNFunction)(RTN, std::ofstream&, Notifier&);
 
 class InstrumentationContext {
 private:
@@ -17,9 +54,9 @@ private:
 public:
     InstrumentationContext();
     ~InstrumentationContext();
-    void ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out);
+    void ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out, Notifier& globalNotifier);
     bool HasStrategy(const std::string& name) const;
-    void ExecuteAllStrategies(IMG img, std::ofstream& out);
+    void ExecuteAllStrategies(IMG img, std::ofstream& out, Notifier& globalNotifier);
 };
 
 #endif // INSTRUMENTATION_CONTEXT_H

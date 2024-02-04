@@ -217,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallContextKey.h" />
+    <ClInclude Include="EventData.h" />
     <ClInclude Include="InstBaseRegOpenKey.h" />
     <ClInclude Include="InstBlockInput.h" />
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
@@ -255,7 +256,9 @@
     <ClInclude Include="InstVirtualProtectEx.h" />
     <ClInclude Include="InstVirtualQuery.h" />
     <ClInclude Include="InstVirtualQueryEx.h" />
+    <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
+    <ClInclude Include="Observer.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

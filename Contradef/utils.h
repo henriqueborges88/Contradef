@@ -3,8 +3,10 @@
 #define UTILS_H
 
 #include "pin.H"
+#include <iostream>
 #include <string>
 #include <cctype>
+#include <deque>
 
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
@@ -12,5 +14,6 @@ std::wstring ReadWideString(ADDRINT addr);
 std::string WStringToString(const std::wstring& wstr);
 std::string ExtractModuleName(const std::string& fullPath);
 std::string toUpperCase(const std::string& str);
+VOID PrintTrace(std::deque<std::string>& rtnTrace);
 
 #endif // UTILS_H

@@ -1,3 +1,3 @@
 Pin: pin-3.28-98749-6643ecee5
 Copyright 2002-2023 Intel Corporation.
-E:  UPC Dispatcher: Unhandled internal exception in Pin or tool. ThreadId = 0 SysThreadId = 14896. Interruption context: IP: 0x059b70c9a SP: 0x1c165ddeef0. Exception Code: RECEIVED_ACCESS_FAULT. Exception Address = 0x059b70c9a. Access Type: READ. Access Address = 0x000000000. ExceptionFlags: 0x000000000
+E:  C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp:156 Inserting IPOINT_AFTER with invalid instruction (   356 0x00007ff748d7af1c call qword ptr [rip+0x241e6]). See INS_IsValidForIpointAfter()

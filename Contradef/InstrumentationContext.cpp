@@ -1,41 +1,5 @@
-#include <iostream>
 #include "InstrumentationContext.h"
-#include "InstIsDebuggerPresent.h"
-#include "InstCheckRemoteDebuggerPresent.h"
-#include "InstOutputDebugStringW.h"
-#include "InstBlockInput.h"
-#include "InstGetForegroundWindow.h"
-#include "InstNtQueryInformationProcess.h"
-#include "InstNtQuerySystemInformation.h"
-#include "InstEnumProcessModules.h"
-#include "InstEnumProcessModulesEx.h"
-#include "InstBaseRegOpenKey.h"
-#include "InstRegOpenKeyW.h"
-#include "InstRegOpenKeyA.h"
-#include "InstRegOpenKeyExW.h"
-#include "InstRegOpenKeyExA.h"
-#include "InstRegQueryValueW.h"
-#include "InstRegQueryValueA.h"
-#include "InstRegQueryValueExW.h"
-#include "InstRegQueryValueExA.h"
-#include "InstNtOpenKey.h"
-#include "InstNtQueryValueKey.h"
-#include "InstGetModuleHandleW.h"
-#include "InstGetModuleHandleA.h"
-#include "InstGetModuleFileNameW.h"
-#include "InstGetModuleFileNameA.h"
-#include "InstGetModuleFileNameExW.h"
-#include "InstGetModuleFileNameExA.h"
-#include "InstGetWindowTextW.h"
-#include "InstGetWindowTextA.h"
-#include "InstQueryPerformanceCounter.h"
-#include "InstQueryPerformanceFrequency.h"
-#include "InstGetTickCount.h"
-#include "InstVirtualQuery.h"
-#include "InstVirtualQueryEx.h"
-#include "InstVirtualProtect.h"
-#include "InstVirtualProtectEx.h"
-#include "InstDebugActiveProcess.h"
+#include "Notifier.h"
 
 
 InstrumentationContext::InstrumentationContext() {
@@ -95,11 +59,11 @@ InstrumentationContext::~InstrumentationContext() {
     strategyMap.clear();  // Opcional, limpa o mapa
 }
 
-void InstrumentationContext::ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out) {
+void InstrumentationContext::ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out, Notifier& globalNotifier) {
     auto it = strategyMap.find(name);
     if (it != strategyMap.end()) {
         out << "Instrumentando a função " << name << std::endl;
-        (*it->second)(rtn, out);
+        (*it->second)(rtn, out, globalNotifier);
     }
 }
 
@@ -107,14 +71,14 @@ bool InstrumentationContext::HasStrategy(const std::string& name) const {
     return strategyMap.find(name) != strategyMap.end();
 }
 
-void InstrumentationContext::ExecuteAllStrategies(IMG img, std::ofstream& out) {
+void InstrumentationContext::ExecuteAllStrategies(IMG img, std::ofstream& out, Notifier& globalNotifier) {
     std::string moduleName = IMG_Name(img);
     for (const auto& pair : strategyMap) {
         RTN rtn = RTN_FindByName(img, pair.first.c_str());
         if (RTN_Valid(rtn)) {
             out << "Executando estratégia: " << pair.first << " no modulo " << moduleName << std::endl;
             RTNFunction func = pair.second;
-            func(rtn, out);
+            func(rtn, out, globalNotifier);
         }
     }
 }

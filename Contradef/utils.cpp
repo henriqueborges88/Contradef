@@ -57,3 +57,10 @@ std::string toUpperCase(const std::string& str) {
     }
     return upperCaseStr;
 }
+
+VOID PrintTrace(std::deque<std::string>& threadTraces) {
+    std::cout << "Routine Trace:" << std::endl;
+    for (const auto& name : threadTraces) {
+        std::cout << "  " << name << std::endl;
+    }
+}
