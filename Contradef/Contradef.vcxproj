@@ -113,7 +113,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>TARGET_IA32E;HOST_IA32E;TARGET_WINDOWS;PIN_CRT=1;__LP64__;_WINDOWS_H_PATH_=C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TARGET_IA32E;HOST_IA32E;TARGET_WINDOWS;PIN_CRT=1;__LP64__;_WINDOWS_H_PATH_="C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um"</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
       <AdditionalIncludeDirectories>..\pin\include\pin;..\pin\include\pin\gen;..\pin\extras\xed-intel64\include\xed;..\pin\extras\components\include;..\pin\extras\stlport\include;..\pin\extras;..\pin\extras\libstdc++\include;..\pin\extras\crt\include;..\pin\extras\crt;..\pin\extras\crt\include\arch-x86_64;..\pin\extras\crt\include\kernel\uapi;..\pin\extras\crt\include\kernel\uapi\asm-x86;..\pin\InstLib;..\pin\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -146,7 +146,7 @@
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <SDLCheck>
       </SDLCheck>
-      <PreprocessorDefinitions>TARGET_IA32E;HOST_IA32E;TARGET_WINDOWS;PIN_CRT=1;__LP64__;_WINDOWS_H_PATH_=C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um</PreprocessorDefinitions>
+      <PreprocessorDefinitions>TARGET_IA32E;HOST_IA32E;TARGET_WINDOWS;PIN_CRT=1;__LP64__;_WINDOWS_H_PATH_="C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um"</PreprocessorDefinitions>
       <ConformanceMode>Default</ConformanceMode>
       <AdditionalIncludeDirectories>..\pin\include\pin;..\pin\include\pin\gen;..\pin\extras\xed-intel64\include\xed;..\pin\extras\components\include;..\pin\extras\stlport\include;..\pin\extras;..\pin\extras\libstdc++\include;..\pin\extras\crt\include;..\pin\extras\crt;..\pin\extras\crt\include\arch-x86_64;..\pin\extras\crt\include\kernel\uapi;..\pin\extras\crt\include\kernel\uapi\asm-x86;..\pin\InstLib;..\pin\Utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WholeProgramOptimization>false</WholeProgramOptimization>
@@ -175,11 +175,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CallContext.cpp" />
     <ClCompile Include="Contradef.cpp" />
     <ClCompile Include="InstBaseRegOpenKey.cpp" />
-    <ClCompile Include="InstBlockInput.cpp" />
     <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
-    <ClCompile Include="InstDebugActiveProcess.cpp" />
     <ClCompile Include="InstEnumProcessModules.cpp" />
     <ClCompile Include="InstEnumProcessModulesEx.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
@@ -208,6 +207,7 @@
     <ClCompile Include="InstRegQueryValueExW.cpp" />
     <ClCompile Include="InstNtQueryInformationProcess.cpp" />
     <ClCompile Include="InstRegQueryValueW.cpp" />
+    <ClCompile Include="Instrumentation.cpp" />
     <ClCompile Include="InstrumentationContext.cpp" />
     <ClCompile Include="InstVirtualProtect.cpp" />
     <ClCompile Include="InstVirtualProtectEx.cpp" />
@@ -216,12 +216,10 @@
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CallContextKey.h" />
+    <ClInclude Include="CallContext.h" />
     <ClInclude Include="EventData.h" />
     <ClInclude Include="InstBaseRegOpenKey.h" />
-    <ClInclude Include="InstBlockInput.h" />
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
-    <ClInclude Include="InstDebugActiveProcess.h" />
     <ClInclude Include="InstEnumProcessModules.h" />
     <ClInclude Include="InstEnumProcessModulesEx.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
@@ -250,6 +248,7 @@
     <ClInclude Include="InstRegQueryValueExW.h" />
     <ClInclude Include="InstNtQueryInformationProcess.h" />
     <ClInclude Include="InstRegQueryValueW.h" />
+    <ClInclude Include="Instrumentation.h" />
     <ClInclude Include="InstrumentationContext.h" />
     <ClInclude Include="InstrumentationStrategy.h" />
     <ClInclude Include="InstVirtualProtect.h" />

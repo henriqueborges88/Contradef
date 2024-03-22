@@ -3,15 +3,22 @@
 #define INST_NT_QUERY_INFORMATION_PROCESS_H
 
 #include "pin.H"
-#include <map>
 #include <string>
+#include <iostream>
 #include <fstream>
+#include <sstream>
 #include <set>
 #include <vector>
+#include <map>
+#include <deque>
+#include <queue>
 #include "utils.h"
-#include "NtStructures.h"
+#include "CallContext.h"
+#include "Notifier.h"
+#include "Observer.h"
+#include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
-#include  "CallContextKey.h"
+#include "NtStructures.h"
 
 struct NtQueryInformationProcessArgs {
     ADDRINT ProcessHandle;
@@ -23,23 +30,24 @@ struct NtQueryInformationProcessArgs {
 
 class InstNtQueryInformationProcess : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
+    static VOID HandleInstructionEvent(const EventData* data, void* context);
+    static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
 
-    static std::map<CallContextKey, NtQueryInformationProcessArgs> argsMap;
     static ADDRINT TARGET_MEMORY_ADDRESS;
-    static ADDRINT nextCallId;
-    static std::ofstream* outStream;
     static LONG retVal;
-
     static DWORD InstNtQueryInformationProcess::NtGlobalFlag;
-
-    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
-    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT instrPtr, ADDRINT* retValAddr, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
-
-    static VOID ReadMemoryValue(CONTEXT* ctxt, INS ins, ADDRINT instAddress, ADDRINT memoryAddress, UINT32 readSize);
-    static bool IsRegisterPermitted(const REG& regName);
+    static std::map<CallContextKey, CallContext*> callContextMap;
+    static UINT32 imgCallId;
+    static UINT32 fcnCallId;
+    static Notifier* globalNotifierPtr;
+    static VOID CheckPrintConditions(CallContext* callContext);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);
+    static VOID ReadMemoryValue(THREADID tid, CallContext* callContext, CONTEXT* ctxt, INS ins, ADDRINT instAddress, ADDRINT memoryAddress, UINT32 readSize);
+    static bool IsRegisterAllowed(const REG& regName);
     static VOID RegContentAnalysisRoutine(CONTEXT* ctxt, REG regToInspect);
     static VOID Instruction(INS ins, VOID* v);
 };

@@ -4,32 +4,134 @@
 A função GetTickCount não possui argumentos de entrada. Ela retorna o número de milissegundos desde que o sistema foi iniciado. Portanto, a estrutura InstGetTickCountArgs é mantida vazia.
 */
 
-std::ofstream* InstGetTickCount::outStream;
+std::map<CallContextKey, CallContext*> InstGetTickCount::callContextMap;
+UINT32 InstGetTickCount::imgCallId = 0;
+UINT32 InstGetTickCount::fcnCallId = 0;
+Notifier* InstGetTickCount::globalNotifierPtr;
 
-VOID InstGetTickCount::CallbackBefore(ADDRINT instrPtr) {
-    //std::cout << "GetTickCount será chamada." << std::endl;
+
+VOID InstGetTickCount::CheckPrintConditions(CallContext* callContext) {
+    CheckPrintConditionsCC(callContext, &InstGetTickCount::callContextMap, InstGetTickCount::globalNotifierPtr);
 }
 
-VOID InstGetTickCount::CallbackAfter(ADDRINT instrPtr, ADDRINT* retValAddr) {
-    *outStream << std::endl << "[+] GetTickCount..." << std::endl;
-    *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
-    *outStream << "[*] Concluído" << std::endl << std::endl;
+// Callbacks que serão chamados quando um evento for notificado
+VOID InstGetTickCount::HandleInstructionEvent(const EventData* data, void* context) {
+    HandleInstructionEventCC(data, context, &InstGetTickCount::callContextMap, InstGetTickCount::globalNotifierPtr);
 }
 
-VOID InstGetTickCount::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstGetTickCount::HandleTraceEvent(const EventData* data, void* context) {
+    HandleTraceEventCC(data, context, &InstGetTickCount::callContextMap, InstGetTickCount::globalNotifierPtr);
+}
 
-    RTN_Open(rtn);
+VOID InstGetTickCount::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress) {
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
 
-    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_INST_PTR,
-        IARG_END);
+    ADDRINT rtnAddress = GetRtnAddr(instAddress);
 
-    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_INST_PTR,
-        IARG_REG_REFERENCE, REG_GAX,
-        IARG_END);
+    UINT32 callCtxId = callId * 100 + fcnCallId;
 
-    RTN_Close(rtn);
+    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, NULL);
 
+    // Criando observadores dinamicamente com o contexto correto
+    auto* instructionObserver = new Observer(InstGetTickCount::HandleInstructionEvent, callContext);
+    auto* traceObserver = new Observer(InstGetTickCount::HandleTraceEvent, callContext);
+
+    // Salvando os observadores no CallContext para futura limpeza
+    callContext->instructionObserver = instructionObserver;
+    callContext->traceObserver = traceObserver;
+
+    CallContextKey key = { callCtxId, tid };
+    callContextMap[key] = callContext;
+
+    // Anexa os observers ao notificador
+    InstGetTickCount::globalNotifierPtr->Attach(instructionObserver);
+    InstGetTickCount::globalNotifierPtr->Attach(traceObserver);
+}
+
+VOID InstGetTickCount::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress) {
+
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
+
+    // Instrumentar funçao
+    UINT32 callCtxId = callId * 100 + fcnCallId;
+    CallContextKey key = { callCtxId, tid };
+    auto it = callContextMap.find(key);
+    if (it != callContextMap.end()) {
+        PIN_LockClient();
+        IMG img = IMG_FindByAddress(instAddress);
+        CallContext* callContext = it->second;
+        // Registrar parámetros
+        std::stringstream& stringStream = callContext->stringStream;
+        stringStream << std::endl << "[+] GetTickCount..." << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Thread: " << tid << std::endl;
+        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+
+        // Instrumentar todas as instruções da rotina chamadora
+        RTN rtnCaller = RTN_FindByAddress(returnAddress);
+        if (RTN_Valid(rtnCaller)) {
+            RTN_Open(rtnCaller);
+
+            stringStream << "    Instruções da rotina chamadora (" << RTN_Name(rtnCaller) << "):" << std::endl;
+            for (INS ins = RTN_InsHead(rtnCaller); INS_Valid(ins); ins = INS_Next(ins)) {
+                std::string disassembledInstruction = INS_Disassemble(ins);
+                ADDRINT insAddress = INS_Address(ins);
+                if (INS_IsCall(ins)) {
+                    // Assume que a chamada é direta para simplificar, para chamadas indiretas seria necessário mais contexto
+                    if (INS_IsDirectCall(ins)) {
+                        ADDRINT targetAddr = INS_DirectBranchOrCallTargetAddress(ins);
+                        RTN targetRtn = RTN_FindByAddress(targetAddr);
+                        if (RTN_Valid(targetRtn)) {
+                            std::string targetName = RTN_Name(targetRtn);
+                            disassembledInstruction = disassembledInstruction + "                           ; " + targetName; // Supondo que InstuctionInfo tenha esse campo
+                        }
+                    }
+                }
+                stringStream << "        " << std::hex << insAddress << std::dec << " | " << disassembledInstruction << std::endl;
+            }
+
+            RTN_Close(rtnCaller);
+        }
+        callContext->defaultPrintReady = true;
+        PIN_UnlockClient();
+    }
+
+    fcnCallId++;;
+}
+
+VOID InstGetTickCount::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
+
+    if (RTN_Name(rtn) == "GetTickCount") {
+        imgCallId++;
+        globalNotifierPtr = &globalNotifier;
+
+        RTN_Open(rtn);
+
+        RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_END);
+
+        RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_REG_REFERENCE, REG_GAX,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_END);
+
+        RTN_Close(rtn);
+    }
 }

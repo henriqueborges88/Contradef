@@ -7,7 +7,7 @@
 #include <fstream>
 #include <map>
 #include "InstrumentationStrategy.h"
-#include "CallContextKey.h"
+#include "CallContext.h"
 #include "utils.h"
 #include "NtStructures.h"
 
@@ -19,7 +19,7 @@ struct InstVirtualQueryArgs {
 
 class InstVirtualQuery : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn);
 
 private:
     static std::map<CallContextKey, InstVirtualQueryArgs> argsMap;

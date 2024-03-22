@@ -26,8 +26,7 @@ VOID InstNtQuerySystemInformation::CallbackAfter(THREADID tid, ADDRINT callId, A
     }
 }
 
-VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
 
@@ -38,7 +37,6 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn, std::ofstream& ou
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // SystemInformation
         IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // SystemInformationLength
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // ReturnLength
-        IARG_PTR, &out,
         IARG_END);
     RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
         IARG_THREAD_ID,
@@ -48,7 +46,6 @@ VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn, std::ofstream& ou
         IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // SystemInformation
         IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // SystemInformationLength
         IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // ReturnLength
-        IARG_PTR, &out,
         IARG_END);
 
     RTN_Close(rtn);

@@ -11,7 +11,6 @@
 #include "InstIsDebuggerPresent.h"
 #include "InstCheckRemoteDebuggerPresent.h"
 #include "InstOutputDebugStringW.h"
-#include "InstBlockInput.h"
 #include "InstGetForegroundWindow.h"
 #include "InstNtQueryInformationProcess.h"
 #include "InstNtQuerySystemInformation.h"
@@ -43,9 +42,8 @@
 #include "InstVirtualQueryEx.h"
 #include "InstVirtualProtect.h"
 #include "InstVirtualProtectEx.h"
-#include "InstDebugActiveProcess.h"
 
-typedef void (*RTNFunction)(RTN, std::ofstream&, Notifier&);
+typedef void (*RTNFunction)(RTN, Notifier&);
 
 class InstrumentationContext {
 private:
@@ -54,9 +52,9 @@ private:
 public:
     InstrumentationContext();
     ~InstrumentationContext();
-    void ExecuteStrategy(const std::string& name, RTN rtn, std::ofstream& out, Notifier& globalNotifier);
+    void ExecuteStrategy(const std::string& name, RTN rtn, Notifier& globalNotifier);
     bool HasStrategy(const std::string& name) const;
-    void ExecuteAllStrategies(IMG img, std::ofstream& out, Notifier& globalNotifier);
+    void ExecuteAllStrategies(IMG img, Notifier& globalNotifier);
 };
 
 #endif // INSTRUMENTATION_CONTEXT_H

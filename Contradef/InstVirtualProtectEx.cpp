@@ -33,8 +33,7 @@ VOID InstVirtualProtectEx::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* 
     }
 }
 
-VOID InstVirtualProtectEx::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstVirtualProtectEx::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

@@ -3,15 +3,21 @@
 #define INST_NT_OPEN_KEY_H
 
 #include "pin.H"
+#include "NtStructures.h"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
-#include "NtStructures.h"
+#include <deque>
+#include <queue>
+#include "utils.h"
+#include "CallContext.h"
+#include "Notifier.h"
+#include "Observer.h"
+#include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
-#include  "CallContextKey.h"
-#include  "utils.h"
 
-struct InstNtOpenKeyArgs {
+struct NtOpenKeyArgs {
     ADDRINT KeyHandle;
     ADDRINT DesiredAccess;
     ADDRINT ObjectAttributes;
@@ -20,14 +26,18 @@ struct InstNtOpenKeyArgs {
 
 class InstNtOpenKey : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
+    static VOID HandleInstructionEvent(const EventData* data, void* context);
+    static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, InstNtOpenKeyArgs> argsMap;
-    static ADDRINT nextCallId;
-    static std::ofstream* outStream;
-    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
-    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
+    static std::map<CallContextKey, CallContext*> callContextMap;
+    static UINT32 imgCallId;
+    static UINT32 fcnCallId;
+    static Notifier* globalNotifierPtr;
+    static VOID CheckPrintConditions(CallContext* callContext);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes);
 };
 
 #endif // INST_NT_OPEN_KEY_H

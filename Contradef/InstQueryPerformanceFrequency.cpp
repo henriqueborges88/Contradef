@@ -23,9 +23,8 @@ VOID InstQueryPerformanceFrequency::CallbackAfter(THREADID tid, ADDRINT callId, 
     }
 }
 
-VOID InstQueryPerformanceFrequency::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
-    
+VOID InstQueryPerformanceFrequency::InstrumentFunction(RTN rtn) {
+
     RTN_Open(rtn);
 
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

@@ -1,8 +1,7 @@
+C:\Users\henri\source\repos\Contradef\Contradef\CallContext.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\CallContext.obj
 C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Contradef.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstBaseRegOpenKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstBaseRegOpenKey.obj
-C:\Users\henri\source\repos\Contradef\Contradef\InstBlockInput.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstBlockInput.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCheckRemoteDebuggerPresent.obj
-C:\Users\henri\source\repos\Contradef\Contradef\InstDebugActiveProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstDebugActiveProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstEnumProcessModules.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstEnumProcessModulesEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetForegroundWindow.obj
@@ -31,6 +30,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExA.cpp;C:\User
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueExW.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueW.obj
+C:\Users\henri\source\repos\Contradef\Contradef\Instrumentation.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Instrumentation.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstrumentationContext.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstrumentationContext.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualProtect.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualProtectEx.obj

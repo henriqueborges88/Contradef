@@ -45,9 +45,6 @@
     <ClCompile Include="InstQueryPerformanceCounter.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstBlockInput.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="InstGetForegroundWindow.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
@@ -129,7 +126,10 @@
     <ClCompile Include="InstVirtualProtectEx.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstDebugActiveProcess.cpp">
+    <ClCompile Include="CallContext.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="Instrumentation.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>
@@ -159,9 +159,6 @@
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstQueryPerformanceCounter.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstBlockInput.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstGetForegroundWindow.h">
@@ -212,7 +209,7 @@
     <ClInclude Include="utils.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="CallContextKey.h">
+    <ClInclude Include="CallContext.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstNtQueryValueKey.h">
@@ -254,9 +251,6 @@
     <ClInclude Include="InstVirtualProtectEx.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="InstDebugActiveProcess.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="Observer.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
@@ -264,6 +258,9 @@
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="EventData.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="Instrumentation.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>

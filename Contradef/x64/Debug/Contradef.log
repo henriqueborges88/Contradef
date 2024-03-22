@@ -1,29 +1,255 @@
 ﻿cl : linha de comando  warning D9025: substituindo '/EHs' com '/EHs-'
 cl : linha de comando  warning D9002: ignorando opção desconhecida '/FP:strict'
+  CallContext.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
   Contradef.cpp
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp(153,14): warning C4996: 'LEVEL_CORE::INS_IsDirectBranchOrCall': foi declarado preterido
 C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp(165,34): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstBaseRegOpenKey.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstBaseRegOpenKey.cpp(95,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstCheckRemoteDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.cpp(96,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstEnumProcessModules.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp(15,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp(15,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp(20,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp(20,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstEnumProcessModulesEx.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp(15,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp(15,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp(20,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp(20,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstGetForegroundWindow.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.cpp(88,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleFileNameExA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameExA.cpp(96,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleFileNameExW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameExW.cpp(96,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleFileNameW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameW.cpp(94,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleFileNameA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameA.cpp(94,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleHandleA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleA.cpp(102,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetModuleHandleW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleW.cpp(91,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetTickCount.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetTickCount.cpp(88,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetWindowTextA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetWindowTextA.cpp(95,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstGetWindowTextW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetWindowTextW.cpp(95,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstIsDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstIsDebuggerPresent.cpp(84,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstNtOpenKey.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenKey.cpp(103,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstNtQuerySystemInformation.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp(14,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp(14,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp(19,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp(19,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstNtQueryValueKey.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryValueKey.cpp(304,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  Gerando Código...
+  Compilando...
+  InstOutputDebugStringW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugStringW.cpp(91,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstQueryPerformanceCounter.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp(12,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp(12,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp(19,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp(19,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstQueryPerformanceFrequency.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceFrequency.cpp(11,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceFrequency.cpp(11,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceFrequency.cpp(16,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceFrequency.cpp(16,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstRegOpenKeyA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyA.cpp(72,35): warning C4129: 'A': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyA.cpp(72,35): warning C4129: 'D': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyA.cpp(72,35): warning C4129: 'V': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyA.cpp(99,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegOpenKeyExA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyExA.cpp(99,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegOpenKeyExW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyExW.cpp(99,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegOpenKeyW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.cpp(72,35): warning C4129: 'A': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.cpp(72,35): warning C4129: 'D': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.cpp(72,35): warning C4129: 'V': sequência de escape de caractere não reconhecida
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.cpp(99,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegQueryValueA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueA.cpp(98,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegQueryValueExA.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExA.cpp(101,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegQueryValueExW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExW.cpp(101,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstNtQueryInformationProcess.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp(173,14): warning C4244: '=': conversão de 'ADDRINT' para 'LONG', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp(346,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstRegQueryValueW.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueW.cpp(98,46): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  Instrumentation.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstrumentationContext.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  InstVirtualProtect.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp(14,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp(14,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp(19,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp(19,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstVirtualProtectEx.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp(15,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp(15,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp(20,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp(20,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstVirtualQuery.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp(13,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp(13,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp(57,22): warning C4244: '+=': conversão de 'SIZE_T' para 'unsigned long', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp(92,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp(92,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  InstVirtualQueryEx.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp(14,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp(14,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp(58,22): warning C4244: '+=': conversão de 'SIZE_T' para 'unsigned long', possível perda de dados
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp(93,28): warning C4838: a conversão de 'ADDRINT' em 'UINT32' requer uma conversão de restrição
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp(93,28): warning C4244: 'inicializando': conversão de 'ADDRINT' para 'UINT32', possível perda de dados
+  utils.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+  Gerando Código...
      Criando biblioteca C:\Users\henri\source\repos\Contradef\x64\Debug\Contradef.lib e objeto C:\Users\henri\source\repos\Contradef\x64\Debug\Contradef.exp
 LINK : warning LNK4281: endereço básico 0xC5000000 indesejável para imagem x64. Defina o endereço básico acima de 4 GB para melhor otimização de ASLR
 crtbeginS.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 Contradef.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstBaseRegOpenKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstBlockInput.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstCheckRemoteDebuggerPresent.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstDebugActiveProcess.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstEnumProcessModules.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstEnumProcessModulesEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstGetForegroundWindow.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleFileNameExA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleFileNameExW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleFileNameW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleFileNameA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleHandleA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetModuleHandleW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstGetTickCount.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetWindowTextA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetWindowTextW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstIsDebuggerPresent.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtOpenKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQuerySystemInformation.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQueryValueKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados

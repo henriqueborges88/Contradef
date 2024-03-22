@@ -31,8 +31,7 @@ VOID InstVirtualProtect::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* re
     }
 }
 
-VOID InstVirtualProtect::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstVirtualProtect::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

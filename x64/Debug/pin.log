@@ -1,3 +1,0 @@
-Pin: pin-3.28-98749-6643ecee5
-Copyright 2002-2023 Intel Corporation.
-E:  C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp:156 Inserting IPOINT_AFTER with invalid instruction (   356 0x00007ff748d7af1c call qword ptr [rip+0x241e6]). See INS_IsValidForIpointAfter()

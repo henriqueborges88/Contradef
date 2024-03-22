@@ -5,25 +5,35 @@
 #include "pin.H"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
-#include "InstrumentationStrategy.h"
+#include <deque>
+#include <queue>
 #include "utils.h"
-#include  "CallContextKey.h"
+#include "CallContext.h"
+#include "Notifier.h"
+#include "Observer.h"
+#include "Instrumentation.h"
+#include "InstrumentationStrategy.h"
 
-struct InstOutputDebugStringWArgs {
+struct OutputDebugStringWArgs {
     ADDRINT lpOutputString;
 };
 
 class InstOutputDebugStringW : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
+    static VOID HandleInstructionEvent(const EventData* data, void* context);
+    static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, InstOutputDebugStringWArgs> argsMap;
-    static ADDRINT nextCallId;
-    static std::ofstream* outStream;
-    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT lpOutputString);
-    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT lpOutputString);
+    static std::map<CallContextKey, CallContext*> callContextMap;
+    static UINT32 imgCallId;
+    static UINT32 fcnCallId;
+    static Notifier* globalNotifierPtr;
+    static VOID CheckPrintConditions(CallContext* callContext);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpOutputString);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpOutputString);
 };
 
 #endif // INST_OUTPUT_DEBUG_STRING_W_H

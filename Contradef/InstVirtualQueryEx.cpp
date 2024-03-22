@@ -108,8 +108,7 @@ VOID InstVirtualQueryEx::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* re
     }
 }
 
-VOID InstVirtualQueryEx::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstVirtualQueryEx::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

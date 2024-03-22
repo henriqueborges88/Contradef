@@ -28,8 +28,7 @@ VOID InstEnumProcessModulesEx::CallbackAfter(THREADID tid, ADDRINT callId, ADDRI
     }
 }
 
-VOID InstEnumProcessModulesEx::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
+VOID InstEnumProcessModulesEx::InstrumentFunction(RTN rtn) {
 
     RTN_Open(rtn);
     RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),

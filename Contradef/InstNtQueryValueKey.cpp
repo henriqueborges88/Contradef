@@ -30,89 +30,104 @@
 #define REG_QWORD 11
 #endif
 
-std::map<CallContextKey, InstNtQueryValueKeyArgs> InstNtQueryValueKey::argsMap;
-ADDRINT InstNtQueryValueKey::nextCallId = 0;
-std::ofstream* InstNtQueryValueKey::outStream;
 
-VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInformation) {
+std::map<CallContextKey, CallContext*> InstNtQueryValueKey::callContextMap;
+UINT32 InstNtQueryValueKey::imgCallId = 0;
+UINT32 InstNtQueryValueKey::fcnCallId = 0;
+Notifier* InstNtQueryValueKey::globalNotifierPtr;
+
+VOID InstNtQueryValueKey::CheckPrintConditions(CallContext* callContext) {
+    CheckPrintConditionsCC(callContext, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
+}
+
+// Callbacks que serão chamados quando um evento for notificado
+VOID InstNtQueryValueKey::HandleInstructionEvent(const EventData* data, void* context) {
+    HandleInstructionEventCC(data, context, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
+}
+
+VOID InstNtQueryValueKey::HandleTraceEvent(const EventData* data, void* context) {
+    HandleTraceEventCC(data, context, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
+}
+
+VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInformation, std::stringstream& stringStream) {
     //KEY_VALUE_PARTIAL_INFORMATION* info;
     //info = (KEY_VALUE_PARTIAL_INFORMATION*)keyValueInformation;
 
     auto info = reinterpret_cast<KEY_VALUE_FULL_INFORMATION*>(keyValueInformation);
 
-    *outStream << "    Tipo do valor: " << info->Type << std::endl;
-    *outStream << "    Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
+    stringStream << "            Tipo do valor: " << info->Type << std::endl;
+    stringStream << "            Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
 
     BYTE* data = keyValueInformation + info->DataOffset;
 
     switch (info->Type) {
     case REG_NONE: {
-        *outStream << "    Valor (REG_NONE): ";
+        stringStream << "            Valor (REG_NONE): ";
         if (info->DataLength > 100000) {
-            *outStream << "    Tamanho excede o limite";
+            stringStream << "            Tamanho excede o limite";
         }
         else {
             for (ULONG i = 0; i < info->DataLength; ++i) {
-                *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
+                stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        *outStream << "     (dados binários brutos)" << std::endl;
+        stringStream << "            (dados binários brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
+        stringStream << "            Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_EXPAND_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
+        stringStream << "            Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_DWORD: {
         if (info->DataLength >= sizeof(DWORD)) {
             DWORD dwordValue = *reinterpret_cast<DWORD*>(data);
-            *outStream << "    Valor (DWORD): " << dwordValue << std::endl;
+            stringStream << "            Valor (DWORD): " << dwordValue << std::endl;
         }
         break;
     }
     case REG_BINARY: {
-        *outStream << "    Valor (binário): ";
+        stringStream << "            Valor (binário): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
-            *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
+            stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
-        std::cout << std::endl;
+        stringStream << std::endl;
         break;
     }
     case REG_MULTI_SZ: {
         const WCHAR* multiSz = reinterpret_cast<const WCHAR*>(data);
-        std::cout << L"Valor (multi-string): ";
+        stringStream << "            Valor (multi-string): ";
 
         while (*multiSz) {
             std::wstring str(multiSz);
-            *outStream << "    " << WStringToString(str) << " | ";
+            stringStream << "            " << WStringToString(str) << " | ";
             multiSz += str.size() + 1;
         }
-        *outStream << std::endl;
+        stringStream << std::endl;
         break;
     }
     case REG_QWORD: {
         if (info->DataLength >= sizeof(ULONGLONG)) {
             ULONGLONG qwordValue = *reinterpret_cast<ULONGLONG*>(data);
-            *outStream << "    Valor (QWORD): " << qwordValue << std::endl;
+            stringStream << "            Valor (QWORD): " << qwordValue << std::endl;
         }
         break;
     }
     default:
-        *outStream << "    Tipo de dado não reconhecido ou não suportado." << std::endl;
+        stringStream << "            Tipo de dado não reconhecido ou não suportado." << std::endl;
     }
 }
 
-VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInformation) {
+VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInformation, std::stringstream& stringStream) {
     auto info = reinterpret_cast<KEY_VALUE_PARTIAL_INFORMATION*>(keyValueInformation);
 
-    *outStream << "    Tipo do valor: " << info->Type << std::endl;
-    *outStream << "    Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
+    stringStream << "            Tipo do valor: " << info->Type << std::endl;
+    stringStream << "            Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
 
     // O dado é armazenado diretamente na estrutura após os campos iniciais
     BYTE* data = info->Data;
@@ -120,82 +135,89 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
     // Exemplo de interpretação de dados, dependendo do tipo
     switch (info->Type) {
     case REG_NONE: {
-        *outStream << "    Valor (REG_NONE): ";
+        stringStream << "            Valor (REG_NONE): ";
         if (info->DataLength > 100000) {
-            *outStream << "    Tamanho excede o limite";
+            stringStream << "            Tamanho excede o limite";
         }
         else {
             for (ULONG i = 0; i < info->DataLength; ++i) {
-                *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
+                stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        *outStream << "     (dados binários brutos)" << std::endl;
+        stringStream << "            (dados binários brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
+        stringStream << "            Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_EXPAND_SZ: {
         std::wstring stringValue(reinterpret_cast<WCHAR*>(data), info->DataLength / sizeof(WCHAR));
-        *outStream << "    Valor (string): " << WStringToString(stringValue) << std::endl;
+        stringStream << "            Valor (string): " << WStringToString(stringValue) << std::endl;
         break;
     }
     case REG_DWORD: {
         if (info->DataLength >= sizeof(DWORD)) {
             DWORD dwordValue = *reinterpret_cast<DWORD*>(data);
-            *outStream << "    Valor (DWORD): " << dwordValue << std::endl;
+            stringStream << "            Valor (DWORD): " << dwordValue << std::endl;
         }
         break;
     }
     case REG_BINARY: {
-        *outStream << "    Valor (binário): ";
+        stringStream << "            Valor (binário): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
-            *outStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
+            stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
         std::cout << std::endl;
         break;
     }
     case REG_MULTI_SZ: {
         const WCHAR* multiSz = reinterpret_cast<const WCHAR*>(data);
-        std::cout << L"Valor (multi-string): ";
+        stringStream << "            Valor (multi-string): ";
 
         while (*multiSz) {
             std::wstring str(multiSz);
-            *outStream << "    " << WStringToString(str) << " | ";
+            stringStream << "            " << WStringToString(str) << " | ";
             multiSz += str.size() + 1;
         }
-        *outStream << std::endl;
+        stringStream << std::endl;
         break;
     }
     case REG_QWORD: {
         if (info->DataLength >= sizeof(ULONGLONG)) {
             ULONGLONG qwordValue = *reinterpret_cast<ULONGLONG*>(data);
-            *outStream << "    Valor (QWORD): " << qwordValue << std::endl;
+            stringStream << "            Valor (QWORD): " << qwordValue << std::endl;
         }
         break;
     }
     default:
-        *outStream << "    Tipo de dado não reconhecido ou não suportado." << std::endl;
+        stringStream << "            Tipo de dado não reconhecido ou não suportado." << std::endl;
     }
 }
 
 
-VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInformation) {
+VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInformation, std::stringstream& stringStream) {
     auto info = reinterpret_cast<KEY_VALUE_BASIC_INFORMATION*>(keyValueInformation);
 
-    *outStream << "    Tipo do valor: " << info->Type << std::endl;
-    *outStream << "    Comprimento do nome do valor: " << std::dec << info->NameLength << " bytes" << std::endl;
+    stringStream << "            Tipo do valor: " << info->Type << std::endl;
+    stringStream << "            Comprimento do nome do valor: " << std::dec << info->NameLength << " bytes" << std::endl;
 
     // O nome do valor é armazenado diretamente na estrutura após os campos iniciais
     std::wstring valueName(info->Name, info->NameLength / sizeof(WCHAR));
-    *outStream << "    Nome do valor: " << WStringToString(valueName) << std::endl;
+    stringStream << "            Nome do valor: " << WStringToString(valueName) << std::endl;
 
 }
 
-VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
-    InstNtQueryValueKeyArgs args;
+VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
+
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
+
+    ADDRINT rtnAddress = GetRtnAddr(instAddress);
+
+    NtQueryValueKeyArgs args;
     args.KeyHandle = KeyHandle;
     args.ValueName = ValueName;
     args.KeyValueInformationClass = KeyValueInformationClass;
@@ -203,70 +225,141 @@ VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT K
     args.Length = Length;
     args.ResultLength = ResultLength;
 
-    CallContextKey key = { callId, tid };
-    argsMap[key] = args;
+    UINT32 callCtxId = callId * 100 + fcnCallId;
 
+    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
+
+    // Criando observadores dinamicamente com o contexto correto
+    auto* instructionObserver = new Observer(InstNtQueryValueKey::HandleInstructionEvent, callContext);
+    auto* traceObserver = new Observer(InstNtQueryValueKey::HandleTraceEvent, callContext);
+
+    // Salvando os observadores no CallContext para futura limpeza
+    callContext->instructionObserver = instructionObserver;
+    callContext->traceObserver = traceObserver;
+
+    CallContextKey key = { callCtxId, tid };
+    callContextMap[key] = callContext;
+
+    // Anexa os observers ao notificador
+    InstNtQueryValueKey::globalNotifierPtr->Attach(instructionObserver);
+    InstNtQueryValueKey::globalNotifierPtr->Attach(traceObserver);
 }
 
-VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
-    CallContextKey key = { callId, tid };
-    auto it = argsMap.find(key);
-    if (it != argsMap.end()) {
-        const InstNtQueryValueKeyArgs& args = it->second;
-        *outStream << std::endl << "[+] NtQueryValueKey..." << std::endl;
-        
+VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
+   
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
 
-        UNICODE_STRING* unicodeString = reinterpret_cast<UNICODE_STRING*>(args.ValueName);
+    // Instrumentar funçao
+    UINT32 callCtxId = callId * 100 + fcnCallId;
+    CallContextKey key = { callCtxId, tid };
+    auto it = callContextMap.find(key);
+    if (it != callContextMap.end()) {
+        PIN_LockClient();
+        IMG img = IMG_FindByAddress(instAddress);
+        CallContext* callContext = it->second;
+        // Registrar parámetros
+        const NtQueryValueKeyArgs* args = reinterpret_cast<NtQueryValueKeyArgs*>(callContext->functionArgs);
+        std::stringstream& stringStream = callContext->stringStream;
+        stringStream << std::endl << "[+] NtQueryValueKey..." << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Thread: " << tid << std::endl;
+        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parámetros: " << std::endl;
+
+        UNICODE_STRING* unicodeString = reinterpret_cast<UNICODE_STRING*>(args->ValueName);
         if (unicodeString && unicodeString->Buffer) {
             WCHAR* wideCharStr = reinterpret_cast<WCHAR*>(unicodeString->Buffer);
             std::wstring valueNameStr = std::wstring(wideCharStr);
-            *outStream << "    ValueName (parámetro): " << WStringToString(valueNameStr) << std::endl;
+            stringStream << "        ValueName: " << WStringToString(valueNameStr) << std::endl;
         }
 
+        BYTE* KeyValueInformationBuffer = reinterpret_cast<BYTE*>(args->KeyValueInformation);
+        if (args->KeyValueInformationClass == 0) {
+            InterpretKeyValueInformationBasic(KeyValueInformationBuffer, stringStream);
+        }
+        else if (args->KeyValueInformationClass == 1) {
+            InterpretKeyValueInformationFull(KeyValueInformationBuffer, stringStream);
+        }
+        else if (args->KeyValueInformationClass == 2) {
+            InterpretKeyValueInformationPartial(KeyValueInformationBuffer, stringStream);
+        }
 
-        BYTE* KeyValueInformationBuffer = reinterpret_cast<BYTE*>(args.KeyValueInformation);
-        if (args.KeyValueInformationClass == 0) {
-            InterpretKeyValueInformationBasic(KeyValueInformationBuffer);
+        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+
+        // Instrumentar todas as instruções da rotina chamadora
+        RTN rtnCaller = RTN_FindByAddress(returnAddress);
+        if (RTN_Valid(rtnCaller)) {
+            RTN_Open(rtnCaller);
+
+            stringStream << "    Instruções da rotina chamadora (" << RTN_Name(rtnCaller) << "):" << std::endl;
+            for (INS ins = RTN_InsHead(rtnCaller); INS_Valid(ins); ins = INS_Next(ins)) {
+                std::string disassembledInstruction = INS_Disassemble(ins);
+                ADDRINT insAddress = INS_Address(ins);
+                if (INS_IsCall(ins)) {
+                    // Assume que a chamada é direta para simplificar, para chamadas indiretas seria necessário mais contexto
+                    if (INS_IsDirectCall(ins)) {
+                        ADDRINT targetAddr = INS_DirectBranchOrCallTargetAddress(ins);
+                        RTN targetRtn = RTN_FindByAddress(targetAddr);
+                        if (RTN_Valid(targetRtn)) {
+                            std::string targetName = RTN_Name(targetRtn);
+                            disassembledInstruction = disassembledInstruction + "                           ; " + targetName; // Supondo que InstuctionInfo tenha esse campo
+                        }
+                    }
+                }
+                stringStream << "        " << std::hex << insAddress << std::dec << " | " << disassembledInstruction << std::endl;
+            }
+
+            RTN_Close(rtnCaller);
         }
-        else if(args.KeyValueInformationClass == 1) {
-            InterpretKeyValueInformationFull(KeyValueInformationBuffer);
-        }
-        else if (args.KeyValueInformationClass == 2) {
-            InterpretKeyValueInformationPartial(KeyValueInformationBuffer);
-        }
-        *outStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        *outStream << "[*] Concluído" << std::endl << std::endl;
-        argsMap.erase(it); // Limpar a entrada após o uso
+        callContext->defaultPrintReady = true;
+        PIN_UnlockClient();
     }
+
+    fcnCallId++;
 }
 
-VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, std::ofstream& out) {
-    outStream = &out;
-    
-    RTN_Open(rtn);
-    RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
-        IARG_THREAD_ID,
-        IARG_ADDRINT, &nextCallId,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // KeyValueInformation
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // Length
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // ResultLength
-        IARG_END);
+VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
-        IARG_THREAD_ID,
-        IARG_ADDRINT, &nextCallId,
-        IARG_REG_REFERENCE, REG_GAX,
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // KeyValueInformation
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // Length
-        IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // ResultLength
-        IARG_END);
+    if (RTN_Name(rtn) == "NtQueryValueKey") {
+        imgCallId++;
+        globalNotifierPtr = &globalNotifier;
 
-    RTN_Close(rtn);
+        RTN_Open(rtn);
+        RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // KeyValueInformation
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // Length
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // ResultLength
+            IARG_END);
+
+        RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_REG_REFERENCE, REG_GAX,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // KeyValueInformation
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // Length
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // ResultLength
+            IARG_END);
+
+        RTN_Close(rtn);
+    }
 
 }

@@ -14,121 +14,35 @@ Para o Themida:
 std::map<CallContextKey, CallContext*> InstGetModuleHandleA::callContextMap;
 UINT32 InstGetModuleHandleA::imgCallId = 0;
 UINT32 InstGetModuleHandleA::fcnCallId = 0;
-std::ofstream* InstGetModuleHandleA::outStream;
 Notifier* InstGetModuleHandleA::globalNotifierPtr;
 
 VOID InstGetModuleHandleA::CheckPrintConditions(CallContext* callContext) {
-    if (!(callContext->countInstructionsAfterCall >= 20 && callContext->countFunctionsCalledAfterCall >= 20)) {
-        return;
-    }
-    
-    std::stringstream& stringStream = callContext->stringStream;
-    
-    stringStream << "    Instruções executadas na rotina chamadora:" << std::endl;
-    for (const auto& instructionInfo : callContext->instructionsAfterCall) {
-        //criar metodo para marcar a instrução que chama a função
-        stringStream << "        " << std::hex << instructionInfo.address << std::dec << " | " << instructionInfo.disassembledInstruction << std::endl;
-    }
-    
-    stringStream << "    Pila de chamadas:" << std::endl;
-    for (const auto& callFunctionInfo : callContext->functionsCalledAfterCall) {
-        if (callFunctionInfo.address == callContext->rtnAddress) {
-            stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " | --> " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
-        }
-        else {
-            stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " |     " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
-        }
-    }
-    
-    stringStream << "[*] Concluído" << std::endl << std::endl;
-
-    *outStream << stringStream.str();
-
-    // Limpa memoria
-    CallContextKey key = { callContext->callId, callContext->threadId };
-    callContextMap.erase(key);
-
-    delete callContext;
+    CheckPrintConditionsCC(callContext, &InstGetModuleHandleA::callContextMap, InstGetModuleHandleA::globalNotifierPtr);
 }
-
 
 // Callbacks que serão chamados quando um evento for notificado
 VOID InstGetModuleHandleA::HandleInstructionEvent(const EventData* data, void* context) {
-    // Verifica o tipo de evento e processa conforme necessário
-    CallContext* callContext = reinterpret_cast<CallContext*>(context);
-    if (data->type == EventData::Instruction) {
-        if (callContext->countInstructionsAfterCall >= 20) {
-            auto instructionEvent = static_cast<const InstructionEventData*>(data);
-            auto iTrace = instructionEvent->instuctionInformation.instructionTrace;
-
-            // Copia a fila original para uma fila temporária para não alterar a fila original. std::queue não fornece acesso direto aos seus elementos além da frente e do fim da fila.
-            std::queue<InstuctionInformation> tempQueue = *iTrace;
-
-            // Desenfileira cada elemento da fila temporária e imprime
-            while (!tempQueue.empty()) {
-                InstuctionInformation instructionInfo = tempQueue.front();
-                tempQueue.pop();
-                callContext->instructionsAfterCall.push_back(instructionInfo);
-            }
-            
-            InstGetModuleHandleA::globalNotifierPtr->Detach(callContext->instructionObserver);
-            CheckPrintConditions(callContext);
-        }
-        else {
-            callContext->countInstructionsAfterCall++;
-        }
-    }
+    HandleInstructionEventCC(data, context, &InstGetModuleHandleA::callContextMap, InstGetModuleHandleA::globalNotifierPtr);
 }
 
 VOID InstGetModuleHandleA::HandleTraceEvent(const EventData* data, void* context) {
-    CallContext* callContext = reinterpret_cast<CallContext*>(context);
-    if (data->type == EventData::CallTrace) {
-        if (callContext->countFunctionsCalledAfterCall >= 20) {
-            UINT32 specificThreadId = callContext->threadId;
-            auto traceEvent = static_cast<const TraceEventData*>(data);
-            std::stringstream& stringStream = callContext->stringStream;
-            auto threadCallTracePtr = traceEvent->callTraceInfo.threadCallTraces;
-            const std::map<THREADID, std::deque<CallRtnInformation>> threadCallTraces = *threadCallTracePtr;
-            auto it = threadCallTraces.find(specificThreadId);
-            if (it != threadCallTraces.end()) {
-                const std::deque<CallRtnInformation>& callTraces = it->second;
-                for (const CallRtnInformation& callInfo : callTraces) {
-                    callContext->functionsCalledAfterCall.push_back(callInfo);
-                }
-            }
-            InstGetModuleHandleA::globalNotifierPtr->Detach(callContext->traceObserver);
-            CheckPrintConditions(callContext);
-        }
-        else {
-            callContext->countFunctionsCalledAfterCall++;
-        }
-    }
+    HandleTraceEventCC(data, context, &InstGetModuleHandleA::callContextMap, InstGetModuleHandleA::globalNotifierPtr);
 }
 
 VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpModuleName) {
 
-    PIN_LockClient();
-    IMG img = IMG_FindByAddress(returnAddress);
-    if (IMG_Valid(img)) {
-        if (!IMG_IsMainExecutable(img)) {
-            // Se a leitura não ocorre na imagem principal (executavel). Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
-            return;
-        }
+    if (!IsMainExecutable(returnAddress)) {
+        return;
     }
 
-    RTN rtnCall = RTN_FindByAddress(instAddress);
-    ADDRINT rtnAddress = 0;
-    if (RTN_Valid(rtnCall)) {
-        rtnAddress = RTN_Address(rtnCall);
-    }
-    PIN_UnlockClient();
+    ADDRINT rtnAddress = GetRtnAddr(instAddress);
 
     GetModuleHandleAArgs args;
     args.lpModuleName = lpModuleName;
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
-    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
+    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
     
     // Criando observadores dinamicamente com o contexto correto
     auto* instructionObserver = new Observer(InstGetModuleHandleA::HandleInstructionEvent, callContext);
@@ -148,14 +62,8 @@ VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
 VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpModuleName) {
 
-    PIN_LockClient();
-    IMG img = IMG_FindByAddress(returnAddress);
-    if (IMG_Valid(img)) {
-        if (!IMG_IsMainExecutable(img)) {
-            PIN_UnlockClient();
-            // Se a leitura não ocorre na imagem principal (executavel). Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
-            return;
-        }
+    if (!IsMainExecutable(returnAddress)) {
+        return;
     }
 
     // Instrumentar funçao
@@ -163,50 +71,55 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
+        PIN_LockClient();
+        IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
         // Registrar parámetros
-        const GetModuleHandleAArgs& args = callContext->getModuleHandleAArgs;
+        const GetModuleHandleAArgs* args = reinterpret_cast<GetModuleHandleAArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args.lpModuleName);
+        std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args->lpModuleName);
         stringStream << std::endl << "[+] GetModuleHandleA..." << std::endl;
-        stringStream << "    lpModuleName (parámetro): " << ansiStringLpModuleName << std::endl;
-        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Thread: " << tid << std::endl;
+        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
         stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Trace de chamadas (antes da invocação):" << std::endl;
+        stringStream << "    Parámetros: " << std::endl;
+        stringStream << "        lpModuleName: " << ansiStringLpModuleName << std::endl;
+        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
         // Instrumentar todas as instruções da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        RTN_Open(rtnCaller);
+        if (RTN_Valid(rtnCaller)) {
+            RTN_Open(rtnCaller);
 
-        stringStream << "    Instruções da rotina chamadora (" << RTN_Name(rtnCaller) << "):" << std::endl;
-        for (INS ins = RTN_InsHead(rtnCaller); INS_Valid(ins); ins = INS_Next(ins)) {
-            std::string disassembledInstruction = INS_Disassemble(ins);
-            ADDRINT insAddress = INS_Address(ins);
-            if (INS_IsCall(ins)) {
-                // Assume que a chamada é direta para simplificar, para chamadas indiretas seria necessário mais contexto
-                if (INS_IsDirectCall(ins)) {
-                    ADDRINT targetAddr = INS_DirectBranchOrCallTargetAddress(ins);
-                    RTN targetRtn = RTN_FindByAddress(targetAddr);
-                    if (RTN_Valid(targetRtn)) {
-                        std::string targetName = RTN_Name(targetRtn);
-                        disassembledInstruction = disassembledInstruction + "                   ; " + targetName; // Supondo que InstuctionInfo tenha esse campo
+            stringStream << "    Instruções da rotina chamadora (" << RTN_Name(rtnCaller) << "):" << std::endl;
+            for (INS ins = RTN_InsHead(rtnCaller); INS_Valid(ins); ins = INS_Next(ins)) {
+                std::string disassembledInstruction = INS_Disassemble(ins);
+                ADDRINT insAddress = INS_Address(ins);
+                if (INS_IsCall(ins)) {
+                    // Assume que a chamada é direta para simplificar, para chamadas indiretas seria necessário mais contexto
+                    if (INS_IsDirectCall(ins)) {
+                        ADDRINT targetAddr = INS_DirectBranchOrCallTargetAddress(ins);
+                        RTN targetRtn = RTN_FindByAddress(targetAddr);
+                        if (RTN_Valid(targetRtn)) {
+                            std::string targetName = RTN_Name(targetRtn);
+                            disassembledInstruction = disassembledInstruction + "                           ; " + targetName; // Supondo que InstuctionInfo tenha esse campo
+                        }
                     }
                 }
+                stringStream << "        " << std::hex << insAddress << std::dec << " | " << disassembledInstruction << std::endl;
             }
-            stringStream << "        " << std::hex << insAddress << std::dec << " | " << disassembledInstruction << std::endl;
+
+            RTN_Close(rtnCaller);
         }
-
-        RTN_Close(rtnCaller);
+        callContext->defaultPrintReady = true;
         PIN_UnlockClient();
-
     }
 
     fcnCallId++;
 }
 
-VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn, std::ofstream& out, Notifier& globalNotifier) {
-
-    imgCallId++;
+VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
     SEC sec = RTN_Sec(rtn);
     IMG img = SEC_Img(sec);
@@ -222,7 +135,7 @@ VOID InstGetModuleHandleA::InstrumentFunction(RTN rtn, std::ofstream& out, Notif
     }
 
     if (RTN_Name(rtn) == "GetModuleHandleA") {
-        outStream = &out;
+        imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
         RTN_Open(rtn);

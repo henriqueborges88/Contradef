@@ -21,7 +21,7 @@ using std::wstring;
 
 
 const size_t MAX_TRACE_SIZE = 40; // Número de rotinas a rastrear
-std::queue<InstuctionInformation> instructionTrace;
+std::queue<InstructionInformation> instructionTrace;
 std::map<THREADID, std::deque<CallRtnInformation>> threadTraces;
 PIN_LOCK lock;
 std::ofstream OutFile;
@@ -103,10 +103,10 @@ INT32 Usage()
 }
 
 VOID InstrumentFunctions(IMG img, VOID* v) {
-    context.ExecuteAllStrategies(img, OutFile, globalNotifier);
+    context.ExecuteAllStrategies(img, globalNotifier);
 }
 
-std::map<ADDRINT, InstuctionInformation> globalInstructionInfoMap;
+std::map<ADDRINT, InstructionInformation> globalInstructionInfoMap;
 
 VOID BeforeIndirectCall(ADDRINT instrAddr, ADDRINT targetAddr) {
     PIN_LockClient();
@@ -114,7 +114,7 @@ VOID BeforeIndirectCall(ADDRINT instrAddr, ADDRINT targetAddr) {
         if (RTN_Valid(targetRtn)) {
             auto insIt = globalInstructionInfoMap.find(instrAddr);
             if (insIt != globalInstructionInfoMap.end()) {
-                InstuctionInformation instructionInfo = insIt->second;
+                InstructionInformation instructionInfo = insIt->second;
                 std::string targetName = RTN_Name(targetRtn);
                 instructionInfo.disassembledInstruction += "                   ; " + targetName;
                 if (instructionTrace.size() >= MAX_TRACE_SIZE) {
@@ -147,7 +147,7 @@ VOID Instruction(INS ins, VOID* v) {
         }
     }
 
-    InstuctionInformation instructionInfo = { &instructionTrace, address, disassembledInstruction };
+    InstructionInformation instructionInfo = { &instructionTrace, address, disassembledInstruction };
 
     if (INS_IsCall(ins)) {
         if (!INS_IsDirectBranchOrCall(ins)) {
@@ -236,18 +236,32 @@ VOID Routine(RTN rtn, VOID* v) {
     RTN_Close(rtn);
 }
 
+VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
+    if (data->type != EventData::ExecutionCompleted) {
+        return;
+    }
+    auto executionEvent = static_cast<const ExecutionEventData*>(data);
+    auto executionOutputText = executionEvent->executionInformation.outputText;
+    OutFile << executionOutputText;
+}
 
 int main(int argc, char* argv[]) {
 
     string filename;
     filename = KnobOutputFile.Value();
-    filename += "." + decstr(getpid());
+    filename += "." + decstr(getpid()) + ".txt";
     OutFile.open(filename.c_str());
 
     if (PIN_Init(argc, argv))
     {
         return Usage();
     }
+
+    // Criando observadores dinamicamente com o contexto nulo
+    auto* executionCompleted = new Observer(HandleExecutionCompletedEvent, NULL);
+
+    // Anexa os observers ao notificador
+    globalNotifier.Attach(executionCompleted);
     
     PIN_InitLock(&lock);
 

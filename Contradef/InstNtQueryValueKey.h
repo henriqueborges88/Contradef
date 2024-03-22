@@ -5,10 +5,17 @@
 #include "pin.H"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <map>
+#include <deque>
+#include <queue>
+#include "utils.h"
+#include "CallContext.h"
+#include "Notifier.h"
+#include "Observer.h"
+#include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
 #include "NtStructures.h"
-#include  "CallContextKey.h"
 
 // Baseado em https://github.com/3gstudent/HiddenNtRegistry/blob/master/HiddenNtRegistry.h
 
@@ -102,7 +109,7 @@ typedef NTSTATUS(STDAPICALLTYPE NTQUERYVALUEKEY)
 typedef NTQUERYVALUEKEY FAR* LPNTQUERYVALUEKEY;
 
 
-struct InstNtQueryValueKeyArgs {
+struct NtQueryValueKeyArgs {
     ADDRINT KeyHandle;
     ADDRINT ValueName;
     USHORT KeyValueInformationClass;
@@ -113,17 +120,21 @@ struct InstNtQueryValueKeyArgs {
 
 class InstNtQueryValueKey : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
+    static VOID HandleInstructionEvent(const EventData* data, void* context);
+    static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, InstNtQueryValueKeyArgs> argsMap;
-    static ADDRINT nextCallId;
-    static std::ofstream* outStream;
-    static VOID InterpretKeyValueInformationFull(BYTE* keyValueInformation);
-    static VOID InterpretKeyValueInformationPartial(BYTE* keyValueInformation);
-    static VOID InterpretKeyValueInformationBasic(BYTE* keyValueInformation);
-    static VOID CallbackBefore(THREADID tid, ADDRINT callId, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
-    static VOID CallbackAfter(THREADID tid, ADDRINT callId, ADDRINT* retValAddr, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
+    static std::map<CallContextKey, CallContext*> callContextMap;
+    static UINT32 imgCallId;
+    static UINT32 fcnCallId;
+    static Notifier* globalNotifierPtr;
+    static VOID CheckPrintConditions(CallContext* callContext);
+    static VOID InterpretKeyValueInformationFull(BYTE* keyValueInformation, std::stringstream& stringStream);
+    static VOID InterpretKeyValueInformationPartial(BYTE* keyValueInformation, std::stringstream& stringStream);
+    static VOID InterpretKeyValueInformationBasic(BYTE* keyValueInformation, std::stringstream& stringStream);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
 };
 
 #endif // INST_NT_QUERY_VALUE_KEY_H

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <map>
 #include "InstrumentationStrategy.h"
-#include "CallContextKey.h"
+#include "CallContext.h"
 #include "utils.h"
 
 struct InstVirtualProtectExArgs {
@@ -20,7 +20,7 @@ struct InstVirtualProtectExArgs {
 
 class InstVirtualProtectEx : public InstrumentationStrategy {
 public:
-    static VOID InstrumentFunction(RTN rtn, std::ofstream& out);
+    static VOID InstrumentFunction(RTN rtn);
 
 private:
     static std::map<CallContextKey, InstVirtualProtectExArgs> argsMap;

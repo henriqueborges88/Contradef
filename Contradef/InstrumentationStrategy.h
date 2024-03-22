@@ -6,7 +6,7 @@
 
 class InstrumentationStrategy {
 public:
-    virtual void InstrumentFunction(RTN rtn, std::ofstream& out) = 0;
+    virtual void InstrumentFunction(RTN rtn) = 0;
     virtual ~InstrumentationStrategy() {}
 };
 
