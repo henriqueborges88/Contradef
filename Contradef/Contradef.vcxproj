@@ -213,6 +213,7 @@
     <ClCompile Include="InstVirtualProtectEx.cpp" />
     <ClCompile Include="InstVirtualQuery.cpp" />
     <ClCompile Include="InstVirtualQueryEx.cpp" />
+    <ClCompile Include="params.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -258,6 +259,7 @@
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="params.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

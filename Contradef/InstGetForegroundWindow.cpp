@@ -76,27 +76,7 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
         // Instrumentar todas as instruções da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
-            RTN_Open(rtnCaller);
-
-            stringStream << "    Instruções da rotina chamadora (" << RTN_Name(rtnCaller) << "):" << std::endl;
-            for (INS ins = RTN_InsHead(rtnCaller); INS_Valid(ins); ins = INS_Next(ins)) {
-                std::string disassembledInstruction = INS_Disassemble(ins);
-                ADDRINT insAddress = INS_Address(ins);
-                if (INS_IsCall(ins)) {
-                    // Assume que a chamada é direta para simplificar, para chamadas indiretas seria necessário mais contexto
-                    if (INS_IsDirectCall(ins)) {
-                        ADDRINT targetAddr = INS_DirectBranchOrCallTargetAddress(ins);
-                        RTN targetRtn = RTN_FindByAddress(targetAddr);
-                        if (RTN_Valid(targetRtn)) {
-                            std::string targetName = RTN_Name(targetRtn);
-                            disassembledInstruction = disassembledInstruction + "                           ; " + targetName; // Supondo que InstuctionInfo tenha esse campo
-                        }
-                    }
-                }
-                stringStream << "        " << std::hex << insAddress << std::dec << " | " << disassembledInstruction << std::endl;
-            }
-
-            RTN_Close(rtnCaller);
+            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
         }
         callContext->defaultPrintReady = true;
         PIN_UnlockClient();

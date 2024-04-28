@@ -9,22 +9,24 @@ VOID CheckPrintConditionsCC(CallContext* callContext, std::map<CallContextKey, C
 
     std::stringstream& stringStream = callContext->stringStream;
 
-    if (callContext->instructionsAfterCall.size() > 0) {
-        stringStream << "    Instruções executadas na rotina chamadora:" << std::endl;
-        for (const auto& instructionInfo : callContext->instructionsAfterCall) {
-            //criar metodo para marcar a instrução que chama a função
-            stringStream << "        " << std::hex << instructionInfo.address << std::dec << " | " << instructionInfo.disassembledInstruction << std::endl;
-        }
-    }
-
-    if (callContext->functionsCalledAfterCall.size() > 0) {
-        stringStream << "    Pila de chamadas:" << std::endl;
-        for (const auto& callFunctionInfo : callContext->functionsCalledAfterCall) {
-            if (callFunctionInfo.address == callContext->rtnAddress) {
-                stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " | --> " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
+    if (KnobDetailLevel.Value()) {
+        if (callContext->instructionsAfterCall.size() > 0) {
+            stringStream << "    Instruções executadas na rotina chamadora:" << std::endl;
+            for (const auto& instructionInfo : callContext->instructionsAfterCall) {
+                //criar metodo para marcar a instrução que chama a função
+                stringStream << "        " << std::hex << instructionInfo.address << std::dec << " | " << instructionInfo.disassembledInstruction << std::endl;
             }
-            else {
-                stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " |     " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
+        }
+
+        if (callContext->functionsCalledAfterCall.size() > 0) {
+            stringStream << "    Pila de chamadas:" << std::endl;
+            for (const auto& callFunctionInfo : callContext->functionsCalledAfterCall) {
+                if (callFunctionInfo.address == callContext->rtnAddress) {
+                    stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " | --> " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
+                }
+                else {
+                    stringStream << "        " << std::hex << callFunctionInfo.address << std::dec << " |     " << callFunctionInfo.functionName << " (chamada por: " << callFunctionInfo.rtnCallerName << ")" << std::endl;
+                }
             }
         }
     }
