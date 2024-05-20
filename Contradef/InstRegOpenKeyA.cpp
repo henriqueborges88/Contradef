@@ -69,10 +69,7 @@ VOID InstRegOpenKeyA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         const InstRegOpenKeyAArgs* args = reinterpret_cast<InstRegOpenKeyAArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::string ansiStringLpSubKey = ConvertAddrToAnsiString(args->lpSubKey);
-        if (ansiStringLpSubKey == "HARDWARE\ACPI\DSDT\VBOX__") {
-            // Contramedida pode ser alterando o valor de retorno para algumas chaves
-            //*retValAddr = 0;
-        }
+        
         stringStream << std::endl << "[+] RegOpenKeyA..." << std::endl;
         stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
@@ -83,6 +80,18 @@ VOID InstRegOpenKeyA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         stringStream << "        lpSubKey: " << ansiStringLpSubKey << std::endl;
         stringStream << "        phkResult: " << args->phkResult << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+
+        if (isRegistryKeyPartInList(ansiStringLpSubKey)) {
+            std::cout << "A chave de registro está na lista." << std::endl;
+            // Contramedida pode ser alterando o valor de retorno para algumas chaves
+            //*retValAddr = 0;
+            //alterar o valor de retorno
+            //verificar a necessidade de chamar RegCloseKey para encerrar o handle
+            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que não existe
+        }
+        else {
+            std::cout << "A chave de registro não está na lista." << std::endl;
+        }
 
         // Instrumentar todas as instruções da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(*retValAddr);

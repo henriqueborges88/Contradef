@@ -68,7 +68,7 @@ VOID InstGetWindowTextW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         // Registrar parámetros
         const GetWindowTextWArgs* args = reinterpret_cast<GetWindowTextWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        std::wstring ansiStringlpString = ConvertAddrToWideString(args->lpString);
+        std::wstring wideStringlpString = ConvertAddrToWideString(args->lpString);
         stringStream << std::endl << "[+] GetWindowTextW..." << std::endl;
         stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
@@ -76,7 +76,7 @@ VOID InstGetWindowTextW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Parámetros: " << std::endl;
         stringStream << "        hWnd: " << args->hWnd << std::endl;
-        stringStream << "        lpString: " << WStringToString(ansiStringlpString) << std::endl;
+        stringStream << "        lpString: " << WStringToString(wideStringlpString) << std::endl;
         stringStream << "        nMaxCount: " << args->nMaxCount << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 

@@ -15,6 +15,8 @@
 #include "Observer.h"
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
+#include "RegistryKeys.h"
+#include "RegistryErrors.h"
 
 struct RegOpenKeyExAArgs {
     ADDRINT hKey;

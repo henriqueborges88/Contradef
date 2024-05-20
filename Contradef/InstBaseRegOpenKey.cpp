@@ -80,6 +80,18 @@ VOID InstBaseRegOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "        phkResult: " << args->phkResult << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
+        if (isRegistryKeyPartInList(WStringToString(wslpSubKey))) {
+            std::cout << "A chave de registro está na lista." << std::endl;
+            // Contramedida pode ser alterando o valor de retorno para algumas chaves
+            //*retValAddr = 0;
+            //alterar o valor de retorno
+            //verificar a necessidade de chamar RegCloseKey para encerrar o handle
+            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que não existe
+        }
+        else {
+            std::cout << "A chave de registro não está na lista." << std::endl;
+        }
+
         // Instrumentar todas as instruções da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {

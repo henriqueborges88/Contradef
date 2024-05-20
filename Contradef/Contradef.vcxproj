@@ -177,6 +177,7 @@
   <ItemGroup>
     <ClCompile Include="CallContext.cpp" />
     <ClCompile Include="Contradef.cpp" />
+    <ClCompile Include="InstBaseRegEnumKey.cpp" />
     <ClCompile Include="InstBaseRegOpenKey.cpp" />
     <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
     <ClCompile Include="InstEnumProcessModules.cpp" />
@@ -192,12 +193,17 @@
     <ClCompile Include="InstGetWindowTextA.cpp" />
     <ClCompile Include="InstGetWindowTextW.cpp" />
     <ClCompile Include="InstIsDebuggerPresent.cpp" />
+    <ClCompile Include="InstNtEnumKey.cpp" />
     <ClCompile Include="InstNtOpenKey.cpp" />
     <ClCompile Include="InstNtQuerySystemInformation.cpp" />
     <ClCompile Include="InstNtQueryValueKey.cpp" />
     <ClCompile Include="InstOutputDebugStringW.cpp" />
     <ClCompile Include="InstQueryPerformanceCounter.cpp" />
     <ClCompile Include="InstQueryPerformanceFrequency.cpp" />
+    <ClCompile Include="InstRegEnumKeyA.cpp" />
+    <ClCompile Include="InstRegEnumKeyExA.cpp" />
+    <ClCompile Include="InstRegEnumKeyExW.cpp" />
+    <ClCompile Include="InstRegEnumKeyW.cpp" />
     <ClCompile Include="InstRegOpenKeyA.cpp" />
     <ClCompile Include="InstRegOpenKeyExA.cpp" />
     <ClCompile Include="InstRegOpenKeyExW.cpp" />
@@ -214,11 +220,13 @@
     <ClCompile Include="InstVirtualQuery.cpp" />
     <ClCompile Include="InstVirtualQueryEx.cpp" />
     <ClCompile Include="params.cpp" />
+    <ClCompile Include="RegistryKeys.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallContext.h" />
     <ClInclude Include="EventData.h" />
+    <ClInclude Include="InstBaseRegEnumKey.h" />
     <ClInclude Include="InstBaseRegOpenKey.h" />
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
     <ClInclude Include="InstEnumProcessModules.h" />
@@ -234,12 +242,17 @@
     <ClInclude Include="InstGetWindowTextA.h" />
     <ClInclude Include="InstGetWindowTextW.h" />
     <ClInclude Include="InstIsDebuggerPresent.h" />
+    <ClInclude Include="InstNtEnumKey.h" />
     <ClInclude Include="InstNtOpenKey.h" />
     <ClInclude Include="InstNtQuerySystemInformation.h" />
     <ClInclude Include="InstNtQueryValueKey.h" />
     <ClInclude Include="InstOutputDebugStringW.h" />
     <ClInclude Include="InstQueryPerformanceCounter.h" />
     <ClInclude Include="InstQueryPerformanceFrequency.h" />
+    <ClInclude Include="InstRegEnumKeyA.h" />
+    <ClInclude Include="InstRegEnumKeyExA.h" />
+    <ClInclude Include="InstRegEnumKeyExW.h" />
+    <ClInclude Include="InstRegEnumKeyW.h" />
     <ClInclude Include="InstRegOpenKeyA.h" />
     <ClInclude Include="InstRegOpenKeyExA.h" />
     <ClInclude Include="InstRegOpenKeyExW.h" />
@@ -260,6 +273,8 @@
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="params.h" />
+    <ClInclude Include="RegistryErrors.h" />
+    <ClInclude Include="RegistryKeys.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
