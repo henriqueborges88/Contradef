@@ -22,6 +22,8 @@ struct InstRegOpenKeyWArgs {
     ADDRINT hKey;
     ADDRINT lpSubKey;
     ADDRINT phkResult;
+    char originalLastChar; // Para armazenar o último caractere original de lpSubKey
+    bool isModified; // Flag para indicar se lpSubKey foi modificado
 };
 
 class InstRegOpenKeyW : public InstrumentationStrategy {

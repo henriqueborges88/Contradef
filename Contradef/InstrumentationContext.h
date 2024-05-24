@@ -49,6 +49,9 @@
 #include "InstVirtualProtect.h"
 #include "InstVirtualProtectEx.h"
 
+#include "InstWmi.h"
+
+
 typedef void (*RTNFunction)(RTN, Notifier&);
 
 class InstrumentationContext {

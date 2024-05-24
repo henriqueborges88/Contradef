@@ -219,6 +219,7 @@
     <ClCompile Include="InstVirtualProtectEx.cpp" />
     <ClCompile Include="InstVirtualQuery.cpp" />
     <ClCompile Include="InstVirtualQueryEx.cpp" />
+    <ClCompile Include="InstWmi.cpp" />
     <ClCompile Include="params.cpp" />
     <ClCompile Include="RegistryKeys.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="InstVirtualProtectEx.h" />
     <ClInclude Include="InstVirtualQuery.h" />
     <ClInclude Include="InstVirtualQueryEx.h" />
+    <ClInclude Include="InstWmi.h" />
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />

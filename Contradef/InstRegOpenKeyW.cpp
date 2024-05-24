@@ -31,6 +31,22 @@ VOID InstRegOpenKeyW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     args.lpSubKey = lpSubKey;
     args.phkResult = phkResult;
 
+    //// CONTRAMEDIDA
+    args.originalLastChar = *reinterpret_cast<wchar_t*>(lpSubKey + wcslen(reinterpret_cast<wchar_t*>(lpSubKey)) - 1); // Salvar o último caractere original de lpSubKey
+
+    std::wstring wslpSubKey = ConvertAddrToWideString(lpSubKey);
+    std::string ansiStringLpSubKey = WStringToString(wslpSubKey);
+    if (isRegistryKeyPartInList(ansiStringLpSubKey)) {
+        wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(lpSubKey);
+        size_t len = wcslen(wideCharStr);
+
+        if (len > 0) {
+            wideCharStr[len - 1] = L'Ç';
+            args.isModified = true;
+        }
+    }
+    ////
+
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
@@ -69,10 +85,18 @@ VOID InstRegOpenKeyW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         const InstRegOpenKeyWArgs* args = reinterpret_cast<InstRegOpenKeyWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::wstring wideStringLpSubKey = ConvertAddrToWideString(args->lpSubKey);
-        if (wideStringLpSubKey == L"HARDWARE\ACPI\DSDT\VBOX__") {
-            // Contramedida pode ser alterando o valor de retorno para algumas chaves
-            //*retValAddr = 0;
+
+        ////CONTRAMEDIDA
+        if (args->isModified) {
+            wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(lpSubKey);
+            size_t len = wcslen(wideCharStr);
+
+            if (len > 0) {
+                wideCharStr[len - 1] = args->originalLastChar;
+            }
         }
+        ////
+
         stringStream << std::endl << "[+] RegOpenKeyW..." << std::endl;
         stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
@@ -83,20 +107,6 @@ VOID InstRegOpenKeyW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         stringStream << "        lpSubKey: " << WStringToString(wideStringLpSubKey) << std::endl;
         stringStream << "        phkResult: " << args->phkResult << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-
-        if (isRegistryKeyPartInList(WStringToString(wideStringLpSubKey))) {
-            std::cout << "A chave de registro está na lista." << std::endl;
-            // Contramedida pode ser alterando o valor de retorno para algumas chaves
-            //*retValAddr = 0;
-            //alterar o valor de retorno
-            //verificar a necessidade de chamar RegCloseKey para encerrar o handle
-            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que não existe
-            //implementae RegEnumKeyExA, na listagem, tentar alterar o valor em memoria de caves de registro de vbox por nbox
-
-        }
-        else {
-            std::cout << "A chave de registro não está na lista." << std::endl;
-        }
 
         // Instrumentar todas as instruções da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(*retValAddr);

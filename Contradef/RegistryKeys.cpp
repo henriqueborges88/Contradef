@@ -24,6 +24,12 @@ const char* VirtualBoxKeys[] = {
 };
 const size_t VirtualBoxKeysSize = sizeof(VirtualBoxKeys) / sizeof(VirtualBoxKeys[0]);
 
+const char* UnknownVMKeys[] = {
+    "HKLM\\SYSTEM\\ControlSet001\\Control\\Class\\{4D36E968-E325-11CE-BFC1-08002BE10318}\\0000",
+    "HKLM\\Hardware\\description\\System"
+};
+const size_t UnknownVMKeysSize = sizeof(UnknownVMKeys) / sizeof(UnknownVMKeys[0]);
+
 // Detecção de Antivírus
 const char* AntivirusKeys[] = {
     "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", // procurar por produtos de antivírus instalados
@@ -85,6 +91,7 @@ bool isRegistryKeyPartInList(const std::string& key) {
     if (checkKeyInList(VMwareKeys, VMwareKeysSize)) return true;
     if (checkKeyInList(VirtualBoxKeys, VirtualBoxKeysSize)) return true;
     if (checkKeyInList(AntivirusKeys, AntivirusKeysSize)) return true;
+    if (checkKeyInList(UnknownVMKeys, UnknownVMKeysSize)) return true;
     if (checkKeyInList(SandboxieKeys, SandboxieKeysSize)) return true;
     if (checkKeyInList(DebuggerKeys, DebuggerKeysSize)) return true;
     if (checkKeyInList(AnalysisToolsKeys, AnalysisToolsKeysSize)) return true;

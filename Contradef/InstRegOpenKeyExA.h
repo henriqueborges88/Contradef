@@ -24,6 +24,8 @@ struct RegOpenKeyExAArgs {
     ADDRINT ulOptions;
     ADDRINT samDesired;
     ADDRINT phkResult;
+    char originalLastChar; // Para armazenar o último caractere original de lpSubKey
+    bool isModified; // Flag para indicar se lpSubKey foi modificado
 };
 
 class InstRegOpenKeyExA : public InstrumentationStrategy {

@@ -42,6 +42,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp;C:\Users\
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualProtectEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualQuery.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualQueryEx.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstWmi.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstWmi.obj
 C:\Users\henri\source\repos\Contradef\Contradef\params.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\params.obj
 C:\Users\henri\source\repos\Contradef\Contradef\RegistryKeys.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\RegistryKeys.obj
 C:\Users\henri\source\repos\Contradef\Contradef\utils.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\utils.obj
