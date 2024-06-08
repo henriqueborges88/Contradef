@@ -13,9 +13,6 @@
 #include "InstOutputDebugStringW.h"
 #include "InstGetForegroundWindow.h"
 #include "InstNtQueryInformationProcess.h"
-#include "InstNtQuerySystemInformation.h"
-#include "InstEnumProcessModules.h"
-#include "InstEnumProcessModulesEx.h"
 #include "InstBaseRegOpenKey.h"
 #include "InstBaseRegEnumKey.h"
 #include "InstRegOpenKeyW.h"
@@ -41,13 +38,9 @@
 #include "InstGetModuleFileNameExA.h"
 #include "InstGetWindowTextW.h"
 #include "InstGetWindowTextA.h"
-#include "InstQueryPerformanceCounter.h"
-#include "InstQueryPerformanceFrequency.h"
 #include "InstGetTickCount.h"
 #include "InstVirtualQuery.h"
 #include "InstVirtualQueryEx.h"
-#include "InstVirtualProtect.h"
-#include "InstVirtualProtectEx.h"
 
 #include "InstWmi.h"
 #include "InstWmiEx.h"
@@ -84,12 +77,13 @@
 #include "InstGetLocalTime.h"
 #include "InstGetSystemTime.h"
 #include "InstNtQuerySystemTime.h"
-#include "InstNtQueryPerformanceCounter.h"
 #include "InstNtQueryInformationThread.h"
 #include "InstFindWindowA.h"
 #include "InstFindWindowW.h"
 #include "InstNtQueryVirtualMemory.h"
-#include "InstZwQueryVirtualMemory.h"
+#include "InstNtCreateTimer2.h"
+#include "InstNtQueryKey.h"
+
 
 
 typedef void (*RTNFunction)(RTN, Notifier&);

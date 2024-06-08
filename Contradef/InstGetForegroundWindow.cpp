@@ -1,7 +1,7 @@
 #include "InstGetForegroundWindow.h"
 
 /*
-A função GetForegroundWindow não possui argumentos. Ela simplesmente retorna o identificador da janela atualmente em primeiro plano. Por isso, o método CallbackBefore apenas registra a chamada da função, e o CallbackAfter registra o valor de retorno.
+A funï¿½ï¿½o GetForegroundWindow nï¿½o possui argumentos. Ela simplesmente retorna o identificador da janela atualmente em primeiro plano. Por isso, o mï¿½todo CallbackBefore apenas registra a chamada da funï¿½ï¿½o, e o CallbackAfter registra o valor de retorno.
 */
 
 std::map<CallContextKey, CallContext*> InstGetForegroundWindow::callContextMap;
@@ -13,7 +13,7 @@ VOID InstGetForegroundWindow::CheckPrintConditions(CallContext* callContext) {
     CheckPrintConditionsCC(callContext, &InstGetForegroundWindow::callContextMap, InstGetForegroundWindow::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstGetForegroundWindow::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstGetForegroundWindow::callContextMap, InstGetForegroundWindow::globalNotifierPtr);
 }
@@ -56,7 +56,7 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
        return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -64,16 +64,18 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         std::stringstream& stringStream = callContext->stringStream;
-        stringStream << std::endl << "[+] GetForegroundWindow..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -87,7 +89,8 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
 
 VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "GetForegroundWindow") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "GetForegroundWindow") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
         RTN_Open(rtn);
@@ -98,7 +101,7 @@ VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifi
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_END);
 
         RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
@@ -108,7 +111,7 @@ VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifi
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_END);
 
         RTN_Close(rtn);

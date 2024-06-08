@@ -59,7 +59,7 @@ VOID InstNtOpenProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         return;
     }
 
-    // Instrumentar função
+    // Instrumentar funï¿½ï¿½o
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -67,23 +67,25 @@ VOID InstNtOpenProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parâmetros
+        // Registrar parï¿½metros
         const InstNtOpenProcessArgs* args = reinterpret_cast<InstNtOpenProcessArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 
-        stringStream << std::endl << "[+] NtOpenProcess Detected..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parâmetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
         stringStream << "        ProcessHandle: " << args->ProcessHandle << std::endl;
         stringStream << "        DesiredAccess: " << args->DesiredAccess << std::endl;
         stringStream << "        ObjectAttributes: " << args->ObjectAttributes << std::endl;
         stringStream << "        ClientId: " << args->ClientId << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(*retValAddr);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -97,7 +99,8 @@ VOID InstNtOpenProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
 VOID InstNtOpenProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "NtOpenProcess") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "NtOpenProcess") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -108,7 +111,7 @@ VOID InstNtOpenProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // DesiredAccess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ObjectAttributes
@@ -122,7 +125,7 @@ VOID InstNtOpenProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // DesiredAccess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ObjectAttributes

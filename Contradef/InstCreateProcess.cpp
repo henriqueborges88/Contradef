@@ -69,7 +69,7 @@ VOID InstCreateProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         return;
     }
 
-    // Instrumentar função
+    // Instrumentar funï¿½ï¿½o
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -77,19 +77,21 @@ VOID InstCreateProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parâmetros
+        // Registrar parï¿½metros
         const InstCreateProcessArgs* args = reinterpret_cast<InstCreateProcessArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 
         std::string applicationName = args->lpApplicationName ? ConvertAddrToAnsiString(args->lpApplicationName) : "NULL";
         std::string commandLine = args->lpCommandLine ? ConvertAddrToAnsiString(args->lpCommandLine) : "NULL";
 
-        stringStream << std::endl << "[+] CreateProcess Detected..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parâmetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
         stringStream << "        lpApplicationName: " << applicationName << std::endl;
         stringStream << "        lpCommandLine: " << commandLine << std::endl;
         stringStream << "        lpProcessAttributes: " << args->lpProcessAttributes << std::endl;
@@ -102,7 +104,7 @@ VOID InstCreateProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         stringStream << "        lpProcessInformation: " << args->lpProcessInformation << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(*retValAddr);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -116,7 +118,8 @@ VOID InstCreateProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
 VOID InstCreateProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "CreateProcessA" || RTN_Name(rtn) == "CreateProcessW") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "CreateProcessA" || rtnName == "CreateProcessW") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -127,7 +130,7 @@ VOID InstCreateProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpApplicationName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpCommandLine
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpProcessAttributes
@@ -147,7 +150,7 @@ VOID InstCreateProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpApplicationName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpCommandLine
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpProcessAttributes

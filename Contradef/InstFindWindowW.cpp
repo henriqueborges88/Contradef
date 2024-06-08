@@ -55,7 +55,7 @@ VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         return;
     }
 
-    // Instrumentar função
+    // Instrumentar funï¿½ï¿½o
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -63,7 +63,7 @@ VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parâmetros
+        // Registrar parï¿½metros
         const InstFindWindowWArgs* args = reinterpret_cast<InstFindWindowWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::wstring className = ConvertAddrToWideString(args->lpClassName);
@@ -71,17 +71,19 @@ VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         std::string ansiClassName(className.begin(), className.end());
         std::string ansiWindowName(windowName.begin(), windowName.end());
 
-        stringStream << std::endl << "[+] FindWindowW Detected..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parâmetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
         stringStream << "        lpClassName: " << ansiClassName << std::endl;
         stringStream << "        lpWindowName: " << ansiWindowName << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -95,7 +97,8 @@ VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
 VOID InstFindWindowW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "FindWindowW") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "FindWindowW") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -106,7 +109,7 @@ VOID InstFindWindowW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpClassName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpWindowName
             IARG_END);
@@ -118,7 +121,7 @@ VOID InstFindWindowW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpClassName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpWindowName
             IARG_END);

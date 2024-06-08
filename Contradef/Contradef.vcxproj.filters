@@ -42,16 +42,10 @@
     <ClCompile Include="InstOutputDebugStringW.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstQueryPerformanceCounter.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="InstGetForegroundWindow.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="InstGetTickCount.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
-    <ClCompile Include="InstNtQuerySystemInformation.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="InstGetModuleFileNameA.cpp">
@@ -61,12 +55,6 @@
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="InstNtOpenKey.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
-    <ClCompile Include="InstEnumProcessModules.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
-    <ClCompile Include="InstEnumProcessModulesEx.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="InstGetModuleFileNameW.cpp">
@@ -96,9 +84,6 @@
     <ClCompile Include="InstGetWindowTextA.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstQueryPerformanceFrequency.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="InstGetModuleFileNameExA.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
@@ -118,12 +103,6 @@
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="InstVirtualQueryEx.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
-    <ClCompile Include="InstVirtualProtect.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
-    <ClCompile Include="InstVirtualProtectEx.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="CallContext.cpp">
@@ -261,9 +240,6 @@
     <ClCompile Include="InstNtQuerySystemTime.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstNtQueryPerformanceCounter.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="InstNtQueryInformationThread.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
@@ -279,7 +255,10 @@
     <ClCompile Include="InstNtQueryVirtualMemory.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="InstZwQueryVirtualMemory.cpp">
+    <ClCompile Include="InstNtCreateTimer2.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="InstNtQueryKey.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
   </ItemGroup>
@@ -308,16 +287,10 @@
     <ClInclude Include="InstOutputDebugStringW.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="InstQueryPerformanceCounter.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="InstGetForegroundWindow.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstGetTickCount.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstNtQuerySystemInformation.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstGetModuleFileNameA.h">
@@ -327,12 +300,6 @@
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstNtOpenKey.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstEnumProcessModules.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstEnumProcessModulesEx.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstGetModuleFileNameW.h">
@@ -371,9 +338,6 @@
     <ClInclude Include="InstGetWindowTextA.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="InstQueryPerformanceFrequency.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="InstGetModuleFileNameExA.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
@@ -393,12 +357,6 @@
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="InstVirtualQueryEx.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstVirtualProtect.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
-    <ClInclude Include="InstVirtualProtectEx.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="Observer.h">
@@ -545,9 +503,6 @@
     <ClInclude Include="InstNtQuerySystemTime.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="InstNtQueryPerformanceCounter.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="InstNtQueryInformationThread.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
@@ -557,7 +512,10 @@
     <ClInclude Include="InstFindWindowW.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="InstZwQueryVirtualMemory.h">
+    <ClInclude Include="InstNtCreateTimer2.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="InstNtQueryKey.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>

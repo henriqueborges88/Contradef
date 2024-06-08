@@ -1,6 +1,6 @@
 #pragma once
-#ifndef INST_ZW_QUERY_VIRTUAL_MEMORY_H
-#define INST_ZW_QUERY_VIRTUAL_MEMORY_H
+#ifndef INST_NT_CREATE_TIMER2_H
+#define INST_NT_CREATE_TIMER2_H
 
 #include "pin.H"
 #include <iostream>
@@ -16,16 +16,18 @@
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
 
-struct InstZwQueryVirtualMemoryArgs {
-    ADDRINT ProcessHandle;
-    ADDRINT BaseAddress;
-    ADDRINT MemoryInformationClass;
-    ADDRINT MemoryInformation;
-    ADDRINT MemoryInformationLength;
-    ADDRINT ReturnLength;
+struct InstNtCreateTimer2Args {
+    ADDRINT TimerHandle;
+    ADDRINT DesiredAccess;
+    ADDRINT ObjectAttributes;
+    ADDRINT TimerType;
+    ADDRINT TimerAttributes;
+    ADDRINT Anonymous1;
+    ADDRINT Anonymous2;
+    ADDRINT Anonymous3;
 };
 
-class InstZwQueryVirtualMemory : public InstrumentationStrategy {
+class InstNtCreateTimer2 : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
     static VOID HandleInstructionEvent(const EventData* data, void* context);
@@ -38,11 +40,11 @@ private:
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
     static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
-        ADDRINT ProcessHandle, ADDRINT BaseAddress, ADDRINT MemoryInformationClass, ADDRINT MemoryInformation,
-        ADDRINT MemoryInformationLength, ADDRINT ReturnLength);
+        ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
+        ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3);
     static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
-        ADDRINT ProcessHandle, ADDRINT BaseAddress, ADDRINT MemoryInformationClass, ADDRINT MemoryInformation,
-        ADDRINT MemoryInformationLength, ADDRINT ReturnLength);
+        ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
+        ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3);
 };
 
-#endif // INST_ZW_QUERY_VIRTUAL_MEMORY_H
+#endif // INST_NT_CREATE_TIMER2_H

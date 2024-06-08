@@ -1,7 +1,7 @@
 #include "InstGetTickCount.h"
 
 /*
-A função GetTickCount não possui argumentos de entrada. Ela retorna o número de milissegundos desde que o sistema foi iniciado. Portanto, a estrutura InstGetTickCountArgs é mantida vazia.
+A funï¿½ï¿½o GetTickCount nï¿½o possui argumentos de entrada. Ela retorna o nï¿½mero de milissegundos desde que o sistema foi iniciado. Portanto, a estrutura InstGetTickCountArgs ï¿½ mantida vazia.
 */
 
 std::map<CallContextKey, CallContext*> InstGetTickCount::callContextMap;
@@ -14,7 +14,7 @@ VOID InstGetTickCount::CheckPrintConditions(CallContext* callContext) {
     CheckPrintConditionsCC(callContext, &InstGetTickCount::callContextMap, InstGetTickCount::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstGetTickCount::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstGetTickCount::callContextMap, InstGetTickCount::globalNotifierPtr);
 }
@@ -56,7 +56,7 @@ VOID InstGetTickCount::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
         return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -64,16 +64,18 @@ VOID InstGetTickCount::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         std::stringstream& stringStream = callContext->stringStream;
-        stringStream << std::endl << "[+] GetTickCount..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -87,7 +89,8 @@ VOID InstGetTickCount::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
 
 VOID InstGetTickCount::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "GetTickCount") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "GetTickCount") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -99,7 +102,7 @@ VOID InstGetTickCount::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_END);
 
         RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
@@ -109,7 +112,7 @@ VOID InstGetTickCount::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_END);
 
         RTN_Close(rtn);

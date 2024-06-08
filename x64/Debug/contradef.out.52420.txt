@@ -1,0 +1,39 @@
+
+[+] RegOpenKeyA...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 0
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2459489846272
+        lpSubKey: SYSTEM\ControlSet001\Control\Class\{4D36E968-E325-11CE-BFC1-08002BE10318}\000½
+        phkResult: 2007978728
+    Valor de retorno: 2
+[*] Concluído
+
+
+[+] RegOpenKeyA...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 1
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2459489846272
+        lpSubKey: Hardware\description\Syste½
+        phkResult: 2007978728
+    Valor de retorno: 2
+[*] Concluído
+
+
+[+] RegOpenKeyA...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 2
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2459489846272
+        lpSubKey: HARDWARE\ACPI\DSDT\VBOX_½
+        phkResult: 2007978728
+    Valor de retorno: 2
+[*] Concluído
+

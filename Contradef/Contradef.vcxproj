@@ -185,8 +185,6 @@
     <ClCompile Include="InstCreateProcess.cpp" />
     <ClCompile Include="InstCreateProcessAsUser.cpp" />
     <ClCompile Include="InstCreateService.cpp" />
-    <ClCompile Include="InstEnumProcessModules.cpp" />
-    <ClCompile Include="InstEnumProcessModulesEx.cpp" />
     <ClCompile Include="InstFindWindowA.cpp" />
     <ClCompile Include="InstFindWindowW.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
@@ -210,14 +208,14 @@
     <ClCompile Include="InstNtContinue.cpp" />
     <ClCompile Include="InstNtCreateProcessEx.cpp" />
     <ClCompile Include="InstNtCreateThreadEx.cpp" />
+    <ClCompile Include="InstNtCreateTimer2.cpp" />
     <ClCompile Include="InstNtEnumKey.cpp" />
     <ClCompile Include="InstNtGetContextThread.cpp" />
     <ClCompile Include="InstNtOpenKey.cpp" />
     <ClCompile Include="InstNtOpenProcess.cpp" />
     <ClCompile Include="InstNtQueryInformationThread.cpp" />
+    <ClCompile Include="InstNtQueryKey.cpp" />
     <ClCompile Include="InstNtQueryObject.cpp" />
-    <ClCompile Include="InstNtQueryPerformanceCounter.cpp" />
-    <ClCompile Include="InstNtQuerySystemInformation.cpp" />
     <ClCompile Include="InstNtQuerySystemTime.cpp" />
     <ClCompile Include="InstNtQueryValueKey.cpp" />
     <ClCompile Include="InstNtQueryVirtualMemory.cpp" />
@@ -233,8 +231,6 @@
     <ClCompile Include="InstOpenProcess.cpp" />
     <ClCompile Include="InstOutputDebugStringA.cpp" />
     <ClCompile Include="InstOutputDebugStringW.cpp" />
-    <ClCompile Include="InstQueryPerformanceCounter.cpp" />
-    <ClCompile Include="InstQueryPerformanceFrequency.cpp" />
     <ClCompile Include="InstRegEnumKeyA.cpp" />
     <ClCompile Include="InstRegEnumKeyExA.cpp" />
     <ClCompile Include="InstRegEnumKeyExW.cpp" />
@@ -253,14 +249,11 @@
     <ClCompile Include="InstShellExecute.cpp" />
     <ClCompile Include="InstShellExecuteEx.cpp" />
     <ClCompile Include="InstStartService.cpp" />
-    <ClCompile Include="InstVirtualProtect.cpp" />
-    <ClCompile Include="InstVirtualProtectEx.cpp" />
     <ClCompile Include="InstVirtualQuery.cpp" />
     <ClCompile Include="InstVirtualQueryEx.cpp" />
     <ClCompile Include="InstWinExec.cpp" />
     <ClCompile Include="InstWmi.cpp" />
     <ClCompile Include="InstWmiEx.cpp" />
-    <ClCompile Include="InstZwQueryVirtualMemory.cpp" />
     <ClCompile Include="params.cpp" />
     <ClCompile Include="RegistryKeys.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -276,8 +269,6 @@
     <ClInclude Include="InstCreateProcess.h" />
     <ClInclude Include="InstCreateProcessAsUser.h" />
     <ClInclude Include="InstCreateService.h" />
-    <ClInclude Include="InstEnumProcessModules.h" />
-    <ClInclude Include="InstEnumProcessModulesEx.h" />
     <ClInclude Include="InstFindWindowA.h" />
     <ClInclude Include="InstFindWindowW.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
@@ -301,14 +292,13 @@
     <ClInclude Include="InstNtContinue.h" />
     <ClInclude Include="InstNtCreateProcessEx.h" />
     <ClInclude Include="InstNtCreateThreadEx.h" />
+    <ClInclude Include="InstNtCreateTimer2.h" />
     <ClInclude Include="InstNtEnumKey.h" />
     <ClInclude Include="InstNtGetContextThread.h" />
     <ClInclude Include="InstNtOpenKey.h" />
     <ClInclude Include="InstNtOpenProcess.h" />
     <ClInclude Include="InstNtQueryInformationThread.h" />
     <ClInclude Include="InstNtQueryObject.h" />
-    <ClInclude Include="InstNtQueryPerformanceCounter.h" />
-    <ClInclude Include="InstNtQuerySystemInformation.h" />
     <ClInclude Include="InstNtQuerySystemTime.h" />
     <ClInclude Include="InstNtQueryValueKey.h" />
     <ClInclude Include="InstNtSetContextThread.h" />
@@ -322,8 +312,6 @@
     <ClInclude Include="InstOpenProcess.h" />
     <ClInclude Include="InstOutputDebugStringA.h" />
     <ClInclude Include="InstOutputDebugStringW.h" />
-    <ClInclude Include="InstQueryPerformanceCounter.h" />
-    <ClInclude Include="InstQueryPerformanceFrequency.h" />
     <ClInclude Include="InstRegEnumKeyA.h" />
     <ClInclude Include="InstRegEnumKeyExA.h" />
     <ClInclude Include="InstRegEnumKeyExW.h" />
@@ -343,14 +331,11 @@
     <ClInclude Include="InstShellExecute.h" />
     <ClInclude Include="InstShellExecuteEx.h" />
     <ClInclude Include="InstStartService.h" />
-    <ClInclude Include="InstVirtualProtect.h" />
-    <ClInclude Include="InstVirtualProtectEx.h" />
     <ClInclude Include="InstVirtualQuery.h" />
     <ClInclude Include="InstVirtualQueryEx.h" />
     <ClInclude Include="InstWinExec.h" />
     <ClInclude Include="InstWmi.h" />
     <ClInclude Include="InstWmiEx.h" />
-    <ClInclude Include="InstZwQueryVirtualMemory.h" />
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
@@ -358,6 +343,7 @@
     <ClInclude Include="RegistryErrors.h" />
     <ClInclude Include="RegistryKeys.h" />
     <ClInclude Include="utils.h" />
+    <ClInclude Include="InstNtQueryKey.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

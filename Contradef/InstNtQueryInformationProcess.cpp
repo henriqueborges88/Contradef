@@ -1,9 +1,9 @@
 #include "InstNtQueryInformationProcess.h"
 
 /*
-A função NtQueryInformationProcess é uma chamada de sistema do Windows, e a instrumentação para ela pode ser mais complexa do que para funções de API padrão.
+A funï¿½ï¿½o NtQueryInformationProcess ï¿½ uma chamada de sistema do Windows, e a instrumentaï¿½ï¿½o para ela pode ser mais complexa do que para funï¿½ï¿½es de API padrï¿½o.
 
-Info sobre a função:
+Info sobre a funï¿½ï¿½o:
 https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FNT%20Objects%2FProcess%2FNtQueryInformationProcess.html
 https://pubhtml5.com/dtiq/ufpk/Windows_Kernel_Programming/274
 https://forums.codeguru.com/showthread.php?371338-debugger-check-via-PEB
@@ -12,14 +12,14 @@ https://anti-debug.checkpoint.com/techniques/debug-flags.html
 https://www.youtube.com/watch?v=WlE8abc8V-4
 https://community.osr.com/discussion/228192
 
-Verificar se pode ser utilizado para obter os argumentos de execução do processo e ver se está sendo debugado:
+Verificar se pode ser utilizado para obter os argumentos de execuï¿½ï¿½o do processo e ver se estï¿½ sendo debugado:
 https://www.bordergate.co.uk/argument-spoofing/
 
 */
 
 
-// Definição do PROCESSINFOCLASS e ProcessBasicInformation
-// Mais informação sobre classes de comportamento evasivo -> https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryinformationprocess
+// Definiï¿½ï¿½o do PROCESSINFOCLASS e ProcessBasicInformation
+// Mais informaï¿½ï¿½o sobre classes de comportamento evasivo -> https://learn.microsoft.com/en-us/windows/win32/api/winternl/nf-winternl-ntqueryinformationprocess
 /*
 Value	Meaning
 ProcessBasicInformation
@@ -56,7 +56,7 @@ ProcessSubsystemInformation
 Retrieves a SUBSYSTEM_INFORMATION_TYPE value indicating the subsystem type of the process. The buffer pointed to by the ProcessInformation parameter should be large enough to hold a single SUBSYSTEM_INFORMATION_TYPE enumeration.
 
 
-Extraído de:
+Extraï¿½do de:
 https://github.com/winsiderss/systeminformer/blob/ae0cdac96f9c752c881a801af03f5b74deb51fa9/phnt/include/ntpsapi.h#L110
 https://ntdoc.m417z.com/processinfoclass
 
@@ -75,7 +75,7 @@ VOID InstNtQueryInformationProcess::CheckPrintConditions(CallContext* callContex
     CheckPrintConditionsCC(callContext, &InstNtQueryInformationProcess::callContextMap, InstNtQueryInformationProcess::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstNtQueryInformationProcess::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstNtQueryInformationProcess::callContextMap, InstNtQueryInformationProcess::globalNotifierPtr);
 }
@@ -126,7 +126,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -135,13 +135,13 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         IMG img = IMG_FindByAddress(instAddress);
 
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         const NtQueryInformationProcessArgs* args = reinterpret_cast<NtQueryInformationProcessArgs*>(callContext->functionArgs);
 
-        // ADDRINT ProcessInformation é alterado no retorno, posivelmente por alguma manipulação do registrador durante a execução da funçaõ.
+        // ADDRINT ProcessInformation ï¿½ alterado no retorno, posivelmente por alguma manipulaï¿½ï¿½o do registrador durante a execuï¿½ï¿½o da funï¿½aï¿½.
 
         if (ProcessInformationClass == ProcessBasicInformation) {
-            // Verifica se ProcessInformation é um ponteiro válido
+            // Verifica se ProcessInformation ï¿½ um ponteiro vï¿½lido
             if (args->ProcessInformation != NULL) {
                 PROCESS_BASIC_INFORMATION* pbi = reinterpret_cast<PROCESS_BASIC_INFORMATION*>(args->ProcessInformation);
 
@@ -153,7 +153,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
                 // 64 bits
                 DWORD_PTR pebBaseAddress = reinterpret_cast<DWORD_PTR>(pbi->PebBaseAddress);
                 if (PIN_CheckReadAccess(reinterpret_cast<void*>(pebBaseAddress))) {
-                    // Considerando que 0xBC é o offset para NtGlobalFlag no PEB
+                    // Considerando que 0xBC ï¿½ o offset para NtGlobalFlag no PEB
                     DWORD_PTR NtGlobalFlagPtrAddress = pebBaseAddress + 0xBC;
                     DWORD* NtGlobalFlagPtr = reinterpret_cast<DWORD*>(NtGlobalFlagPtrAddress);
 
@@ -161,7 +161,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
                         TARGET_MEMORY_ADDRESS = reinterpret_cast<ADDRINT>(NtGlobalFlagPtr);
                         NtGlobalFlag = *NtGlobalFlagPtr; // Salvar o valor de NtGlobalFlag
 
-                        // Criar a função de instrumentação apenas uma vez e enviar o ponteiro para o endereço de memoria dque deve ser verificado. En
+                        // Criar a funï¿½ï¿½o de instrumentaï¿½ï¿½o apenas uma vez e enviar o ponteiro para o endereï¿½o de memoria dque deve ser verificado. En
                         INS_AddInstrumentFunction(Instruction, callContext);
                     }
                 }
@@ -177,13 +177,13 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
 }
 
 
-/// transferir funçoes para o main
-// Variável de estado para rastrear o progresso na identificação da sequência
+/// transferir funï¿½oes para o main
+// Variï¿½vel de estado para rastrear o progresso na identificaï¿½ï¿½o da sequï¿½ncia
 
 
 
 
-// Lista de registradores permitidos para instrumentação
+// Lista de registradores permitidos para instrumentaï¿½ï¿½o
 REG init[] = {
     REG_GAX,
     REG_GBX,
@@ -209,7 +209,7 @@ REG init[] = {
 };
 std::set<REG> permittedRegisters(init, init + sizeof(init) / sizeof(init[0]));
 
-// Função para verificar se um registrador está na lista permitida
+// Funï¿½ï¿½o para verificar se um registrador estï¿½ na lista permitida
 bool InstNtQueryInformationProcess::IsRegisterAllowed(const REG& regName) {
     return permittedRegisters.find(regName) != permittedRegisters.end();
 }
@@ -218,31 +218,31 @@ VOID FetchInsCode(INS ins) {
     
     PIN_LockClient();
 
-    // Obter o endereço da instrução
+    // Obter o endereï¿½o da instruï¿½ï¿½o
     ADDRINT address = INS_Address(ins);
 
-    // Definir um buffer para armazenar o código binário da instrução
-    std::vector<UINT8> buffer(15); //15 bytes -> x64bits Tamanho máximo para uma instrução x86/64
+    // Definir um buffer para armazenar o cï¿½digo binï¿½rio da instruï¿½ï¿½o
+    std::vector<UINT8> buffer(15); //15 bytes -> x64bits Tamanho mï¿½ximo para uma instruï¿½ï¿½o x86/64
 
     EXCEPTION_INFO exceptInfo;
 
-    // Buscar o código binário da instrução
+    // Buscar o cï¿½digo binï¿½rio da instruï¿½ï¿½o
     if (PIN_FetchCode(reinterpret_cast<UINT8*>(&buffer[0]), (VOID*)address, 15, &exceptInfo)) {
-        std::cout << "Instrução em 0x" << std::hex << address << ": ";
+        std::cout << "Instruï¿½ï¿½o em 0x" << std::hex << address << ": ";
         for (UINT8 byte : buffer) {
             std::cout << std::hex << static_cast<unsigned>(byte);
         }
         std::cout << std::endl;
     }
     //else {
-    //    std::cout << "Falha ao buscar o código da instrução em 0x" << std::hex << address << std::endl;
+    //    std::cout << "Falha ao buscar o cï¿½digo da instruï¿½ï¿½o em 0x" << std::hex << address << std::endl;
     //}
 
     PIN_UnlockClient();
 
 }
 
-// Callback de análise para ler um valor de memória
+// Callback de anï¿½lise para ler um valor de memï¿½ria
 VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* callContext, CONTEXT* ctxt, INS ins, ADDRINT instAddress, ADDRINT memoryAddress, UINT32 readSize) {
     
     if (callContext == nullptr) {
@@ -259,28 +259,28 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         
         int numOperands = INS_OperandCount(ins);
         for (int i = 0; i < numOperands; ++i) {
-            // Verificar se o operando é imediato
-            // O valor de memória procurado é dinamico, então não pode estar como valor imediato (constante)
+            // Verificar se o operando ï¿½ imediato
+            // O valor de memï¿½ria procurado ï¿½ dinamico, entï¿½o nï¿½o pode estar como valor imediato (constante)
             // Porem, o operando a ser comparado com o valor em memoria pode conter o valor 0
             if (INS_OperandIsImmediate(ins, i)) {
                 ADDRINT imm = INS_OperandImmediate(ins, i);
                 //std::cout << "Valor do operando imediato: " << imm << std::endl;
             }
 
-            // Verificar se o operando é do tipo registrador
+            // Verificar se o operando ï¿½ do tipo registrador
             //if (INS_OperandIsReg(ins, i)) {
             //    REG reg = INS_OperandReg(ins, i);
             //    ADDRINT regValue = PIN_GetContextReg(ctxt, reg);
 
             //    // Imprimir o valor do registrador em hexadecimal
-            //    //std::cout << std::hex << std::showbase;  // Configurar o fluxo de saída para hexadecimal
+            //    //std::cout << std::hex << std::showbase;  // Configurar o fluxo de saï¿½da para hexadecimal
             //    std::cout << "Valor do registrador " << REG_StringShort(reg) << ": " << regValue << std::endl;
-            //    //std::cout << std::dec;  // Voltar para a formatação decimal para futuras impressões
+            //    //std::cout << std::dec;  // Voltar para a formataï¿½ï¿½o decimal para futuras impressï¿½es
             //}
 
-            // Verificar se o operando é do tipo memória
+            // Verificar se o operando ï¿½ do tipo memï¿½ria
             if (INS_OperandIsMemory(ins, i)) {
-                // Se necessário inserir alguma rotina de verificação
+                // Se necessï¿½rio inserir alguma rotina de verificaï¿½ï¿½o
             }
 
         }
@@ -298,7 +298,7 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         IMG img = IMG_FindByAddress(instAddress);
         std::string moduleName = ExtractModuleName(IMG_Name(img));
         if (toUpperCase(moduleName) == "NTDLL.DLL") {
-            // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar funções em modulos diferentes ao principal, se for o caso, desativar o return
+            // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar funï¿½ï¿½es em modulos diferentes ao principal, se for o caso, desativar o return
             return;
         }
 
@@ -306,30 +306,30 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         ADDRINT* stackPtr;
         PIN_GetContextRegval(ctxt, REG_STACK_PTR, reinterpret_cast<UINT8*>(&stackPtr));
 
-        // Obter o endereço de retorno da pilha
+        // Obter o endereï¿½o de retorno da pilha
         ADDRINT returnAddr = *stackPtr;
 
-        // Obter a disassemblagem da instrução
+        // Obter a disassemblagem da instruï¿½ï¿½o
         std::string disassembledInstruction = INS_Disassemble(ins);
         
-        // Obter a RTN da instrução atual
+        // Obter a RTN da instruï¿½ï¿½o atual
         RTN rtn = INS_Rtn(ins);
 
         ADDRINT rtnAddress = RTN_Address(rtn);
-        stringStream << std::endl << "[+] NtQueryInformationProcess [NtGlobalFlag]..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << std::endl << "[+] " << RTN_Name(rtn) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << rtnAddress << std::dec << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << rtnAddress << std::dec << std::endl;
         if (RTN_Valid(rtn)) {
             stringStream << "    Nome da rotina: " + RTN_Name(rtn) << std::endl;
         }
         stringStream << "    Valor de retorno (NtQueryInformationProcess): " << retVal << std::endl;
-        stringStream << "    Instrução: " << disassembledInstruction << std::endl;
-        stringStream << "    Endereço da instrução: " << std::hex << std::showbase << instAddress << std::dec << std::endl;
-        stringStream << "    Endereço do valor em memória: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
+        stringStream << "    Instruï¿½ï¿½o: " << disassembledInstruction << std::endl;
+        stringStream << "    Endereï¿½o da instruï¿½ï¿½o: " << std::hex << std::showbase << instAddress << std::dec << std::endl;
+        stringStream << "    Endereï¿½o do valor em memï¿½ria: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
         stringStream << "    Valor da flag NtGlobalFlag: " << valueAtNtGlobalFlagAddress << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         std::string callerFcn = "";
         RTN rtnCaller = RTN_FindByAddress(returnAddr);
         if (RTN_Valid(rtnCaller)) {
@@ -341,46 +341,46 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
     }
 }
 
-// (DESATIVADO) Callback de análise para ler um valor de um registrador 
+// (DESATIVADO) Callback de anï¿½lise para ler um valor de um registrador 
 VOID InstNtQueryInformationProcess::RegContentAnalysisRoutine(CONTEXT* ctxt, REG regToInspect) {
     ADDRINT regValue = PIN_GetContextReg(ctxt, regToInspect);
     //std::cout << "Valor do registrador: " << REG_StringShort(regToInspect) << " = " << regValue << std::endl;
     if (InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS != 0 && InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS == regValue) {
-        std::cout << "-----Endereço de memória para o NtGlobalFlagPtr foi acessado em uma instrução CMP por meio do registrador " << REG_StringShort(regToInspect) << "com valor " << regValue << std::endl;
+        std::cout << "-----Endereï¿½o de memï¿½ria para o NtGlobalFlagPtr foi acessado em uma instruï¿½ï¿½o CMP por meio do registrador " << REG_StringShort(regToInspect) << "com valor " << regValue << std::endl;
     }
 }
 
 VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
     /*
-    Procurar em qual registrador é armazenado o valor NtGlobalFlagPtr e logo se tem um CMP com 0 na sequencia (cmp dword ptr [rbx], 0)
+    Procurar em qual registrador ï¿½ armazenado o valor NtGlobalFlagPtr e logo se tem um CMP com 0 na sequencia (cmp dword ptr [rbx], 0)
     */
     if (INS_IsMemoryRead(ins) ) { // 
         // CMP identificado
 
-        // Obter a disassemblagem da instrução
+        // Obter a disassemblagem da instruï¿½ï¿½o
         //std::string disassembledInstruction = INS_Disassemble(ins);
         // Imprimir a disassemblagem
         //std::cout << disassembledInstruction << std::endl;
 
         // Verificar se tem ao menos dois operandos
         if (INS_OperandCount(ins) > 1) {
-            // Obter o número de operandos
+            // Obter o nï¿½mero de operandos
             int numOperands = INS_OperandCount(ins);
 
             for (int i = 0; i < numOperands; ++i) {
-                // Verificar se o operando é imediato
-                // O valor de memória procurado é dinamico, então não pode estar como valor imediato (constante)
+                // Verificar se o operando ï¿½ imediato
+                // O valor de memï¿½ria procurado ï¿½ dinamico, entï¿½o nï¿½o pode estar como valor imediato (constante)
                 // Porem, o operando a ser comparado com o valor em memoria pode conter o valor 0
                 if (INS_OperandIsImmediate(ins, i)) {
                     ADDRINT imm = INS_OperandImmediate(ins, i);
                 }
 
-                // Verificar se o operando é do tipo registrador
+                // Verificar se o operando ï¿½ do tipo registrador
                 if (INS_OperandIsReg(ins, i)) {
                     REG reg = INS_OperandReg(ins, i);
                     if (IsRegisterAllowed(reg)) {
-                        // Inserir o callback de análise antes da execução da instrução
-                        // Habilitar no cado de uma verificação mais exaustiva. Pode reduzir a acuracia pois a verificação é aplicada sob o endereço de memoria como valor do registrador
+                        // Inserir o callback de anï¿½lise antes da execuï¿½ï¿½o da instruï¿½ï¿½o
+                        // Habilitar no cado de uma verificaï¿½ï¿½o mais exaustiva. Pode reduzir a acuracia pois a verificaï¿½ï¿½o ï¿½ aplicada sob o endereï¿½o de memoria como valor do registrador
                         /*INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)RegContentAnalysisRoutine,
                             IARG_CONTEXT,
                             IARG_UINT32, reg,
@@ -388,9 +388,9 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
                     }
                 }
 
-                // Verificar se o operando é do tipo memória
+                // Verificar se o operando ï¿½ do tipo memï¿½ria
                 if (INS_OperandIsMemory(ins, i)) {
-                    // Inserir um callback de análise antes da instrução
+                    // Inserir um callback de anï¿½lise antes da instruï¿½ï¿½o
 
                     INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)ReadMemoryValue,
                         IARG_THREAD_ID,
@@ -411,7 +411,8 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
 
 VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "NtQueryInformationProcess") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "NtQueryInformationProcess") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -423,7 +424,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ProcessInformation
@@ -438,7 +439,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ProcessInformation

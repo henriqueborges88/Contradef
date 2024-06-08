@@ -1,0 +1,39 @@
+
+[+] .boot...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 0
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2288987405952
+        lpSubKey: 
+        phkResult: 2008040168
+    Valor de retorno: 2
+[*] Concluído
+
+
+[+] .boot...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 1
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2288987405952
+        lpSubKey: 
+        phkResult: 2008040168
+    Valor de retorno: 2
+[*] Concluído
+
+
+[+] .boot...
+    Nome do mï¿½dulo: C:\WINDOWS\System32\advapi32.dll
+    Thread: 0
+    Id de chamada: 2
+    Endereï¿½o da rotina: 7ffabb17a0e0
+    Parï¿½metros: 
+        hKey: 2288987405952
+        lpSubKey: 
+        phkResult: 2008040168
+    Valor de retorno: 2
+[*] Concluído
+

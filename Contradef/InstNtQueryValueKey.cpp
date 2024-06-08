@@ -40,7 +40,7 @@ VOID InstNtQueryValueKey::CheckPrintConditions(CallContext* callContext) {
     CheckPrintConditionsCC(callContext, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstNtQueryValueKey::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
 }
@@ -71,7 +71,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInforma
                 stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        stringStream << "            (dados binários brutos)" << std::endl;
+        stringStream << "            (dados binï¿½rios brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
@@ -92,7 +92,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInforma
         break;
     }
     case REG_BINARY: {
-        stringStream << "            Valor (binário): ";
+        stringStream << "            Valor (binï¿½rio): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
             stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
@@ -119,7 +119,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInforma
         break;
     }
     default:
-        stringStream << "            Tipo de dado não reconhecido ou não suportado." << std::endl;
+        stringStream << "            Tipo de dado nï¿½o reconhecido ou nï¿½o suportado." << std::endl;
     }
 }
 
@@ -129,10 +129,10 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
     stringStream << "            Tipo do valor: " << info->Type << std::endl;
     stringStream << "            Tamanho do dado: " << std::dec << info->DataLength << " bytes" << std::endl;
 
-    // O dado é armazenado diretamente na estrutura após os campos iniciais
+    // O dado ï¿½ armazenado diretamente na estrutura apï¿½s os campos iniciais
     BYTE* data = info->Data;
 
-    // Exemplo de interpretação de dados, dependendo do tipo
+    // Exemplo de interpretaï¿½ï¿½o de dados, dependendo do tipo
     switch (info->Type) {
     case REG_NONE: {
         stringStream << "            Valor (REG_NONE): ";
@@ -144,7 +144,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
                 stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
             }
         }
-        stringStream << "            (dados binários brutos)" << std::endl;
+        stringStream << "            (dados binï¿½rios brutos)" << std::endl;
         break;
     }
     case REG_SZ: {
@@ -165,7 +165,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
         break;
     }
     case REG_BINARY: {
-        stringStream << "            Valor (binário): ";
+        stringStream << "            Valor (binï¿½rio): ";
         for (ULONG i = 0; i < info->DataLength; ++i) {
             stringStream << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << static_cast<unsigned>(data[i]) << " ";
         }
@@ -192,7 +192,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationPartial(BYTE* keyValueInfo
         break;
     }
     default:
-        stringStream << "            Tipo de dado não reconhecido ou não suportado." << std::endl;
+        stringStream << "            Tipo de dado nï¿½o reconhecido ou nï¿½o suportado." << std::endl;
     }
 }
 
@@ -203,7 +203,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInform
     stringStream << "            Tipo do valor: " << info->Type << std::endl;
     stringStream << "            Comprimento do nome do valor: " << std::dec << info->NameLength << " bytes" << std::endl;
 
-    // O nome do valor é armazenado diretamente na estrutura após os campos iniciais
+    // O nome do valor ï¿½ armazenado diretamente na estrutura apï¿½s os campos iniciais
     std::wstring valueName(info->Name, info->NameLength / sizeof(WCHAR));
     stringStream << "            Nome do valor: " << WStringToString(valueName) << std::endl;
 
@@ -251,7 +251,7 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -259,15 +259,17 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         const NtQueryValueKeyArgs* args = reinterpret_cast<NtQueryValueKeyArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        stringStream << std::endl << "[+] NtQueryValueKey..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parámetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
 
         UNICODE_STRING* unicodeString = reinterpret_cast<UNICODE_STRING*>(args->ValueName);
         if (unicodeString && unicodeString->Buffer) {
@@ -289,7 +291,7 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -303,7 +305,8 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
 VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    if (RTN_Name(rtn) == "NtQueryValueKey") {
+    std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "NtQueryValueKey" || rtnName == "ZwQueryValueKey") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -314,7 +317,7 @@ VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) 
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass
@@ -330,7 +333,7 @@ VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) 
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ValueName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // KeyValueInformationClass

@@ -9,7 +9,7 @@ VOID InstRegQueryValueExA::CheckPrintConditions(CallContext* callContext) {
     CheckPrintConditionsCC(callContext, &InstRegQueryValueExA::callContextMap, InstRegQueryValueExA::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstRegQueryValueExA::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstRegQueryValueExA::callContextMap, InstRegQueryValueExA::globalNotifierPtr);
 }
@@ -60,7 +60,7 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -68,16 +68,18 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         const InstRegQueryValueExAArgs* args = reinterpret_cast<InstRegQueryValueExAArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::string ansiStringlpValueName = ConvertAddrToAnsiString(args->lpValueName);
-        stringStream << std::endl << "[+] RegQueryValueExA..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parámetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
         stringStream << "        hKey: " << args->hKey << std::endl;
         stringStream << "        lpValueName: " << ansiStringlpValueName << std::endl;
         stringStream << "        lpReserved: " << args->lpReserved << std::endl;
@@ -86,7 +88,7 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         stringStream << "        lpcbData: " << args->lpcbData << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -113,6 +115,7 @@ VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
         return;
     }
 
+   std::string rtnName = RTN_Name(rtn);
     if (RTN_Name(rtn) == "GetModuleHandleA") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
@@ -125,7 +128,7 @@ VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpReserved
@@ -141,7 +144,7 @@ VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_REG_REFERENCE, REG_GAX,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName

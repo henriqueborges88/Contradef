@@ -1,16 +1,14 @@
 ﻿cl : linha de comando  warning D9025: substituindo '/EHs' com '/EHs-'
 cl : linha de comando  warning D9002: ignorando opção desconhecida '/FP:strict'
-  Contradef.cpp
+  InstNtQueryKey.cpp
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
-C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp(153,14): warning C4996: 'LEVEL_CORE::INS_IsDirectBranchOrCall': foi declarado preterido
-C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp(165,34): warning C4996: 'LEVEL_PINCLIENT::INS_DirectBranchOrCallTargetAddress': foi declarado preterido
+  InstNtQueryValueKey.cpp
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
+C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
   InstrumentationContext.cpp
-C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
-C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
-C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
-  InstZwQueryVirtualMemory.cpp
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(105,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(238,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
 C:\Users\henri\source\repos\Contradef\pin\include\pin\gen\pinsync.hpp(842,1): warning C5208: a classe sem nome usada no nome de typedef não pode declarar membros que não sejam membros de dados, enumerações de membro ou classes de membro não estáticos
@@ -28,8 +26,6 @@ InstCoCreateInstance.obj : warning LNK4210: seção .CRT existe; podem existir i
 InstCreateProcess.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstCreateProcessAsUser.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstCreateService.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstEnumProcessModules.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstEnumProcessModulesEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstFindWindowA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstFindWindowW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstGetForegroundWindow.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
@@ -53,14 +49,14 @@ InstNtClose.obj : warning LNK4210: seção .CRT existe; podem existir inicializa
 InstNtContinue.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtCreateProcessEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtCreateThreadEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstNtCreateTimer2.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtEnumKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtGetContextThread.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtOpenKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtOpenProcess.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQueryInformationThread.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
+InstNtQueryKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQueryObject.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstNtQueryPerformanceCounter.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstNtQuerySystemInformation.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQuerySystemTime.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQueryValueKey.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstNtQueryVirtualMemory.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
@@ -75,8 +71,6 @@ InstNtYieldExecution.obj : warning LNK4210: seção .CRT existe; podem existir i
 InstOpenProcess.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstOutputDebugStringA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstOutputDebugStringW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstQueryPerformanceCounter.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstQueryPerformanceFrequency.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstRegEnumKeyA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstRegEnumKeyExA.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstRegEnumKeyExW.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
@@ -93,14 +87,11 @@ InstRegQueryValueW.obj : warning LNK4210: seção .CRT existe; podem existir ini
 InstShellExecute.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstShellExecuteEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstStartService.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstVirtualProtect.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstVirtualProtectEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstVirtualQuery.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstVirtualQueryEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstWinExec.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstWmi.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 InstWmiEx.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
-InstZwQueryVirtualMemory.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 params.obj : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(ms_dllcrt.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados
 pin.lib(message.cpp.obj) : warning LNK4210: seção .CRT existe; podem existir inicializadores e terminadores estáticos não manipulados

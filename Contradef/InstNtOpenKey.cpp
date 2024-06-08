@@ -9,7 +9,7 @@ VOID InstNtOpenKey::CheckPrintConditions(CallContext* callContext) {
     CheckPrintConditionsCC(callContext, &InstNtOpenKey::callContextMap, InstNtOpenKey::globalNotifierPtr);
 }
 
-// Callbacks que serão chamados quando um evento for notificado
+// Callbacks que serï¿½o chamados quando um evento for notificado
 VOID InstNtOpenKey::HandleInstructionEvent(const EventData* data, void* context) {
     HandleInstructionEventCC(data, context, &InstNtOpenKey::callContextMap, InstNtOpenKey::globalNotifierPtr);
 }
@@ -65,7 +65,7 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
         return;
     }
 
-    // Instrumentar funçao
+    // Instrumentar funï¿½ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -73,15 +73,17 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar parámetros
+        // Registrar parï¿½metros
         const NtOpenKeyArgs* args = reinterpret_cast<NtOpenKeyArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        stringStream << std::endl << "[+] NtOpenKey..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        // Obter a RTN da instruï¿½ï¿½o atual
+        RTN rtnCurrent = RTN_FindByAddress(instAddress);
+        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+        stringStream << "    Nome do mï¿½dulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parámetros: " << std::endl;
+        stringStream << "    Endereï¿½o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parï¿½metros: " << std::endl;
         stringStream << "        KeyHandle: " << args->KeyHandle << std::endl;
         stringStream << "        keyPath: " << args->keyPathStr << std::endl;
         stringStream << "        DesiredAccess: " << args->DesiredAccess << std::endl;
@@ -89,18 +91,18 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
 
         if (isRegistryKeyPartInList(args->keyPathStr)) {
-            std::cout << "A chave de registro está na lista." << std::endl;
+            std::cout << "A chave de registro estï¿½ na lista." << std::endl;
             // Contramedida pode ser alterando o valor de retorno para algumas chaves
             //*retValAddr = 0;
             //alterar o valor de retorno
             //verificar a necessidade de chamar RegCloseKey para encerrar o handle
-            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que não existe
+            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que nï¿½o existe
         }
         else {
-            std::cout << "A chave de registro não está na lista." << std::endl;
+            std::cout << "A chave de registro nï¿½o estï¿½ na lista." << std::endl;
         }
 
-        // Instrumentar todas as instruções da rotina chamadora
+        // Instrumentar todas as instruï¿½ï¿½es da rotina chamadora
         RTN rtnCaller = RTN_FindByAddress(returnAddress);
         if (RTN_Valid(rtnCaller)) {
             LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
@@ -114,7 +116,8 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
 
 VOID InstNtOpenKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
     
-    if (RTN_Name(rtn) == "NtOpenKey") {
+   std::string rtnName = RTN_Name(rtn);
+    if (rtnName == "NtOpenKey" || rtnName == "ZwOpenKey") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -125,7 +128,7 @@ VOID InstNtOpenKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // DesiredAccess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ObjectAttributes
@@ -138,7 +141,7 @@ VOID InstNtOpenKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_PTR, static_cast<void*>(&rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_RETURN_IP, // Endereï¿½o da funï¿½ï¿½o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // DesiredAccess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ObjectAttributes
