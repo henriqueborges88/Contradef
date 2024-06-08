@@ -10,7 +10,7 @@ InstrumentationContext::InstrumentationContext() {
     * Com Problema
     strategyMap["QueryPerformanceCounter"] = &InstQueryPerformanceCounter::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado. O CB After funciona no modo Probed
     strategyMap["QueryPerformanceFrequency"] = &InstQueryPerformanceFrequency::InstrumentFunction;  // <-----Verificar, o CB after não está sendo invocado. O CB After funciona no modo Probed
-
+    // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
 
     * Falta implementar a lógica de detecção
     strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
@@ -32,34 +32,84 @@ InstrumentationContext::InstrumentationContext() {
     //strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction;
     //strategyMap["GetModuleFileNameA"] = &InstGetModuleFileNameA::InstrumentFunction;
     //strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
-    //strategyMap["BaseRegOpenKey"] = &InstBaseRegOpenKey::InstrumentFunction;
+   //strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
+    //strategyMap["GetWindowTextW"] = &InstGetWindowTextW::InstrumentFunction;
+    //strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
+    //strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
+    //strategyMap["OutputDebugStringW"] = &InstOutputDebugStringW::InstrumentFunction;
+    strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+    
+    
+    // Experimentando
+    /*
+    strategyMap["CoCreateInstance"] = &InstWmi::InstrumentFunction;
+    strategyMap["ConnectServer"] = &InstWmi::InstrumentFunction;
+    strategyMap["ExecQuery"] = &InstWmi::InstrumentFunction;
+
+    strategyMap["CoCreateInstanceEx"] = &InstWmiEx::InstrumentFunction;
+    strategyMap["ConnectServer"] = &InstWmiEx::InstrumentFunction;
+    strategyMap["ExecQuery"] = &InstWmiEx::InstrumentFunction;
+    strategyMap["GetObject"] = &InstWmiEx::InstrumentFunction;
+    strategyMap["GetObjectA"] = &InstWmiEx::InstrumentFunction;
+    strategyMap["GetObjectW"] = &InstWmiEx::InstrumentFunction;
+    */
+    strategyMap["OpenProcess"] = &InstOpenProcess::InstrumentFunction;
+    strategyMap["CreateProcess"] = &InstCreateProcess::InstrumentFunction;
+    strategyMap["CreateProcessAsUser"] = &InstCreateProcessAsUser::InstrumentFunction;
+    strategyMap["ShellExecute"] = &InstShellExecute::InstrumentFunction;
+    strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;
+    strategyMap["WinExec"] = &InstWinExec::InstrumentFunction;
+    strategyMap["NtCreateProcessEx"] = &InstNtCreateProcessEx::InstrumentFunction;
+    strategyMap["NtCreateThreadEx"] = &InstNtCreateThreadEx::InstrumentFunction;
+    strategyMap["CreateService"] = &InstCreateService::InstrumentFunction;
+    strategyMap["StartService"] = &InstStartService::InstrumentFunction;
+    strategyMap["CoCreateInstance"] = &InstCoCreateInstance::InstrumentFunction;
+    strategyMap["LoadLibrary"] = &InstLoadLibrary::InstrumentFunction;
+    strategyMap["LoadLibraryEx"] = &InstLoadLibraryEx::InstrumentFunction;
+    strategyMap["NtOpenProcess"] = &InstNtOpenProcess::InstrumentFunction;
+    strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
+    strategyMap["NtSetInformationProcess"] = &InstNtSetInformationProcess::InstrumentFunction;
+    strategyMap["NtQueryObject"] = &InstNtQueryObject::InstrumentFunction;
+    strategyMap["NtYieldExecution"] = &InstNtYieldExecution::InstrumentFunction;
+    strategyMap["OutputDebugStringA"] = &InstOutputDebugStringA::InstrumentFunction;
+    strategyMap["BlockInput"] = &InstBlockInput::InstrumentFunction;
+    strategyMap["NtUserFindWindowEx"] = &InstNtUserFindWindowEx::InstrumentFunction;
+    strategyMap["NtUserBuildHwndList"] = &InstNtUserBuildHwndList::InstrumentFunction;
+    strategyMap["NtUserQueryWindow"] = &InstNtUserQueryWindow::InstrumentFunction;
+    strategyMap["NtSetDebugFilterState"] = &InstNtSetDebugFilterState::InstrumentFunction;
+    strategyMap["NtClose"] = &InstNtClose::InstrumentFunction;
+    strategyMap["NtGetContextThread"] = &InstNtGetContextThread::InstrumentFunction;
+    strategyMap["NtSetContextThread"] = &InstNtSetContextThread::InstrumentFunction;
+    strategyMap["NtContinue"] = &InstNtContinue::InstrumentFunction;
+    strategyMap["KiUserExceptionDispatcher"] = &InstKiUserExceptionDispatcher::InstrumentFunction;
+    strategyMap["GetTickCount64"] = &InstGetTickCount64::InstrumentFunction;
+    strategyMap["GetLocalTime"] = &InstGetLocalTime::InstrumentFunction;
+    strategyMap["GetSystemTime"] = &InstGetSystemTime::InstrumentFunction;
+    strategyMap["NtQuerySystemTime"] = &InstNtQuerySystemTime::InstrumentFunction;
+    strategyMap["NtQueryPerformanceCounter"] = &InstNtQueryPerformanceCounter::InstrumentFunction;
+    strategyMap["NtQueryInformationThread"] = &InstNtQueryInformationThread::InstrumentFunction;
+    strategyMap["FindWindowA"] = &InstFindWindowA::InstrumentFunction;
+    strategyMap["FindWindowW"] = &InstFindWindowW::InstrumentFunction;
+    strategyMap["NtQueryVirtualMemory"] = &InstNtQueryVirtualMemory::InstrumentFunction;
+    strategyMap["ZwQueryVirtualMemory"] = &InstZwQueryVirtualMemory::InstrumentFunction;
+
+     //strategyMap["BaseRegOpenKey"] = &InstBaseRegOpenKey::InstrumentFunction;
     //strategyMap["BaseRegEnumKey"] = &InstBaseRegEnumKey::InstrumentFunction;
-    strategyMap["RegOpenKeyA"] = &InstRegOpenKeyA::InstrumentFunction;
-    strategyMap["RegEnumKeyA"] = &InstRegEnumKeyA::InstrumentFunction;
-    strategyMap["RegQueryValueA"] = &InstRegQueryValueA::InstrumentFunction;
-    strategyMap["RegOpenKeyW"] = &InstRegOpenKeyW::InstrumentFunction;
-    strategyMap["RegEnumKeyW"] = &InstRegEnumKeyW::InstrumentFunction;
-    strategyMap["RegQueryValueW"] = &InstRegQueryValueW::InstrumentFunction;
-    strategyMap["RegOpenKeyExA"] = &InstRegOpenKeyExA::InstrumentFunction;
-    strategyMap["RegEnumKeyExA"] = &InstRegEnumKeyExA::InstrumentFunction;
-    strategyMap["RegQueryValueExA"] = &InstRegQueryValueExA::InstrumentFunction;
+    //strategyMap["RegOpenKeyA"] = &InstRegOpenKeyA::InstrumentFunction;
+    //strategyMap["RegEnumKeyA"] = &InstRegEnumKeyA::InstrumentFunction;
+    //strategyMap["RegQueryValueA"] = &InstRegQueryValueA::InstrumentFunction;
+    //strategyMap["RegOpenKeyW"] = &InstRegOpenKeyW::InstrumentFunction;
+    //strategyMap["RegEnumKeyW"] = &InstRegEnumKeyW::InstrumentFunction;
+    //strategyMap["RegQueryValueW"] = &InstRegQueryValueW::InstrumentFunction;
+    //strategyMap["RegOpenKeyExA"] = &InstRegOpenKeyExA::InstrumentFunction;
+    //strategyMap["RegEnumKeyExA"] = &InstRegEnumKeyExA::InstrumentFunction;
+    //strategyMap["RegQueryValueExA"] = &InstRegQueryValueExA::InstrumentFunction;
     //strategyMap["RegOpenKeyExW"] = &InstRegOpenKeyExW::InstrumentFunction;
     //strategyMap["RegEnumKeyExW"] = &InstRegEnumKeyExW::InstrumentFunction;
     //strategyMap["RegQueryValueExW"] = &InstRegQueryValueExW::InstrumentFunction;
     //strategyMap["NtOpenKey"] = &InstNtOpenKey::InstrumentFunction;
     //strategyMap["NtEnumKey"] = &InstNtEnumKey::InstrumentFunction;
     //strategyMap["NtQueryValueKey"] = &InstNtQueryValueKey::InstrumentFunction;
-    //strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
-    //strategyMap["GetWindowTextW"] = &InstGetWindowTextW::InstrumentFunction;
-    //strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
-    //strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
-    //strategyMap["OutputDebugStringW"] = &InstOutputDebugStringW::InstrumentFunction;
-    //strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-    
-    strategyMap["Wmi"] = &InstWmi::InstrumentFunction;
-
-    // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
-
 
 }
 

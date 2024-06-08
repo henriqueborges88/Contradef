@@ -16,8 +16,6 @@
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
 
-typedef UINT64 HWND;   // HWND é normalmente um ponteiro ou um valor integral
-
 class InstGetForegroundWindow : public InstrumentationStrategy {
 public:
     static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);

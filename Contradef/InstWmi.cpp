@@ -18,7 +18,6 @@ VOID InstWmi::HandleTraceEvent(const EventData* data, void* context) {
 }
 
 VOID InstWmi::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4) {
-    std::cout << "Wmi Invocado" << std::endl;
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -96,9 +95,10 @@ VOID InstWmi::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RT
 }
 
 VOID InstWmi::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
-    std::cout << "Wmi registrado" << RTN_Name(rtn) << std::endl;
 
     if (RTN_Name(rtn) == "CoCreateInstance" || RTN_Name(rtn) == "ConnectServer" || RTN_Name(rtn) == "ExecQuery") {
+        std::cout << "Wmi Invocado " << RTN_Name(rtn) << std::endl;
+
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 

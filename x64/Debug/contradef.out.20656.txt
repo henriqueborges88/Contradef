@@ -1,0 +1,26 @@
+
+[+] NtQueryInformationProcess [NtGlobalFlag]...
+    Nome do módulo: C:\Users\henri\source\repos\hw\x64\Release\hw.exe
+    Thread: 0
+    Endereço da rotina: 7ff7b9f63770
+    Nome da rotina: ?TestQueryInformationProcess@@YAXXZ
+    Valor de retorno (NtQueryInformationProcess): 0
+    Instrução: cmp dword ptr [rax], 0x0
+    Endereço da instrução: 0x7ff7b9f6393a
+    Endereço do valor em memória: 0x5b035200bc
+    Valor da flag NtGlobalFlag: 0
+[*] Concluído
+
+
+[+] OpenProcess Detected...
+    Nome do módulo: C:\WINDOWS\System32\KERNELBASE.dll
+    Thread: 0
+    Id de chamada: 0
+    Endereço da rotina: 7ffab960c880
+    Parâmetros: 
+        dwDesiredAccess: 2107267792096
+        bInheritHandle: 2107546127904
+        dwProcessId: 2008035880
+    Valor de retorno: 344
+[*] Concluído
+

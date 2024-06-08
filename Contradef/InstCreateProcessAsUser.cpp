@@ -1,0 +1,170 @@
+#include "InstCreateProcessAsUser.h"
+
+std::map<CallContextKey, CallContext*> InstCreateProcessAsUser::callContextMap;
+UINT32 InstCreateProcessAsUser::imgCallId = 0;
+UINT32 InstCreateProcessAsUser::fcnCallId = 0;
+Notifier* InstCreateProcessAsUser::globalNotifierPtr;
+
+VOID InstCreateProcessAsUser::CheckPrintConditions(CallContext* callContext) {
+    CheckPrintConditionsCC(callContext, &InstCreateProcessAsUser::callContextMap, InstCreateProcessAsUser::globalNotifierPtr);
+}
+
+VOID InstCreateProcessAsUser::HandleInstructionEvent(const EventData* data, void* context) {
+    HandleInstructionEventCC(data, context, &InstCreateProcessAsUser::callContextMap, InstCreateProcessAsUser::globalNotifierPtr);
+}
+
+VOID InstCreateProcessAsUser::HandleTraceEvent(const EventData* data, void* context) {
+    HandleTraceEventCC(data, context, &InstCreateProcessAsUser::callContextMap, InstCreateProcessAsUser::globalNotifierPtr);
+}
+
+VOID InstCreateProcessAsUser::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+    ADDRINT hToken, ADDRINT lpApplicationName, ADDRINT lpCommandLine, ADDRINT lpProcessAttributes,
+    ADDRINT lpThreadAttributes, ADDRINT bInheritHandles, ADDRINT dwCreationFlags, ADDRINT lpEnvironment,
+    ADDRINT lpCurrentDirectory, ADDRINT lpStartupInfo, ADDRINT lpProcessInformation) {
+
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
+
+    ADDRINT rtnAddress = GetRtnAddr(instAddress);
+
+    InstCreateProcessAsUserArgs args;
+    args.hToken = hToken;
+    args.lpApplicationName = lpApplicationName;
+    args.lpCommandLine = lpCommandLine;
+    args.lpProcessAttributes = lpProcessAttributes;
+    args.lpThreadAttributes = lpThreadAttributes;
+    args.bInheritHandles = bInheritHandles;
+    args.dwCreationFlags = dwCreationFlags;
+    args.lpEnvironment = lpEnvironment;
+    args.lpCurrentDirectory = lpCurrentDirectory;
+    args.lpStartupInfo = lpStartupInfo;
+    args.lpProcessInformation = lpProcessInformation;
+
+    UINT32 callCtxId = callId * 100 + fcnCallId;
+
+    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
+
+    // Criando observadores dinamicamente com o contexto correto
+    auto* instructionObserver = new Observer(InstCreateProcessAsUser::HandleInstructionEvent, callContext);
+    auto* traceObserver = new Observer(InstCreateProcessAsUser::HandleTraceEvent, callContext);
+
+    // Salvando os observadores no CallContext para futura limpeza
+    callContext->instructionObserver = instructionObserver;
+    callContext->traceObserver = traceObserver;
+
+    CallContextKey key = { callCtxId, tid };
+    callContextMap[key] = callContext;
+
+    // Anexa os observers ao notificador
+    InstCreateProcessAsUser::globalNotifierPtr->Attach(instructionObserver);
+    InstCreateProcessAsUser::globalNotifierPtr->Attach(traceObserver);
+}
+
+VOID InstCreateProcessAsUser::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+    ADDRINT hToken, ADDRINT lpApplicationName, ADDRINT lpCommandLine, ADDRINT lpProcessAttributes,
+    ADDRINT lpThreadAttributes, ADDRINT bInheritHandles, ADDRINT dwCreationFlags, ADDRINT lpEnvironment,
+    ADDRINT lpCurrentDirectory, ADDRINT lpStartupInfo, ADDRINT lpProcessInformation) {
+
+    if (!IsMainExecutable(returnAddress)) {
+        return;
+    }
+
+    // Instrumentar função
+    UINT32 callCtxId = callId * 100 + fcnCallId;
+    CallContextKey key = { callCtxId, tid };
+    auto it = callContextMap.find(key);
+    if (it != callContextMap.end()) {
+        PIN_LockClient();
+        IMG img = IMG_FindByAddress(instAddress);
+        CallContext* callContext = it->second;
+        // Registrar parâmetros
+        const InstCreateProcessAsUserArgs* args = reinterpret_cast<InstCreateProcessAsUserArgs*>(callContext->functionArgs);
+        std::stringstream& stringStream = callContext->stringStream;
+
+        std::string applicationName = args->lpApplicationName ? ConvertAddrToAnsiString(args->lpApplicationName) : "NULL";
+        std::string commandLine = args->lpCommandLine ? ConvertAddrToAnsiString(args->lpCommandLine) : "NULL";
+
+        stringStream << std::endl << "[+] CreateProcessAsUser Detected..." << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Thread: " << tid << std::endl;
+        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parâmetros: " << std::endl;
+        stringStream << "        hToken: " << args->hToken << std::endl;
+        stringStream << "        lpApplicationName: " << applicationName << std::endl;
+        stringStream << "        lpCommandLine: " << commandLine << std::endl;
+        stringStream << "        lpProcessAttributes: " << args->lpProcessAttributes << std::endl;
+        stringStream << "        lpThreadAttributes: " << args->lpThreadAttributes << std::endl;
+        stringStream << "        bInheritHandles: " << args->bInheritHandles << std::endl;
+        stringStream << "        dwCreationFlags: " << args->dwCreationFlags << std::endl;
+        stringStream << "        lpEnvironment: " << args->lpEnvironment << std::endl;
+        stringStream << "        lpCurrentDirectory: " << args->lpCurrentDirectory << std::endl;
+        stringStream << "        lpStartupInfo: " << args->lpStartupInfo << std::endl;
+        stringStream << "        lpProcessInformation: " << args->lpProcessInformation << std::endl;
+        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+
+        // Instrumentar todas as instruções da rotina chamadora
+        RTN rtnCaller = RTN_FindByAddress(*retValAddr);
+        if (RTN_Valid(rtnCaller)) {
+            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
+        }
+        callContext->defaultPrintReady = true;
+        PIN_UnlockClient();
+    }
+
+    fcnCallId++;
+}
+
+VOID InstCreateProcessAsUser::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
+
+    if (RTN_Name(rtn) == "CreateProcessAsUserA" || RTN_Name(rtn) == "CreateProcessAsUserW") {
+        imgCallId++;
+        globalNotifierPtr = &globalNotifier;
+
+        RTN_Open(rtn);
+        RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CallbackBefore,
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hToken
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpApplicationName
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpCommandLine
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // lpProcessAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // lpThreadAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // bInheritHandles
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 6, // dwCreationFlags
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 7, // lpEnvironment
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 8, // lpCurrentDirectory
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 9, // lpStartupInfo
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 10, // lpProcessInformation
+            IARG_END);
+
+        RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)CallbackAfter,
+            IARG_THREAD_ID,
+            IARG_UINT32, imgCallId,
+            IARG_INST_PTR,
+            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_CONTEXT,
+            IARG_REG_REFERENCE, REG_GAX,
+            IARG_RETURN_IP, // Endereço da função chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hToken
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpApplicationName
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpCommandLine
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // lpProcessAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // lpThreadAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // bInheritHandles
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 6, // dwCreationFlags
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 7, // lpEnvironment
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 8, // lpCurrentDirectory
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 9, // lpStartupInfo
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 10, // lpProcessInformation
+            IARG_END);
+
+        RTN_Close(rtn);
+    }
+}
+

@@ -47,6 +47,12 @@
 #define CONST               const
 #endif
 
+typedef UINT64 HWND;   // HWND é normalmente um ponteiro ou um valor integral
+typedef const char* LPCTSTR;
+typedef void* HINSTANCE;
+typedef void* LPVOID;
+typedef void* HKEY;
+
 typedef int LONG;
 typedef void* PVOID;
 typedef unsigned short USHORT;
