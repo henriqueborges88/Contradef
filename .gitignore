@@ -11,3 +11,11 @@ contradef.out*
 /Contradef/x64/Debug/Contradef.log
 /x64/Debug/Contradef.pdb
 /x64/Debug/Contradef.dll
+/Contradef/x64/Debug/utils.obj
+/Contradef/x64/Debug/InstVirtualQueryEx.obj
+/Contradef/x64/Debug/InstVirtualQuery.obj
+/Contradef/x64/Debug/InstrumentationContext.obj
+/tmp/Contradef1.txt
+/tmp/Contradef2.txt
+/tmp/Contradef3.txt
+/x64/Debug/pin.log
