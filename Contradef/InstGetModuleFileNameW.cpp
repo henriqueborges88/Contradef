@@ -7,7 +7,7 @@ Notifier* InstGetModuleFileNameW::globalNotifierPtr;
 
 
 VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -30,7 +30,7 @@ VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
 VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

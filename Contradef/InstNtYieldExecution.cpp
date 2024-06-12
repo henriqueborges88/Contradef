@@ -8,7 +8,7 @@ Notifier* InstNtYieldExecution::globalNotifierPtr;
 
 VOID InstNtYieldExecution::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -26,7 +26,7 @@ VOID InstNtYieldExecution::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
 VOID InstNtYieldExecution::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -9,7 +9,7 @@ Notifier* InstCoCreateInstance::globalNotifierPtr;
 VOID InstCoCreateInstance::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT rclsid, ADDRINT pUnkOuter, ADDRINT dwClsContext, ADDRINT riid, ADDRINT ppv) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -35,7 +35,7 @@ VOID InstCoCreateInstance::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 VOID InstCoCreateInstance::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT rclsid, ADDRINT pUnkOuter, ADDRINT dwClsContext, ADDRINT riid, ADDRINT ppv) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -199,7 +199,7 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInform
 
 VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -225,7 +225,7 @@ VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
 VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

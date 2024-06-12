@@ -11,7 +11,7 @@ VOID InstCreateProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
     ADDRINT bInheritHandles, ADDRINT dwCreationFlags, ADDRINT lpEnvironment, ADDRINT lpCurrentDirectory,
     ADDRINT lpStartupInfo, ADDRINT lpProcessInformation) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -44,7 +44,7 @@ VOID InstCreateProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     ADDRINT bInheritHandles, ADDRINT dwCreationFlags, ADDRINT lpEnvironment, ADDRINT lpCurrentDirectory,
     ADDRINT lpStartupInfo, ADDRINT lpProcessInformation) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

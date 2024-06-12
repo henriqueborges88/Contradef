@@ -9,7 +9,7 @@ Notifier* InstLoadLibraryEx::globalNotifierPtr;
 VOID InstLoadLibraryEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT lpLibFileName, ADDRINT hFile, ADDRINT dwFlags) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -33,7 +33,7 @@ VOID InstLoadLibraryEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 VOID InstLoadLibraryEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT lpLibFileName, ADDRINT hFile, ADDRINT dwFlags) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

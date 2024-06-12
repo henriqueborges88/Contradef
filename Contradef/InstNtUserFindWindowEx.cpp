@@ -9,7 +9,7 @@ Notifier* InstNtUserFindWindowEx::globalNotifierPtr;
 VOID InstNtUserFindWindowEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hwndParent, ADDRINT hwndChildAfter, ADDRINT lpszClass, ADDRINT lpszWindow) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -34,7 +34,7 @@ VOID InstNtUserFindWindowEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 VOID InstNtUserFindWindowEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hwndParent, ADDRINT hwndChildAfter, ADDRINT lpszClass, ADDRINT lpszWindow) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

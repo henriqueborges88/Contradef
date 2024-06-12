@@ -9,7 +9,7 @@ Notifier* InstShellExecuteEx::globalNotifierPtr;
 VOID InstShellExecuteEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT lpExecInfo) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -31,7 +31,7 @@ VOID InstShellExecuteEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 VOID InstShellExecuteEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT lpExecInfo) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

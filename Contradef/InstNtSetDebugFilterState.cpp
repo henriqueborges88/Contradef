@@ -9,7 +9,7 @@ Notifier* InstNtSetDebugFilterState::globalNotifierPtr;
 VOID InstNtSetDebugFilterState::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT ComponentId, ADDRINT Level, ADDRINT State) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -33,7 +33,7 @@ VOID InstNtSetDebugFilterState::CallbackBefore(THREADID tid, UINT32 callId, ADDR
 VOID InstNtSetDebugFilterState::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT ComponentId, ADDRINT Level, ADDRINT State) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

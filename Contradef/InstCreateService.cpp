@@ -12,7 +12,7 @@ VOID InstCreateService::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
     ADDRINT lpLoadOrderGroup, ADDRINT lpdwTagId, ADDRINT lpDependencies, ADDRINT lpServiceStartName,
     ADDRINT lpPassword) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -49,7 +49,7 @@ VOID InstCreateService::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     ADDRINT lpLoadOrderGroup, ADDRINT lpdwTagId, ADDRINT lpDependencies, ADDRINT lpServiceStartName,
     ADDRINT lpPassword) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

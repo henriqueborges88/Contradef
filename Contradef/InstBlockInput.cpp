@@ -8,7 +8,7 @@ Notifier* InstBlockInput::globalNotifierPtr;
 
 VOID InstBlockInput::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT fBlockIt) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -29,7 +29,7 @@ VOID InstBlockInput::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAdd
 
 VOID InstBlockInput::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT fBlockIt) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -8,7 +8,7 @@ Notifier* InstFindWindowW::globalNotifierPtr;
 
 VOID InstFindWindowW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpClassName, ADDRINT lpWindowName) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -30,7 +30,7 @@ VOID InstFindWindowW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
 VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpClassName, ADDRINT lpWindowName) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

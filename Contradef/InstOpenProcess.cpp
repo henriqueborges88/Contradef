@@ -8,7 +8,7 @@ Notifier* InstOpenProcess::globalNotifierPtr;
 
 VOID InstOpenProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT dwDesiredAccess, ADDRINT bInheritHandle, ADDRINT dwProcessId) {
     
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -31,7 +31,7 @@ VOID InstOpenProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
 VOID InstOpenProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT dwDesiredAccess, ADDRINT bInheritHandle, ADDRINT dwProcessId) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

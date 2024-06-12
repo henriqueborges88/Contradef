@@ -9,7 +9,7 @@ Notifier* InstStartService::globalNotifierPtr;
 VOID InstStartService::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hService, ADDRINT dwNumServiceArgs, ADDRINT lpServiceArgVectors) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -33,7 +33,7 @@ VOID InstStartService::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instA
 VOID InstStartService::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hService, ADDRINT dwNumServiceArgs, ADDRINT lpServiceArgVectors) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

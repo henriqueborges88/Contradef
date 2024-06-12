@@ -107,6 +107,7 @@ VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
     auto executionEvent = static_cast<const ExecutionEventData*>(data);
     auto executionOutputText = executionEvent->executionInformation.outputText;
     OutFile << executionOutputText;
+    OutFile.flush();  // Esvazia o buffer de saída
 }
 
 int main(int argc, char* argv[]) {

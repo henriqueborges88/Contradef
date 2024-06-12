@@ -8,7 +8,7 @@ Notifier* InstOutputDebugStringW::globalNotifierPtr;
 
 VOID InstOutputDebugStringW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpOutputString) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -29,7 +29,7 @@ VOID InstOutputDebugStringW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
 VOID InstOutputDebugStringW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpOutputString) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

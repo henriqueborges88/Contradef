@@ -8,7 +8,7 @@ Notifier* InstIsDebuggerPresent::globalNotifierPtr;
 
 
 VOID InstIsDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress) {
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -26,7 +26,7 @@ VOID InstIsDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
 
 VOID InstIsDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress) {
     
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -9,7 +9,7 @@ Notifier* InstNtContinue::globalNotifierPtr;
 VOID InstNtContinue::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT ContextRecord, ADDRINT TestAlert) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -32,7 +32,7 @@ VOID InstNtContinue::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAdd
 VOID InstNtContinue::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT ContextRecord, ADDRINT TestAlert) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

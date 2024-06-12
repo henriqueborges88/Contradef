@@ -12,7 +12,7 @@ Notifier* InstGetForegroundWindow::globalNotifierPtr;
 
 VOID InstGetForegroundWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress) {
     std::cout << "TEst" << std::endl;
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

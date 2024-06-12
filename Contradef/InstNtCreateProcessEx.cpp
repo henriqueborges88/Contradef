@@ -10,7 +10,7 @@ VOID InstNtCreateProcessEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
     ADDRINT ProcessHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT ParentProcess,
     ADDRINT InheritObjectTable, ADDRINT SectionHandle, ADDRINT DebugPort, ADDRINT ExceptionPort, ADDRINT CreateFlags) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -41,7 +41,7 @@ VOID InstNtCreateProcessEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
     ADDRINT ProcessHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT ParentProcess,
     ADDRINT InheritObjectTable, ADDRINT SectionHandle, ADDRINT DebugPort, ADDRINT ExceptionPort, ADDRINT CreateFlags) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

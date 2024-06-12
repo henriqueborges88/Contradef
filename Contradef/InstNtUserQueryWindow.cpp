@@ -9,7 +9,7 @@ Notifier* InstNtUserQueryWindow::globalNotifierPtr;
 VOID InstNtUserQueryWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hwnd, ADDRINT Index) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -32,7 +32,7 @@ VOID InstNtUserQueryWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
 VOID InstNtUserQueryWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hwnd, ADDRINT Index) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

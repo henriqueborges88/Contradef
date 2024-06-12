@@ -9,7 +9,7 @@ Notifier* InstRegEnumKeyExA::globalNotifierPtr;
 VOID InstRegEnumKeyExA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpReserved, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
     std::cout << "EnumKey Invocado" << std::endl;
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -37,7 +37,7 @@ VOID InstRegEnumKeyExA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
 VOID InstRegEnumKeyExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpReserved, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

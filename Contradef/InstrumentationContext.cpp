@@ -53,7 +53,7 @@ InstrumentationContext::InstrumentationContext() {
     */
 
     // Registro do Windows
-    strategyMap["BaseRegOpenKey"] = &InstBaseRegOpenKey::InstrumentFunction;
+    /*strategyMap["BaseRegOpenKey"] = &InstBaseRegOpenKey::InstrumentFunction;
     strategyMap["BaseRegEnumKey"] = &InstBaseRegEnumKey::InstrumentFunction;
     strategyMap["RegOpenKeyA"] = &InstRegOpenKeyA::InstrumentFunction;
     strategyMap["RegEnumKeyA"] = &InstRegEnumKeyA::InstrumentFunction;
@@ -71,7 +71,7 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["ZwOpenKey"] = &InstNtOpenKey::InstrumentFunction;
     strategyMap["NtEnumKey"] = &InstNtEnumKey::InstrumentFunction;
     strategyMap["ZwEnumKey"] = &InstNtEnumKey::InstrumentFunction;
-    strategyMap["NtQueryValueKey"] = &InstNtQueryValueKey::InstrumentFunction;
+    strategyMap["NtQueryValueKey"] = &InstNtQueryValueKey::InstrumentFunction;*/
     strategyMap["ZwQueryValueKey"] = &InstNtQueryValueKey::InstrumentFunction;
     strategyMap["NtQueryKey"] = &InstNtQueryKey::InstrumentFunction;
 

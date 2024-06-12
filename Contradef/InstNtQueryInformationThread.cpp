@@ -10,7 +10,7 @@ VOID InstNtQueryInformationThread::CallbackBefore(THREADID tid, UINT32 callId, A
     ADDRINT ThreadHandle, ADDRINT ThreadInformationClass, ADDRINT ThreadInformation,
     ADDRINT ThreadInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -37,7 +37,7 @@ VOID InstNtQueryInformationThread::CallbackAfter(THREADID tid, UINT32 callId, AD
     ADDRINT ThreadHandle, ADDRINT ThreadInformationClass, ADDRINT ThreadInformation,
     ADDRINT ThreadInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

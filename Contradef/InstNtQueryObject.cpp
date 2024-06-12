@@ -9,7 +9,7 @@ Notifier* InstNtQueryObject::globalNotifierPtr;
 VOID InstNtQueryObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT Handle, ADDRINT ObjectInformationClass, ADDRINT ObjectInformation, ADDRINT ObjectInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -35,7 +35,7 @@ VOID InstNtQueryObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 VOID InstNtQueryObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT Handle, ADDRINT ObjectInformationClass, ADDRINT ObjectInformation, ADDRINT ObjectInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

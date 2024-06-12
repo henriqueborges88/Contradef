@@ -11,7 +11,7 @@ VOID InstNtCreateThreadEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     ADDRINT StartAddress, ADDRINT Parameter, ADDRINT CreateFlags, ADDRINT ZeroBits,
     ADDRINT StackSize, ADDRINT MaximumStackSize, ADDRINT AttributeList) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -45,7 +45,7 @@ VOID InstNtCreateThreadEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     ADDRINT StartAddress, ADDRINT Parameter, ADDRINT CreateFlags, ADDRINT ZeroBits,
     ADDRINT StackSize, ADDRINT MaximumStackSize, ADDRINT AttributeList) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

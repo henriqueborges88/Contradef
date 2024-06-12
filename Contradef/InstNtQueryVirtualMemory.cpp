@@ -10,7 +10,7 @@ VOID InstNtQueryVirtualMemory::CallbackBefore(THREADID tid, UINT32 callId, ADDRI
     ADDRINT ProcessHandle, ADDRINT BaseAddress, ADDRINT MemoryInformationClass, ADDRINT MemoryInformation,
     ADDRINT MemoryInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -38,7 +38,7 @@ VOID InstNtQueryVirtualMemory::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
     ADDRINT ProcessHandle, ADDRINT BaseAddress, ADDRINT MemoryInformationClass, ADDRINT MemoryInformation,
     ADDRINT MemoryInformationLength, ADDRINT ReturnLength) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -9,7 +9,7 @@ Notifier* InstKiUserExceptionDispatcher::globalNotifierPtr;
 VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT ExceptionRecord, ADDRINT ContextRecord) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -32,7 +32,7 @@ VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, 
 VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT ExceptionRecord, ADDRINT ContextRecord) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -8,7 +8,7 @@ Notifier* InstCheckRemoteDebuggerPresent::globalNotifierPtr;
 
 VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -33,7 +33,7 @@ VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId,
 
 VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
     
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

@@ -8,7 +8,7 @@ Notifier* InstNtQuerySystemTime::globalNotifierPtr;
 
 VOID InstNtQuerySystemTime::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT SystemTime) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -29,7 +29,7 @@ VOID InstNtQuerySystemTime::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
 
 VOID InstNtQuerySystemTime::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT SystemTime) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

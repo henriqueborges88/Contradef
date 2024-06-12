@@ -9,7 +9,7 @@ Notifier* InstNtSetContextThread::globalNotifierPtr;
 VOID InstNtSetContextThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT ThreadHandle, ADDRINT ThreadContext) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -32,7 +32,7 @@ VOID InstNtSetContextThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 VOID InstNtSetContextThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT ThreadHandle, ADDRINT ThreadContext) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

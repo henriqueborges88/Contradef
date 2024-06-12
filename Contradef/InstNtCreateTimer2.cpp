@@ -10,7 +10,7 @@ VOID InstNtCreateTimer2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
     ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
     ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -40,7 +40,7 @@ VOID InstNtCreateTimer2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
     ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
     ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 

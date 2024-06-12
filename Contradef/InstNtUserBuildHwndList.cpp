@@ -9,7 +9,7 @@ Notifier* InstNtUserBuildHwndList::globalNotifierPtr;
 VOID InstNtUserBuildHwndList::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hDesktop, ADDRINT hwndParent, ADDRINT hwndChild, ADDRINT bEnumChildren, ADDRINT pWnds, ADDRINT nWnds) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
@@ -36,7 +36,7 @@ VOID InstNtUserBuildHwndList::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
 VOID InstNtUserBuildHwndList::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hDesktop, ADDRINT hwndParent, ADDRINT hwndChild, ADDRINT bEnumChildren, ADDRINT pWnds, ADDRINT nWnds) {
 
-    if (!IsMainExecutable(returnAddress)) {
+    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
