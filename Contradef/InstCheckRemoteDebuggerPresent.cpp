@@ -5,20 +5,8 @@ UINT32 InstCheckRemoteDebuggerPresent::imgCallId = 0;
 UINT32 InstCheckRemoteDebuggerPresent::fcnCallId = 0;
 Notifier* InstCheckRemoteDebuggerPresent::globalNotifierPtr;
 
-VOID InstCheckRemoteDebuggerPresent::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstCheckRemoteDebuggerPresent::callContextMap, InstCheckRemoteDebuggerPresent::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstCheckRemoteDebuggerPresent::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstCheckRemoteDebuggerPresent::callContextMap, InstCheckRemoteDebuggerPresent::globalNotifierPtr);
-}
-
-VOID InstCheckRemoteDebuggerPresent::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstCheckRemoteDebuggerPresent::callContextMap, InstCheckRemoteDebuggerPresent::globalNotifierPtr);
-}
-
-VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
+VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -37,23 +25,13 @@ VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId,
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstCheckRemoteDebuggerPresent::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstCheckRemoteDebuggerPresent::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstCheckRemoteDebuggerPresent::globalNotifierPtr->Attach(instructionObserver);
-    InstCheckRemoteDebuggerPresent::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
+VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
     
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -82,13 +60,15 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         stringStream << "        hProcess: " << args->hProcess << std::endl;
         stringStream << "        pbDebuggerPresent: " << *debuggerPresent << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -121,7 +101,7 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globa
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
@@ -132,7 +112,7 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globa
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

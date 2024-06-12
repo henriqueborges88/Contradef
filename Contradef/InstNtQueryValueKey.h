@@ -87,7 +87,7 @@ struct KEY_VALUE_FULL_INFORMATION {
     ULONG DataOffset;
     ULONG DataLength;
     ULONG NameLength;
-    WCHAR Name[1]; // Nome do valor (de tamanho variável)
+    WCHAR Name[1]; // Nome do valor (de tamanho variï¿½vel)
 };
 
 typedef enum _KEY_VALUE_INFORMATION_CLASS
@@ -133,8 +133,8 @@ private:
     static VOID InterpretKeyValueInformationFull(BYTE* keyValueInformation, std::stringstream& stringStream);
     static VOID InterpretKeyValueInformationPartial(BYTE* keyValueInformation, std::stringstream& stringStream);
     static VOID InterpretKeyValueInformationBasic(BYTE* keyValueInformation, std::stringstream& stringStream);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength);
 };
 
 #endif // INST_NT_QUERY_VALUE_KEY_H

@@ -5,19 +5,8 @@ UINT32 InstNtUserFindWindowEx::imgCallId = 0;
 UINT32 InstNtUserFindWindowEx::fcnCallId = 0;
 Notifier* InstNtUserFindWindowEx::globalNotifierPtr;
 
-VOID InstNtUserFindWindowEx::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtUserFindWindowEx::callContextMap, InstNtUserFindWindowEx::globalNotifierPtr);
-}
 
-VOID InstNtUserFindWindowEx::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtUserFindWindowEx::callContextMap, InstNtUserFindWindowEx::globalNotifierPtr);
-}
-
-VOID InstNtUserFindWindowEx::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtUserFindWindowEx::callContextMap, InstNtUserFindWindowEx::globalNotifierPtr);
-}
-
-VOID InstNtUserFindWindowEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstNtUserFindWindowEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hwndParent, ADDRINT hwndChildAfter, ADDRINT lpszClass, ADDRINT lpszWindow) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -36,23 +25,13 @@ VOID InstNtUserFindWindowEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtUserFindWindowEx::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtUserFindWindowEx::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtUserFindWindowEx::globalNotifierPtr->Attach(instructionObserver);
-    InstNtUserFindWindowEx::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtUserFindWindowEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstNtUserFindWindowEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hwndParent, ADDRINT hwndChildAfter, ADDRINT lpszClass, ADDRINT lpszWindow) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -87,13 +66,15 @@ VOID InstNtUserFindWindowEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
         stringStream << "        lpszClass: " << className << std::endl;
         stringStream << "        lpszWindow: " << windowName << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -112,7 +93,7 @@ VOID InstNtUserFindWindowEx::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hwndParent
@@ -125,7 +106,7 @@ VOID InstNtUserFindWindowEx::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

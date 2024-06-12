@@ -36,18 +36,6 @@ UINT32 InstNtQueryValueKey::imgCallId = 0;
 UINT32 InstNtQueryValueKey::fcnCallId = 0;
 Notifier* InstNtQueryValueKey::globalNotifierPtr;
 
-VOID InstNtQueryValueKey::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
-}
-
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstNtQueryValueKey::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
-}
-
-VOID InstNtQueryValueKey::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtQueryValueKey::callContextMap, InstNtQueryValueKey::globalNotifierPtr);
-}
 
 VOID InstNtQueryValueKey::InterpretKeyValueInformationFull(BYTE* keyValueInformation, std::stringstream& stringStream) {
     //KEY_VALUE_PARTIAL_INFORMATION* info;
@@ -209,10 +197,10 @@ VOID InstNtQueryValueKey::InterpretKeyValueInformationBasic(BYTE* keyValueInform
 
 }
 
-VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
+VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
 
     if (!IsMainExecutable(returnAddress)) {
-        return;
+        //return;
     }
 
     ADDRINT rtnAddress = GetRtnAddr(instAddress);
@@ -229,26 +217,16 @@ VOID InstNtQueryValueKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtQueryValueKey::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtQueryValueKey::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtQueryValueKey::globalNotifierPtr->Attach(instructionObserver);
-    InstNtQueryValueKey::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
-   
+VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT ValueName, USHORT KeyValueInformationClass, ADDRINT KeyValueInformation, UINT Length, UINT ResultLength) {
+
     if (!IsMainExecutable(returnAddress)) {
-        return;
+        //return;
     }
 
     // Instrumentar fun�ao
@@ -290,13 +268,15 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         }
 
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -304,7 +284,6 @@ VOID InstNtQueryValueKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 }
 
 VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
-
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "NtQueryValueKey" || rtnName == "ZwQueryValueKey") {
         imgCallId++;
@@ -315,7 +294,7 @@ VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) 
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
@@ -330,7 +309,7 @@ VOID InstNtQueryValueKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) 
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

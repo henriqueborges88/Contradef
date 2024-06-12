@@ -32,8 +32,8 @@ private:
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT SystemTime);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT SystemTime);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT SystemTime);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT SystemTime);
 };
 
 #endif // INST_NT_QUERY_SYSTEM_TIME_H

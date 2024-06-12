@@ -44,12 +44,12 @@ private:
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
         ADDRINT hSCManager, ADDRINT lpServiceName, ADDRINT lpDisplayName, ADDRINT dwDesiredAccess,
         ADDRINT dwServiceType, ADDRINT dwStartType, ADDRINT dwErrorControl, ADDRINT lpBinaryPathName,
         ADDRINT lpLoadOrderGroup, ADDRINT lpdwTagId, ADDRINT lpDependencies, ADDRINT lpServiceStartName,
         ADDRINT lpPassword);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
         ADDRINT hSCManager, ADDRINT lpServiceName, ADDRINT lpDisplayName, ADDRINT dwDesiredAccess,
         ADDRINT dwServiceType, ADDRINT dwStartType, ADDRINT dwErrorControl, ADDRINT lpBinaryPathName,
         ADDRINT lpLoadOrderGroup, ADDRINT lpdwTagId, ADDRINT lpDependencies, ADDRINT lpServiceStartName,

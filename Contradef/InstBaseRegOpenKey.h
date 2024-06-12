@@ -22,7 +22,7 @@ struct BaseRegOpenKeyArgs {
     ADDRINT hKey;
     ADDRINT lpSubKey;
     ADDRINT phkResult;
-    char originalLastChar; // Para armazenar o último caractere original de lpSubKey
+    char originalLastChar; // Para armazenar o ï¿½ltimo caractere original de lpSubKey
     bool isModified; // Flag para indicar se lpSubKey foi modificado
 };
 
@@ -38,8 +38,8 @@ private:
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT phkResult);
 };
 
 #endif // INST_BASE_REG_OPEN_KEY_H

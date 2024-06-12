@@ -5,20 +5,8 @@ UINT32 InstNtOpenKey::imgCallId = 0;
 UINT32 InstNtOpenKey::fcnCallId = 0;
 Notifier* InstNtOpenKey::globalNotifierPtr;
 
-VOID InstNtOpenKey::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtOpenKey::callContextMap, InstNtOpenKey::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstNtOpenKey::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtOpenKey::callContextMap, InstNtOpenKey::globalNotifierPtr);
-}
-
-VOID InstNtOpenKey::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtOpenKey::callContextMap, InstNtOpenKey::globalNotifierPtr);
-}
-
-VOID InstNtOpenKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
+VOID InstNtOpenKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -43,23 +31,13 @@ VOID InstNtOpenKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddr
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtOpenKey::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtOpenKey::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtOpenKey::globalNotifierPtr->Attach(instructionObserver);
-    InstNtOpenKey::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
+VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
     
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -89,7 +67,6 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
         stringStream << "        DesiredAccess: " << args->DesiredAccess << std::endl;
         stringStream << "        ObjectAttributes: " << args->ObjectAttributes << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-
         if (isRegistryKeyPartInList(args->keyPathStr)) {
             std::cout << "A chave de registro est� na lista." << std::endl;
             // Contramedida pode ser alterando o valor de retorno para algumas chaves
@@ -102,13 +79,7 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
             std::cout << "A chave de registro n�o est� na lista." << std::endl;
         }
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
-        PIN_UnlockClient();
+
     }
 
     fcnCallId++;
@@ -126,7 +97,7 @@ VOID InstNtOpenKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // KeyHandle
@@ -138,7 +109,7 @@ VOID InstNtOpenKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

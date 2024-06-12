@@ -5,19 +5,8 @@ UINT32 InstNtClose::imgCallId = 0;
 UINT32 InstNtClose::fcnCallId = 0;
 Notifier* InstNtClose::globalNotifierPtr;
 
-VOID InstNtClose::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtClose::callContextMap, InstNtClose::globalNotifierPtr);
-}
 
-VOID InstNtClose::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtClose::callContextMap, InstNtClose::globalNotifierPtr);
-}
-
-VOID InstNtClose::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtClose::callContextMap, InstNtClose::globalNotifierPtr);
-}
-
-VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT Handle) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -33,23 +22,13 @@ VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddres
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtClose::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtClose::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtClose::globalNotifierPtr->Attach(instructionObserver);
-    InstNtClose::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtClose::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstNtClose::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT Handle) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -78,13 +57,15 @@ VOID InstNtClose::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
         stringStream << "    Par�metros: " << std::endl;
         stringStream << "        Handle: " << args->Handle << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -94,7 +75,10 @@ VOID InstNtClose::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
 VOID InstNtClose::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
     
     std::string rtnName = RTN_Name(rtn);
+
     if (rtnName == "NtClose" || rtnName == "ZwClose") {
+        std::cout << "Instrumentada " << rtnName << std::endl;
+
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -103,7 +87,7 @@ VOID InstNtClose::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // Handle
@@ -113,7 +97,7 @@ VOID InstNtClose::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

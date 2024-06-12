@@ -5,20 +5,8 @@ UINT32 InstBaseRegEnumKey::imgCallId = 0;
 UINT32 InstBaseRegEnumKey::fcnCallId = 0;
 Notifier* InstBaseRegEnumKey::globalNotifierPtr;
 
-VOID InstBaseRegEnumKey::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstBaseRegEnumKey::callContextMap, InstBaseRegEnumKey::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstBaseRegEnumKey::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstBaseRegEnumKey::callContextMap, InstBaseRegEnumKey::globalNotifierPtr);
-}
-
-VOID InstBaseRegEnumKey::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstBaseRegEnumKey::callContextMap, InstBaseRegEnumKey::globalNotifierPtr);
-}
-
-VOID InstBaseRegEnumKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
+VOID InstBaseRegEnumKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -39,23 +27,13 @@ VOID InstBaseRegEnumKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstBaseRegEnumKey::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstBaseRegEnumKey::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstBaseRegEnumKey::globalNotifierPtr->Attach(instructionObserver);
-    InstBaseRegEnumKey::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstBaseRegEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
+VOID InstBaseRegEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -91,7 +69,6 @@ VOID InstBaseRegEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "        lpcClass: " << args->lpcClass << std::endl;
         stringStream << "        lpftLastWriteTime: " << args->lpftLastWriteTime << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-
         if (isRegistryKeyPartInList(ansiStringLpName)) {
             std::cout << "A chave de registro est� na lista." << std::endl;
             // Contramedida pode ser alterando o valor de retorno para algumas chaves
@@ -104,12 +81,6 @@ VOID InstBaseRegEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
             std::cout << "A chave de registro n�o est� na lista." << std::endl;
         }
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(*retValAddr);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
         PIN_UnlockClient();
     }
 
@@ -129,7 +100,7 @@ VOID InstBaseRegEnumKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
@@ -145,7 +116,7 @@ VOID InstBaseRegEnumKey::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

@@ -5,19 +5,8 @@ UINT32 InstCoCreateInstance::imgCallId = 0;
 UINT32 InstCoCreateInstance::fcnCallId = 0;
 Notifier* InstCoCreateInstance::globalNotifierPtr;
 
-VOID InstCoCreateInstance::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstCoCreateInstance::callContextMap, InstCoCreateInstance::globalNotifierPtr);
-}
 
-VOID InstCoCreateInstance::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstCoCreateInstance::callContextMap, InstCoCreateInstance::globalNotifierPtr);
-}
-
-VOID InstCoCreateInstance::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstCoCreateInstance::callContextMap, InstCoCreateInstance::globalNotifierPtr);
-}
-
-VOID InstCoCreateInstance::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstCoCreateInstance::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT rclsid, ADDRINT pUnkOuter, ADDRINT dwClsContext, ADDRINT riid, ADDRINT ppv) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -37,23 +26,13 @@ VOID InstCoCreateInstance::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstCoCreateInstance::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstCoCreateInstance::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstCoCreateInstance::globalNotifierPtr->Attach(instructionObserver);
-    InstCoCreateInstance::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstCoCreateInstance::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstCoCreateInstance::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT rclsid, ADDRINT pUnkOuter, ADDRINT dwClsContext, ADDRINT riid, ADDRINT ppv) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -86,13 +65,15 @@ VOID InstCoCreateInstance::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         stringStream << "        riid: " << args->riid << std::endl;
         stringStream << "        ppv: " << args->ppv << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(*retValAddr);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -111,7 +92,7 @@ VOID InstCoCreateInstance::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // rclsid
@@ -125,7 +106,7 @@ VOID InstCoCreateInstance::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

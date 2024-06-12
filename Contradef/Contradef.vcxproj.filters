@@ -105,9 +105,6 @@
     <ClCompile Include="InstVirtualQueryEx.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="CallContext.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="Instrumentation.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>

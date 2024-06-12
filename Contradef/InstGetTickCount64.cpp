@@ -5,19 +5,8 @@ UINT32 InstGetTickCount64::imgCallId = 0;
 UINT32 InstGetTickCount64::fcnCallId = 0;
 Notifier* InstGetTickCount64::globalNotifierPtr;
 
-VOID InstGetTickCount64::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstGetTickCount64::callContextMap, InstGetTickCount64::globalNotifierPtr);
-}
 
-VOID InstGetTickCount64::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstGetTickCount64::callContextMap, InstGetTickCount64::globalNotifierPtr);
-}
-
-VOID InstGetTickCount64::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstGetTickCount64::callContextMap, InstGetTickCount64::globalNotifierPtr);
-}
-
-VOID InstGetTickCount64::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress) {
+VOID InstGetTickCount64::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -29,23 +18,13 @@ VOID InstGetTickCount64::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, nullptr);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstGetTickCount64::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstGetTickCount64::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstGetTickCount64::globalNotifierPtr->Attach(instructionObserver);
-    InstGetTickCount64::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstGetTickCount64::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress) {
+VOID InstGetTickCount64::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -69,13 +48,15 @@ VOID InstGetTickCount64::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
         stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -94,7 +75,7 @@ VOID InstGetTickCount64::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_END);
@@ -103,7 +84,7 @@ VOID InstGetTickCount64::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

@@ -1,6 +1,6 @@
 .vs/
-Contradef/x64/Debug/**
-Contradef/x32/Debug/**
+/Contradef/x64/Debug/**
+/Contradef/x32/Debug/**
 *.obj
 contradef.out*
 /Contradef/x64/Debug/InstGetModuleFileNameA.obj

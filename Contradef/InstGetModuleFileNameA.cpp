@@ -5,20 +5,8 @@ UINT32 InstGetModuleFileNameA::imgCallId = 0;
 UINT32 InstGetModuleFileNameA::fcnCallId = 0;
 Notifier* InstGetModuleFileNameA::globalNotifierPtr;
 
-VOID InstGetModuleFileNameA::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstGetModuleFileNameA::callContextMap, InstGetModuleFileNameA::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstGetModuleFileNameA::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstGetModuleFileNameA::callContextMap, InstGetModuleFileNameA::globalNotifierPtr);
-}
-
-VOID InstGetModuleFileNameA::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstGetModuleFileNameA::callContextMap, InstGetModuleFileNameA::globalNotifierPtr);
-}
-
-VOID InstGetModuleFileNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
+VOID InstGetModuleFileNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
     if (!IsMainExecutable(returnAddress)) {
         return;
     }
@@ -34,23 +22,13 @@ VOID InstGetModuleFileNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstGetModuleFileNameA::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstGetModuleFileNameA::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstGetModuleFileNameA::globalNotifierPtr->Attach(instructionObserver);
-    InstGetModuleFileNameA::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstGetModuleFileNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
+VOID InstGetModuleFileNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
     
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -80,13 +58,15 @@ VOID InstGetModuleFileNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
         stringStream << "        lpFilename: " << ansiStringLpFilename << std::endl;
         stringStream << "        nSize: " << nSize << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -118,7 +98,7 @@ VOID InstGetModuleFileNameA::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hModule
@@ -130,7 +110,7 @@ VOID InstGetModuleFileNameA::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

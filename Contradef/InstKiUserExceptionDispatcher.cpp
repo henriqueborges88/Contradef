@@ -5,19 +5,8 @@ UINT32 InstKiUserExceptionDispatcher::imgCallId = 0;
 UINT32 InstKiUserExceptionDispatcher::fcnCallId = 0;
 Notifier* InstKiUserExceptionDispatcher::globalNotifierPtr;
 
-VOID InstKiUserExceptionDispatcher::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstKiUserExceptionDispatcher::callContextMap, InstKiUserExceptionDispatcher::globalNotifierPtr);
-}
 
-VOID InstKiUserExceptionDispatcher::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstKiUserExceptionDispatcher::callContextMap, InstKiUserExceptionDispatcher::globalNotifierPtr);
-}
-
-VOID InstKiUserExceptionDispatcher::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstKiUserExceptionDispatcher::callContextMap, InstKiUserExceptionDispatcher::globalNotifierPtr);
-}
-
-VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT ExceptionRecord, ADDRINT ContextRecord) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -34,23 +23,13 @@ VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, 
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstKiUserExceptionDispatcher::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstKiUserExceptionDispatcher::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstKiUserExceptionDispatcher::globalNotifierPtr->Attach(instructionObserver);
-    InstKiUserExceptionDispatcher::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT ExceptionRecord, ADDRINT ContextRecord) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -80,13 +59,15 @@ VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, A
         stringStream << "        ExceptionRecord: " << args->ExceptionRecord << std::endl;
         stringStream << "        ContextRecord: " << args->ContextRecord << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -105,7 +86,7 @@ VOID InstKiUserExceptionDispatcher::InstrumentFunction(RTN rtn, Notifier& global
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ExceptionRecord
@@ -116,7 +97,7 @@ VOID InstKiUserExceptionDispatcher::InstrumentFunction(RTN rtn, Notifier& global
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

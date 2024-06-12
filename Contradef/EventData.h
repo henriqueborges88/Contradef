@@ -8,7 +8,7 @@
 // Classe base para eventos
 class EventData {
 public:
-    enum EventType { Instruction, CallTrace, ExecutionCompleted };
+    enum EventType { ExecutionCompleted };
 
     EventType type; // Identificador do tipo de evento
 
@@ -20,41 +20,12 @@ public:
     virtual ~EventData() = default; // Destrutor virtual para herança
 };
 
-
-
-// Evento de instrução
-struct InstructionInformation {
-    std::queue<InstructionInformation>* instructionTrace;
-    ADDRINT address;
-    std::string disassembledInstruction;
-};
-class InstructionEventData : public EventData {
-public:
-    InstructionInformation instuctionInformation;
-
-    InstructionEventData(const InstructionInformation& iInformation)
-        : EventData(Instruction), instuctionInformation(iInformation) {}
-};
-
 // Evento de trace
 struct CallRtnInformation {
     ADDRINT address;
     std::string functionName;
     std::string imgName;
     std::string rtnCallerName;
-};
-
-struct CallTraceInformation {
-    std::map<THREADID, std::deque<CallRtnInformation>>* threadCallTraces;
-    CallRtnInformation callRtnInformation;
-};
-
-class TraceEventData : public EventData {
-public:
-    CallTraceInformation callTraceInfo;
-
-    TraceEventData(const CallTraceInformation& cTraceInfo)
-        : EventData(CallTrace), callTraceInfo(cTraceInfo) {}
 };
 
 // Evento de finalização de execução

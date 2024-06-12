@@ -5,20 +5,8 @@ UINT32 InstRegQueryValueW::imgCallId = 0;
 UINT32 InstRegQueryValueW::fcnCallId = 0;
 Notifier* InstRegQueryValueW::globalNotifierPtr;
 
-VOID InstRegQueryValueW::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstRegQueryValueW::callContextMap, InstRegQueryValueW::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstRegQueryValueW::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstRegQueryValueW::callContextMap, InstRegQueryValueW::globalNotifierPtr);
-}
-
-VOID InstRegQueryValueW::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstRegQueryValueW::callContextMap, InstRegQueryValueW::globalNotifierPtr);
-}
-
-VOID InstRegQueryValueW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT lpValue, ADDRINT lpcbValue) {
+VOID InstRegQueryValueW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT lpValue, ADDRINT lpcbValue) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -36,23 +24,13 @@ VOID InstRegQueryValueW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstRegQueryValueW::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstRegQueryValueW::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstRegQueryValueW::globalNotifierPtr->Attach(instructionObserver);
-    InstRegQueryValueW::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstRegQueryValueW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT lpValue, ADDRINT lpcbValue) {
+VOID InstRegQueryValueW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT lpSubKey, ADDRINT lpValue, ADDRINT lpcbValue) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -85,13 +63,15 @@ VOID InstRegQueryValueW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "        lpValue: " << WStringToString(ansiStringlpValue) << std::endl;
         stringStream << "        lpcbValue: " << WStringToString(ansiStringlpcbValue) << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -111,7 +91,7 @@ VOID InstRegQueryValueW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
@@ -124,7 +104,7 @@ VOID InstRegQueryValueW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

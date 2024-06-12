@@ -71,20 +71,8 @@ UINT32 InstNtQueryInformationProcess::imgCallId = 0;
 UINT32 InstNtQueryInformationProcess::fcnCallId = 0;
 Notifier* InstNtQueryInformationProcess::globalNotifierPtr;
 
-VOID InstNtQueryInformationProcess::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtQueryInformationProcess::callContextMap, InstNtQueryInformationProcess::globalNotifierPtr);
-}
 
-// Callbacks que ser�o chamados quando um evento for notificado
-VOID InstNtQueryInformationProcess::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtQueryInformationProcess::callContextMap, InstNtQueryInformationProcess::globalNotifierPtr);
-}
-
-VOID InstNtQueryInformationProcess::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtQueryInformationProcess::callContextMap, InstNtQueryInformationProcess::globalNotifierPtr);
-}
-
-VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
+VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -103,24 +91,14 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, 
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtQueryInformationProcess::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtQueryInformationProcess::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtQueryInformationProcess::globalNotifierPtr->Attach(instructionObserver);
-    InstNtQueryInformationProcess::globalNotifierPtr->Attach(traceObserver);
-
+    
 }
 
-VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
+VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -168,6 +146,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
 
             }
         }
+        PIN_UnlockClient();
     }
     
     retVal = *retValAddr;
@@ -329,14 +308,8 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         stringStream << "    Endere�o do valor em mem�ria: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
         stringStream << "    Valor da flag NtGlobalFlag: " << valueAtNtGlobalFlagAddress << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        std::string callerFcn = "";
-        RTN rtnCaller = RTN_FindByAddress(returnAddr);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
         PIN_UnlockClient();
-        callContext->defaultPrintReady = true;
+
         InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS = 0;
     }
 }
@@ -422,7 +395,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
@@ -436,7 +409,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

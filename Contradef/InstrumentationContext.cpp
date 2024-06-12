@@ -1,16 +1,16 @@
-#include "InstrumentationContext.h"
+ï»¿#include "InstrumentationContext.h"
 #include "Notifier.h"
 
 
 InstrumentationContext::InstrumentationContext() {
-    //TODO: Alterar para o modo de instrumentação Probed (sonda)
+    //TODO: Alterar para o modo de instrumentaÃ§Ã£o Probed (sonda)
 
     /*
     
     * Com Problema
-    // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
+    // Com Problema, nÃ£o chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after nÃ£o estÃ¡ sendo invocado, jÃ¡ tentei removendo os parametros. O CB After funciona no modo Probed
 
-    * Falta implementar a lógica de detecção
+    * Falta implementar a lÃ³gica de detecÃ§Ã£o
     strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
     strategyMap["EnumProcessModulesEx"] = &InstEnumProcessModulesEx::InstrumentFunction;
     strategyMap["EnumProcessModules"] = &InstEnumProcessModules::InstrumentFunction;
@@ -30,12 +30,12 @@ InstrumentationContext::InstrumentationContext() {
     //strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction;
     //strategyMap["GetModuleFileNameA"] = &InstGetModuleFileNameA::InstrumentFunction;
     //strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
-   //strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
+    //strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
     //strategyMap["GetWindowTextW"] = &InstGetWindowTextW::InstrumentFunction;
     //strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
     //strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
     //strategyMap["OutputDebugStringW"] = &InstOutputDebugStringW::InstrumentFunction;
-    strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+    //strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
     
     
     // Experimentando
@@ -76,7 +76,7 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["NtQueryKey"] = &InstNtQueryKey::InstrumentFunction;
 
 
-
+    /*
     strategyMap["FindWindowA"] = &InstFindWindowA::InstrumentFunction;
     strategyMap["FindWindowW"] = &InstFindWindowW::InstrumentFunction;
     strategyMap["KiUserExceptionDispatcher"] = &InstKiUserExceptionDispatcher::InstrumentFunction;
@@ -132,13 +132,13 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["NtQueryVirtualMemory"] = &InstNtQueryVirtualMemory::InstrumentFunction;
     strategyMap["ZwQueryVirtualMemory"] = &InstNtQueryVirtualMemory::InstrumentFunction;
 
-
+    */
 
 
 }
 
 InstrumentationContext::~InstrumentationContext() {
-    // Não é necessário deletar os ponteiros de função
+    // NÃ£o Ã© necessÃ¡rio deletar os ponteiros de funÃ§Ã£o
 
     strategyMap.clear();  // Opcional, limpa o mapa
 }
@@ -155,12 +155,20 @@ bool InstrumentationContext::HasStrategy(const std::string& name) const {
 }
 
 void InstrumentationContext::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
+
     std::string moduleName = IMG_Name(img);
-    for (const auto& pair : strategyMap) {
-        RTN rtn = RTN_FindByName(img, pair.first.c_str());
+    for (SYM sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
+        RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
         if (RTN_Valid(rtn)) {
-            RTNFunction func = pair.second;
-            func(rtn, globalNotifier);
+            std::string funcName = RTN_Name(rtn);
+            for (const auto& pair : strategyMap) {
+                std::string strategyName = pair.first.c_str();
+                if (strategyName == funcName) {
+                    RTNFunction func = pair.second;
+                    func(rtn, globalNotifier);
+                }
+            }
         }
     }
+
 }

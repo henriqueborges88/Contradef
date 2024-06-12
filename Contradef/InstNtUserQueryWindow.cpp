@@ -5,19 +5,8 @@ UINT32 InstNtUserQueryWindow::imgCallId = 0;
 UINT32 InstNtUserQueryWindow::fcnCallId = 0;
 Notifier* InstNtUserQueryWindow::globalNotifierPtr;
 
-VOID InstNtUserQueryWindow::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtUserQueryWindow::callContextMap, InstNtUserQueryWindow::globalNotifierPtr);
-}
 
-VOID InstNtUserQueryWindow::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtUserQueryWindow::callContextMap, InstNtUserQueryWindow::globalNotifierPtr);
-}
-
-VOID InstNtUserQueryWindow::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtUserQueryWindow::callContextMap, InstNtUserQueryWindow::globalNotifierPtr);
-}
-
-VOID InstNtUserQueryWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstNtUserQueryWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hwnd, ADDRINT Index) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -34,23 +23,13 @@ VOID InstNtUserQueryWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtUserQueryWindow::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtUserQueryWindow::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtUserQueryWindow::globalNotifierPtr->Attach(instructionObserver);
-    InstNtUserQueryWindow::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtUserQueryWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstNtUserQueryWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT hwnd, ADDRINT Index) {
 
     if (!IsMainExecutable(returnAddress)) {
@@ -80,13 +59,15 @@ VOID InstNtUserQueryWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
         stringStream << "        hwnd: " << args->hwnd << std::endl;
         stringStream << "        Index: " << args->Index << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -105,7 +86,7 @@ VOID InstNtUserQueryWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifier
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hwnd
@@ -116,7 +97,7 @@ VOID InstNtUserQueryWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifier
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

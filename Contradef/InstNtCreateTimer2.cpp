@@ -5,19 +5,8 @@ UINT32 InstNtCreateTimer2::imgCallId = 0;
 UINT32 InstNtCreateTimer2::fcnCallId = 0;
 Notifier* InstNtCreateTimer2::globalNotifierPtr;
 
-VOID InstNtCreateTimer2::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstNtCreateTimer2::callContextMap, InstNtCreateTimer2::globalNotifierPtr);
-}
 
-VOID InstNtCreateTimer2::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstNtCreateTimer2::callContextMap, InstNtCreateTimer2::globalNotifierPtr);
-}
-
-VOID InstNtCreateTimer2::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstNtCreateTimer2::callContextMap, InstNtCreateTimer2::globalNotifierPtr);
-}
-
-VOID InstNtCreateTimer2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+VOID InstNtCreateTimer2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
     ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3) {
 
@@ -41,23 +30,13 @@ VOID InstNtCreateTimer2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstNtCreateTimer2::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstNtCreateTimer2::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstNtCreateTimer2::globalNotifierPtr->Attach(instructionObserver);
-    InstNtCreateTimer2::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstNtCreateTimer2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+VOID InstNtCreateTimer2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
     ADDRINT TimerHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT TimerType,
     ADDRINT TimerAttributes, ADDRINT Anonymous1, ADDRINT Anonymous2, ADDRINT Anonymous3) {
 
@@ -93,13 +72,15 @@ VOID InstNtCreateTimer2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "        Anonymous2: " << args->Anonymous2 << std::endl;
         stringStream << "        Anonymous3: " << args->Anonymous3 << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(returnAddress);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -117,7 +98,7 @@ VOID InstNtCreateTimer2::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // TimerHandle
@@ -134,7 +115,7 @@ VOID InstNtCreateTimer2::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

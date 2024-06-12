@@ -175,7 +175,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="CallContext.cpp" />
     <ClCompile Include="Contradef.cpp" />
     <ClCompile Include="InstBaseRegEnumKey.cpp" />
     <ClCompile Include="InstBaseRegOpenKey.cpp" />

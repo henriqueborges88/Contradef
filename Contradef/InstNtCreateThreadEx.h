@@ -42,11 +42,11 @@ private:
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress,
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
         ADDRINT ThreadHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT ProcessHandle,
         ADDRINT StartAddress, ADDRINT Parameter, ADDRINT CreateFlags, ADDRINT ZeroBits,
         ADDRINT StackSize, ADDRINT MaximumStackSize, ADDRINT AttributeList);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress,
         ADDRINT ThreadHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes, ADDRINT ProcessHandle,
         ADDRINT StartAddress, ADDRINT Parameter, ADDRINT CreateFlags, ADDRINT ZeroBits,
         ADDRINT StackSize, ADDRINT MaximumStackSize, ADDRINT AttributeList);

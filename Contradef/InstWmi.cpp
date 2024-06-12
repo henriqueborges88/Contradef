@@ -5,19 +5,8 @@ UINT32 InstWmi::imgCallId = 0;
 UINT32 InstWmi::fcnCallId = 0;
 Notifier* InstWmi::globalNotifierPtr;
 
-VOID InstWmi::CheckPrintConditions(CallContext* callContext) {
-    CheckPrintConditionsCC(callContext, &InstWmi::callContextMap, InstWmi::globalNotifierPtr);
-}
 
-VOID InstWmi::HandleInstructionEvent(const EventData* data, void* context) {
-    HandleInstructionEventCC(data, context, &InstWmi::callContextMap, InstWmi::globalNotifierPtr);
-}
-
-VOID InstWmi::HandleTraceEvent(const EventData* data, void* context) {
-    HandleTraceEventCC(data, context, &InstWmi::callContextMap, InstWmi::globalNotifierPtr);
-}
-
-VOID InstWmi::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4) {
+VOID InstWmi::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -35,23 +24,13 @@ VOID InstWmi::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, R
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    // Criando observadores dinamicamente com o contexto correto
-    auto* instructionObserver = new Observer(InstWmi::HandleInstructionEvent, callContext);
-    auto* traceObserver = new Observer(InstWmi::HandleTraceEvent, callContext);
-
-    // Salvando os observadores no CallContext para futura limpeza
-    callContext->instructionObserver = instructionObserver;
-    callContext->traceObserver = traceObserver;
-
+    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    // Anexa os observers ao notificador
-    InstWmi::globalNotifierPtr->Attach(instructionObserver);
-    InstWmi::globalNotifierPtr->Attach(traceObserver);
-}
+    }
 
-VOID InstWmi::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RTN* rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4) {
+VOID InstWmi::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4) {
 
     if (!IsMainExecutable(returnAddress)) {
         return;
@@ -82,13 +61,15 @@ VOID InstWmi::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, RT
         stringStream << "        arg3: " << args->arg3 << std::endl;
         stringStream << "        arg4: " << args->arg4 << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
-        // Instrumentar todas as instru��es da rotina chamadora
-        RTN rtnCaller = RTN_FindByAddress(*retValAddr);
-        if (RTN_Valid(rtnCaller)) {
-            LogRoutineInstructions(rtnCaller, stringStream, callContext->rtnAddress);
-        }
-        callContext->defaultPrintReady = true;
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 
@@ -108,7 +89,7 @@ VOID InstWmi::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP, // Endere�o da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // arg1
@@ -121,7 +102,7 @@ VOID InstWmi::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_PTR, static_cast<void*>(&rtn),
+            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endere�o da fun��o chamante

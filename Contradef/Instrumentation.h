@@ -11,4 +11,3 @@ extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido e
 
 BOOL IsMainExecutable(ADDRINT address);
 ADDRINT GetRtnAddr(ADDRINT instAddress);
-VOID LogRoutineInstructions(RTN rtnCaller, std::stringstream& stringStream, ADDRINT rtnAddress);
