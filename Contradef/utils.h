@@ -3,6 +3,8 @@
 #define UTILS_H
 
 #include "pin.H"
+#include <clocale>
+#include "CallContext.h"
 #include <iostream>
 #include <string>
 #include <cctype>
@@ -10,10 +12,12 @@
 
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
+std::string ConvertWideStringToString(const std::wstring& wstr);
 std::wstring ReadWideString(ADDRINT addr);
 std::string WStringToString(const std::wstring& wstr);
 std::string ExtractModuleName(const std::string& fullPath);
 std::string toUpperCase(const std::string& str);
 VOID PrintTrace(std::deque<std::string>& rtnTrace);
+void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap);
 
 #endif // UTILS_H

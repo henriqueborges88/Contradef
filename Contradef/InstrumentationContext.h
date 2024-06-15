@@ -83,6 +83,11 @@
 #include "InstNtQueryVirtualMemory.h"
 #include "InstNtCreateTimer2.h"
 #include "InstNtQueryKey.h"
+#include "InstNtQuerySystemInformation.h"
+#include "InstEnumProcessModulesEx.h"
+#include "InstEnumProcessModules.h"
+#include "InstVirtualProtect.h"
+#include "InstVirtualProtectEx.h"
 
 
 

@@ -5,7 +5,7 @@ UINT32 InstNtOpenKey::imgCallId = 0;
 UINT32 InstNtOpenKey::fcnCallId = 0;
 Notifier* InstNtOpenKey::globalNotifierPtr;
 
-
+static std::string strc = "";
 VOID InstNtOpenKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT KeyHandle, ADDRINT DesiredAccess, ADDRINT ObjectAttributes) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
@@ -24,7 +24,11 @@ VOID InstNtOpenKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddr
     if (objAttr != nullptr && objAttr->ObjectName != nullptr) {
         UNICODE_STRING* unicodeStr = objAttr->ObjectName;
         std::wstring keyPath(unicodeStr->Buffer, unicodeStr->Length / sizeof(WCHAR));
-        args.keyPathStr = WStringToString(keyPath);
+        args.keyPathStr = std::string(WStringToString(keyPath));
+        strc = std::string(WStringToString(keyPath));
+    }
+    else {
+        args.keyPathStr = "";
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
@@ -63,23 +67,21 @@ VOID InstNtOpenKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
         stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Par�metros: " << std::endl;
         stringStream << "        KeyHandle: " << args->KeyHandle << std::endl;
-        stringStream << "        keyPath: " << args->keyPathStr << std::endl;
+        // Verificar erro de memoria e usar args->keyPathStr
+        stringStream << "        keyPath: " << strc << std::endl; // args->keyPathStr << std::endl;
         stringStream << "        DesiredAccess: " << args->DesiredAccess << std::endl;
         stringStream << "        ObjectAttributes: " << args->ObjectAttributes << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        if (isRegistryKeyPartInList(args->keyPathStr)) {
-            std::cout << "A chave de registro est� na lista." << std::endl;
-            // Contramedida pode ser alterando o valor de retorno para algumas chaves
-            //*retValAddr = 0;
-            //alterar o valor de retorno
-            //verificar a necessidade de chamar RegCloseKey para encerrar o handle
-            //se possivel, alterar o valor da chave de registro antes da chamada, colocar uma chave que n�o existe
-        }
-        else {
-            std::cout << "A chave de registro n�o est� na lista." << std::endl;
-        }
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
 
+        delete callContext;
+        PIN_UnlockClient();
     }
 
     fcnCallId++;

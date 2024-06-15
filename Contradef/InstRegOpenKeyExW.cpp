@@ -31,7 +31,7 @@ VOID InstRegOpenKeyExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
         size_t len = wcslen(wideCharStr);
 
         if (len > 0) {
-            wideCharStr[len - 1] = L'�';
+            wideCharStr[len - 1] = L'q';
             args.isModified = true;
         }
     }
@@ -66,15 +66,15 @@ VOID InstRegOpenKeyExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         std::stringstream& stringStream = callContext->stringStream;
         std::wstring wideStringLpSubKey = ConvertAddrToWideString(args->lpSubKey);
 
-        ////CONTRAMEDIDA
-        if (args->isModified) {
-            wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(lpSubKey);
-            size_t len = wcslen(wideCharStr);
+        ////CONTRAMEDIDA REVERTENDO (FALAHNDO)
+        //if (args->isModified) {
+        //    wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(lpSubKey);
+        //    size_t len = wcslen(wideCharStr);
 
-            if (len > 0) {
-                wideCharStr[len - 1] = args->originalLastChar;
-            }
-        }
+        //    if (len > 0) {
+        //        wideCharStr[len - 1] = args->originalLastChar;
+        //    }
+        //}
         ////
 
         // Obter a RTN da instru��o atual

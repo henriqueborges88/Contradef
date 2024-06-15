@@ -96,7 +96,7 @@ VOID InstRegQueryValueExW::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
     }
 
    std::string rtnName = RTN_Name(rtn);
-    if (RTN_Name(rtn) == "GetModuleHandleA") {
+    if (RTN_Name(rtn) == "RegQueryValueExW") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 

@@ -69,18 +69,15 @@ VOID InstBaseRegEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         stringStream << "        lpcClass: " << args->lpcClass << std::endl;
         stringStream << "        lpftLastWriteTime: " << args->lpftLastWriteTime << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        if (isRegistryKeyPartInList(ansiStringLpName)) {
-            std::cout << "A chave de registro est� na lista." << std::endl;
-            // Contramedida pode ser alterando o valor de retorno para algumas chaves
-            //*retValAddr = 0;
-            //alterar o valor de retorno
-            //verificar a necessidade de chamar RegCloseKey para encerrar o handle
-            //se poss�vel, alterar o valor da chave de registro antes da chamada, colocar uma chave que n�o existe
-        }
-        else {
-            std::cout << "A chave de registro n�o est� na lista." << std::endl;
-        }
+        stringStream << "[*] Conclu�do" << std::endl << std::endl;
 
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
         PIN_UnlockClient();
     }
 

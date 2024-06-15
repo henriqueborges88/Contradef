@@ -40,6 +40,21 @@ std::string WStringToString(const std::wstring& wstr) {
     return str;
 }
 
+// Função para converter std::wstring para std::string
+std::string ConvertWideStringToString(const std::wstring& wstr) {
+    std::setlocale(LC_ALL, "en_US.UTF-8"); // Definir o local adequado
+
+    std::mbstate_t state = std::mbstate_t();
+    const wchar_t* src = wstr.c_str();
+    size_t len = std::wcsrtombs(nullptr, &src, 0, &state) + 1;
+
+    std::string dest(len, '\0');
+    std::wcsrtombs(&dest[0], &src, len, &state);
+    dest.resize(len - 1); // Remover o terminador nulo adicionado
+
+    return dest;
+}
+
 std::string ExtractModuleName(const std::string& fullPath) {
     size_t lastSlashPos = fullPath.find_last_of("\\/");
     if (lastSlashPos != std::string::npos) {
@@ -64,3 +79,22 @@ VOID PrintTrace(std::deque<std::string>& threadTraces) {
         std::cout << "  " << name << std::endl;
     }
 }
+
+
+void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap) {
+
+    for (const auto& pair : callContextMap) {
+        const CallContextKey& key = pair.first;
+        const CallContext* context = pair.second;
+
+        std::cout << "CallContextKey: (callCtxId: " << key.callId
+            << ", tid: " << key.threadId << ")" << std::endl;
+
+        std::cout << "  CallContext: " << std::endl;
+        std::cout << "    callCtxId: " << context->callId << std::endl;
+        std::cout << "    tid: " << context->threadId << std::endl;
+        std::cout << "    rtnAddress: " << std::hex << context->rtnAddress << std::dec << std::endl;
+        std::cout << "    stringStream: " << context->stringStream.str() << std::endl;
+    }
+}
+

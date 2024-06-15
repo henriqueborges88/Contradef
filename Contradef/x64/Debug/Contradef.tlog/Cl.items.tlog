@@ -7,6 +7,8 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstCoCreateInstance.cpp;C:\User
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcessAsUser.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateProcessAsUser.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateService.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateService.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstEnumProcessModules.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstEnumProcessModulesEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstFindWindowA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstFindWindowA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstFindWindowW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstFindWindowW.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstGetForegroundWindow.obj
@@ -38,6 +40,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenProcess.cpp;C:\Users\h
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationThread.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationThread.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryKey.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryObject.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryObject.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQuerySystemInformation.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemTime.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQuerySystemTime.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryValueKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryValueKey.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryVirtualMemory.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryVirtualMemory.obj
@@ -71,6 +74,8 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstrumentationContext.cpp;C:\Us
 C:\Users\henri\source\repos\Contradef\Contradef\InstShellExecute.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstShellExecute.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstShellExecuteEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstShellExecuteEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstStartService.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstStartService.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualProtect.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualProtectEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualQuery.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstVirtualQueryEx.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstWinExec.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstWinExec.obj

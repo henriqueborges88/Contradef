@@ -5,7 +5,6 @@ UINT32 InstNtClose::imgCallId = 0;
 UINT32 InstNtClose::fcnCallId = 0;
 Notifier* InstNtClose::globalNotifierPtr;
 
-
 VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT Handle) {
 
@@ -77,7 +76,6 @@ VOID InstNtClose::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
     std::string rtnName = RTN_Name(rtn);
 
     if (rtnName == "NtClose" || rtnName == "ZwClose") {
-        std::cout << "Instrumentada " << rtnName << std::endl;
 
         imgCallId++;
         globalNotifierPtr = &globalNotifier;

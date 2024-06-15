@@ -1,13 +1,13 @@
 #include "InstCheckRemoteDebuggerPresent.h"
+#include <iostream>
 
+// Inicializações estáticas
 std::map<CallContextKey, CallContext*> InstCheckRemoteDebuggerPresent::callContextMap;
 UINT32 InstCheckRemoteDebuggerPresent::imgCallId = 0;
 UINT32 InstCheckRemoteDebuggerPresent::fcnCallId = 0;
 Notifier* InstCheckRemoteDebuggerPresent::globalNotifierPtr;
 
-
-VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
-
+VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -18,26 +18,19 @@ VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId,
     args.hProcess = hProcess;
     args.pbDebuggerPresent = pbDebuggerPresent;
 
-    // Verificar por que esta declara��o mantem o endere�o correto de pbDebuggerPresent no CB CallbackAfter 
-    BOOL* debuggerPresent = reinterpret_cast<BOOL*>(args.pbDebuggerPresent);
-
     UINT32 callCtxId = callId * 100 + fcnCallId;
-
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    }
+}
 
-VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
-    
+VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
-    // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -45,27 +38,30 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar par�metros
-        const InstCheckRemoteDebuggerPresentArgs* args = reinterpret_cast<InstCheckRemoteDebuggerPresentArgs*>(callContext->functionArgs);
+        const InstCheckRemoteDebuggerPresentArgs* args = reinterpret_cast<const InstCheckRemoteDebuggerPresentArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        BOOL* debuggerPresent = reinterpret_cast<BOOL*>(args->pbDebuggerPresent);
-        // Obter a RTN da instru��o atual
+
+        PBOOL debuggerPresent = reinterpret_cast<PBOOL>(args->pbDebuggerPresent);
+
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Par�metros: " << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parâmetros: " << std::endl;
         stringStream << "        hProcess: " << args->hProcess << std::endl;
-        stringStream << "        pbDebuggerPresent: " << *debuggerPresent << std::endl;
+
+        std::string dp = "NULL";
+        if (debuggerPresent != nullptr) {
+            dp = (*debuggerPresent ? "TRUE" : "FALSE");
+        }
+        stringStream << "        pbDebuggerPresent: " << dp << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Conclu�do" << std::endl << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
-        // Cria evento
         ExecutionEventData executionEvent(executionCompletedInfo);
-        // Notifica os observers
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
@@ -76,7 +72,6 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
 }
 
 VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
-
     SEC sec = RTN_Sec(rtn);
     IMG img = SEC_Img(sec);
     if (IMG_Valid(img)) {
@@ -90,7 +85,7 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globa
         return;
     }
 
-   std::string rtnName = RTN_Name(rtn);
+    std::string rtnName = RTN_Name(rtn);
     if (rtnName == "CheckRemoteDebuggerPresent") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
@@ -103,7 +98,7 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globa
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // pbDebuggerPresent
             IARG_END);
@@ -115,11 +110,10 @@ VOID InstCheckRemoteDebuggerPresent::InstrumentFunction(RTN rtn, Notifier& globa
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hProcess
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // pbDebuggerPresent
             IARG_END);
         RTN_Close(rtn);
     }
-
 }

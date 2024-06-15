@@ -184,6 +184,8 @@
     <ClCompile Include="InstCreateProcess.cpp" />
     <ClCompile Include="InstCreateProcessAsUser.cpp" />
     <ClCompile Include="InstCreateService.cpp" />
+    <ClCompile Include="InstEnumProcessModules.cpp" />
+    <ClCompile Include="InstEnumProcessModulesEx.cpp" />
     <ClCompile Include="InstFindWindowA.cpp" />
     <ClCompile Include="InstFindWindowW.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
@@ -215,6 +217,7 @@
     <ClCompile Include="InstNtQueryInformationThread.cpp" />
     <ClCompile Include="InstNtQueryKey.cpp" />
     <ClCompile Include="InstNtQueryObject.cpp" />
+    <ClCompile Include="InstNtQuerySystemInformation.cpp" />
     <ClCompile Include="InstNtQuerySystemTime.cpp" />
     <ClCompile Include="InstNtQueryValueKey.cpp" />
     <ClCompile Include="InstNtQueryVirtualMemory.cpp" />
@@ -248,6 +251,8 @@
     <ClCompile Include="InstShellExecute.cpp" />
     <ClCompile Include="InstShellExecuteEx.cpp" />
     <ClCompile Include="InstStartService.cpp" />
+    <ClCompile Include="InstVirtualProtect.cpp" />
+    <ClCompile Include="InstVirtualProtectEx.cpp" />
     <ClCompile Include="InstVirtualQuery.cpp" />
     <ClCompile Include="InstVirtualQueryEx.cpp" />
     <ClCompile Include="InstWinExec.cpp" />
@@ -268,6 +273,8 @@
     <ClInclude Include="InstCreateProcess.h" />
     <ClInclude Include="InstCreateProcessAsUser.h" />
     <ClInclude Include="InstCreateService.h" />
+    <ClInclude Include="InstEnumProcessModules.h" />
+    <ClInclude Include="InstEnumProcessModulesEx.h" />
     <ClInclude Include="InstFindWindowA.h" />
     <ClInclude Include="InstFindWindowW.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
@@ -298,6 +305,7 @@
     <ClInclude Include="InstNtOpenProcess.h" />
     <ClInclude Include="InstNtQueryInformationThread.h" />
     <ClInclude Include="InstNtQueryObject.h" />
+    <ClInclude Include="InstNtQuerySystemInformation.h" />
     <ClInclude Include="InstNtQuerySystemTime.h" />
     <ClInclude Include="InstNtQueryValueKey.h" />
     <ClInclude Include="InstNtSetContextThread.h" />
@@ -330,6 +338,8 @@
     <ClInclude Include="InstShellExecute.h" />
     <ClInclude Include="InstShellExecuteEx.h" />
     <ClInclude Include="InstStartService.h" />
+    <ClInclude Include="InstVirtualProtect.h" />
+    <ClInclude Include="InstVirtualProtectEx.h" />
     <ClInclude Include="InstVirtualQuery.h" />
     <ClInclude Include="InstVirtualQueryEx.h" />
     <ClInclude Include="InstWinExec.h" />

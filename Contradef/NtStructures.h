@@ -53,6 +53,7 @@ typedef void* HINSTANCE;
 typedef void* LPVOID;
 typedef void* HKEY;
 
+typedef BOOL near* PBOOL;
 typedef int LONG;
 typedef void* PVOID;
 typedef unsigned short USHORT;
