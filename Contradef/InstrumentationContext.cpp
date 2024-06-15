@@ -7,23 +7,9 @@ InstrumentationContext::InstrumentationContext() {
 
     // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
 
-    
-    strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
-    strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
-    strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
-    strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction;
-    strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction;
-    strategyMap["GetModuleFileNameA"] = &InstGetModuleFileNameA::InstrumentFunction;
-    strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
-    strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
-    strategyMap["GetWindowTextW"] = &InstGetWindowTextW::InstrumentFunction;
-    strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
-    strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
-    strategyMap["OutputDebugStringW"] = &InstOutputDebugStringW::InstrumentFunction;
+    // Quase Pronto
     strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
     
-    
-
 
     // Registro do Windows
     strategyMap["BaseRegOpenKey"] = &InstBaseRegOpenKey::InstrumentFunction;
@@ -54,7 +40,6 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["CoCreateInstance"] = &InstWmi::InstrumentFunction;
     strategyMap["ConnectServer"] = &InstWmi::InstrumentFunction;
     strategyMap["ExecQuery"] = &InstWmi::InstrumentFunction;
-
     strategyMap["CoCreateInstanceEx"] = &InstWmiEx::InstrumentFunction;
     strategyMap["ConnectServer"] = &InstWmiEx::InstrumentFunction;
     strategyMap["ExecQuery"] = &InstWmiEx::InstrumentFunction;
@@ -62,8 +47,21 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["GetObjectA"] = &InstWmiEx::InstrumentFunction;
     strategyMap["GetObjectW"] = &InstWmiEx::InstrumentFunction;
     // Fin Experimentando
+
     
     // Falta implementar a lógica de detecção
+    strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
+    strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
+    strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
+    strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction;
+    strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction;
+    strategyMap["GetModuleFileNameA"] = &InstGetModuleFileNameA::InstrumentFunction;
+    strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
+    strategyMap["GetWindowTextA"] = &InstGetWindowTextA::InstrumentFunction;
+    strategyMap["GetWindowTextW"] = &InstGetWindowTextW::InstrumentFunction;
+    strategyMap["IsDebuggerPresent"] = &InstIsDebuggerPresent::InstrumentFunction;
+    strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
+    strategyMap["OutputDebugStringW"] = &InstOutputDebugStringW::InstrumentFunction;
     strategyMap["FindWindowA"] = &InstFindWindowA::InstrumentFunction;
     strategyMap["FindWindowW"] = &InstFindWindowW::InstrumentFunction;
     strategyMap["KiUserExceptionDispatcher"] = &InstKiUserExceptionDispatcher::InstrumentFunction;
@@ -119,6 +117,7 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["NtQueryVirtualMemory"] = &InstNtQueryVirtualMemory::InstrumentFunction;
     strategyMap["ZwQueryVirtualMemory"] = &InstNtQueryVirtualMemory::InstrumentFunction;
     strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["ZwQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
     strategyMap["EnumProcessModulesEx"] = &InstEnumProcessModulesEx::InstrumentFunction;
     strategyMap["EnumProcessModules"] = &InstEnumProcessModules::InstrumentFunction;
     strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
