@@ -60,6 +60,9 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
+        // CONTRAMEDIDA
+        *debuggerPresent = 0;
+
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);
         globalNotifierPtr->NotifyAll(&executionEvent);

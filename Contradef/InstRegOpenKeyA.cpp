@@ -28,7 +28,7 @@ VOID InstRegOpenKeyA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
         size_t len = strlen(ansiCharStr);
 
         if (len > 0) {
-            ansiCharStr[len - 1] = '�';
+            ansiCharStr[len - 1] = 'q';
             args.isModified = true;
         }
     }

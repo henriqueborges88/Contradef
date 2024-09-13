@@ -1,0 +1,184 @@
+﻿  Contradef.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\Contradef.cpp(1,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstBaseRegEnumKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstBaseRegEnumKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstBaseRegOpenKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstBaseRegOpenKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstBlockInput.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstBlockInput.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstCheckRemoteDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstCoCreateInstance.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstCoCreateInstance.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstCreateProcess.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcess.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstCreateProcessAsUser.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcessAsUser.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstCreateService.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstCreateService.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstEnumProcessModules.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModules.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstEnumProcessModulesEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstEnumProcessModulesEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstFindWindowA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstFindWindowA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstFindWindowW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstFindWindowW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetForegroundWindow.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetForegroundWindow.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetLocalTime.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetLocalTime.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetModuleFileNameExA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameExA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetModuleFileNameExW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameExW.h(4,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetModuleFileNameW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetModuleFileNameA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleFileNameA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetModuleHandleA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Gerando Código...
+  Compilando...
+  InstGetModuleHandleW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetModuleHandleW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetSystemTime.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetSystemTime.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetTickCount.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetTickCount.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetTickCount64.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetTickCount64.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetWindowTextA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetWindowTextA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstGetWindowTextW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstGetWindowTextW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstIsDebuggerPresent.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstIsDebuggerPresent.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstKiUserExceptionDispatcher.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstKiUserExceptionDispatcher.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstLoadLibrary.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstLoadLibrary.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstLoadLibraryEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstLoadLibraryEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtClose.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtClose.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtContinue.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtContinue.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtCreateProcessEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtCreateProcessEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtCreateThreadEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtCreateThreadEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtCreateTimer2.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtCreateTimer2.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtEnumKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtEnumKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtGetContextThread.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtGetContextThread.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtOpenKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtOpenProcess.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenProcess.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryInformationThread.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationThread.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Gerando Código...
+  Compilando...
+  InstNtQueryKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryObject.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryObject.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryPerformanceCounter.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryPerformanceCounter.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQuerySystemInformation.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQuerySystemTime.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemTime.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryValueKey.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryValueKey.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryVirtualMemory.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryVirtualMemory.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryVirtualMemory.h
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryVirtualMemory.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtSetContextThread.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtSetContextThread.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtSetDebugFilterState.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtSetDebugFilterState.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtSetInformationProcess.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtSetInformationProcess.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtSetInformationThread.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtSetInformationThread.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtUserBuildHwndList.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtUserBuildHwndList.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtUserFindWindowEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtUserFindWindowEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtUserQueryWindow.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtUserQueryWindow.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtYieldExecution.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtYieldExecution.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstOpenProcess.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstOpenProcess.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstOutputDebugStringA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugStringA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstOutputDebugStringW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugStringW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstQueryPerformanceCounter.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Gerando Código...
+  Compilando...
+  InstRegEnumKeyA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegEnumKeyExA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyExA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegEnumKeyExW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyExW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegEnumKeyW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegOpenKeyA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegOpenKeyExA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyExA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegOpenKeyExW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyExW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegOpenKeyW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegQueryValueA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegQueryValueExA.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExA.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegQueryValueExW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstNtQueryInformationProcess.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstRegQueryValueW.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueW.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Instrumentation.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\Instrumentation.h(3,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstrumentationContext.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstrumentationStrategy.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstShellExecute.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstShellExecute.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstShellExecuteEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstShellExecuteEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstStartService.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstStartService.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstVirtualProtect.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtect.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstVirtualProtectEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualProtectEx.h(6,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Gerando Código...
+  Compilando...
+  InstVirtualQuery.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQuery.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstVirtualQueryEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstWinExec.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstWinExec.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstWmi.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstWmi.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  InstWmiEx.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\InstWmiEx.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  params.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\params.h(2,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  RegistryKeys.cpp
+  utils.cpp
+C:\Users\henri\source\repos\Contradef\Contradef\utils.h(5,10): fatal  error C1083: Não é possível abrir arquivo incluir: 'pin.H': No such file or directory
+  Gerando Código...

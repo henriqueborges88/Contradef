@@ -36,7 +36,7 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["ZwQueryKey"] = &InstNtQueryKey::InstrumentFunction;
 
 
-    // Experimentando
+   // // Experimentando
     strategyMap["CoCreateInstance"] = &InstWmi::InstrumentFunction;
     strategyMap["ConnectServer"] = &InstWmi::InstrumentFunction;
     strategyMap["ExecQuery"] = &InstWmi::InstrumentFunction;
@@ -46,10 +46,10 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["GetObject"] = &InstWmiEx::InstrumentFunction;
     strategyMap["GetObjectA"] = &InstWmiEx::InstrumentFunction;
     strategyMap["GetObjectW"] = &InstWmiEx::InstrumentFunction;
-    // Fin Experimentando
+   // // Fin Experimentando
 
-    
-    // Falta implementar a lógica de detecção
+   // 
+   // // Falta implementar a lógica de detecção
     strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
     strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
     strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
@@ -96,8 +96,8 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["ZwCreateThreadEx"] = &InstNtCreateThreadEx::InstrumentFunction;
     strategyMap["NtUserFindWindowEx"] = &InstNtUserFindWindowEx::InstrumentFunction;
     strategyMap["ZwUserFindWindowEx"] = &InstNtUserFindWindowEx::InstrumentFunction;
-    strategyMap["NtUserBuildHwndList"] = &InstNtUserBuildHwndList::InstrumentFunction;
-    strategyMap["ZwUserBuildHwndList"] = &InstNtUserBuildHwndList::InstrumentFunction;
+    /*strategyMap["NtUserBuildHwndList"] = &InstNtUserBuildHwndList::InstrumentFunction;
+    strategyMap["ZwUserBuildHwndList"] = &InstNtUserBuildHwndList::InstrumentFunction;*/
     strategyMap["NtUserQueryWindow"] = &InstNtUserQueryWindow::InstrumentFunction;
     strategyMap["ZwUserQueryWindow"] = &InstNtUserQueryWindow::InstrumentFunction;
     strategyMap["NtSetDebugFilterState"] = &InstNtSetDebugFilterState::InstrumentFunction;
@@ -124,7 +124,9 @@ InstrumentationContext::InstrumentationContext() {
     strategyMap["VirtualProtectEx"] = &InstVirtualProtectEx::InstrumentFunction;
     strategyMap["VirtualQuery"] = &InstVirtualQuery::InstrumentFunction;
     strategyMap["VirtualQueryEx"] = &InstVirtualQueryEx::InstrumentFunction;
-
+    strategyMap["QueryPerformanceCounter"] = &InstQueryPerformanceCounter::InstrumentFunction;
+    strategyMap["NtQueryPerformanceCounter"] = &InstNtQueryPerformanceCounter::InstrumentFunction;
+    strategyMap["ZwQueryPerformanceCounter"] = &InstNtQueryPerformanceCounter::InstrumentFunction;
 
 }
 

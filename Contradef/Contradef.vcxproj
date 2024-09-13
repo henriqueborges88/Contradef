@@ -217,6 +217,7 @@
     <ClCompile Include="InstNtQueryInformationThread.cpp" />
     <ClCompile Include="InstNtQueryKey.cpp" />
     <ClCompile Include="InstNtQueryObject.cpp" />
+    <ClCompile Include="InstNtQueryPerformanceCounter.cpp" />
     <ClCompile Include="InstNtQuerySystemInformation.cpp" />
     <ClCompile Include="InstNtQuerySystemTime.cpp" />
     <ClCompile Include="InstNtQueryValueKey.cpp" />
@@ -233,6 +234,7 @@
     <ClCompile Include="InstOpenProcess.cpp" />
     <ClCompile Include="InstOutputDebugStringA.cpp" />
     <ClCompile Include="InstOutputDebugStringW.cpp" />
+    <ClCompile Include="InstQueryPerformanceCounter.cpp" />
     <ClCompile Include="InstRegEnumKeyA.cpp" />
     <ClCompile Include="InstRegEnumKeyExA.cpp" />
     <ClCompile Include="InstRegEnumKeyExW.cpp" />
@@ -258,6 +260,7 @@
     <ClCompile Include="InstWinExec.cpp" />
     <ClCompile Include="InstWmi.cpp" />
     <ClCompile Include="InstWmiEx.cpp" />
+    <ClCompile Include="ModulesDetection.cpp" />
     <ClCompile Include="params.cpp" />
     <ClCompile Include="RegistryKeys.cpp" />
     <ClCompile Include="utils.cpp" />
@@ -305,6 +308,7 @@
     <ClInclude Include="InstNtOpenProcess.h" />
     <ClInclude Include="InstNtQueryInformationThread.h" />
     <ClInclude Include="InstNtQueryObject.h" />
+    <ClInclude Include="InstNtQueryPerformanceCounter.h" />
     <ClInclude Include="InstNtQuerySystemInformation.h" />
     <ClInclude Include="InstNtQuerySystemTime.h" />
     <ClInclude Include="InstNtQueryValueKey.h" />
@@ -319,6 +323,7 @@
     <ClInclude Include="InstOpenProcess.h" />
     <ClInclude Include="InstOutputDebugStringA.h" />
     <ClInclude Include="InstOutputDebugStringW.h" />
+    <ClInclude Include="InstQueryPerformanceCounter.h" />
     <ClInclude Include="InstRegEnumKeyA.h" />
     <ClInclude Include="InstRegEnumKeyExA.h" />
     <ClInclude Include="InstRegEnumKeyExW.h" />
@@ -345,6 +350,7 @@
     <ClInclude Include="InstWinExec.h" />
     <ClInclude Include="InstWmi.h" />
     <ClInclude Include="InstWmiEx.h" />
+    <ClInclude Include="ModulesDetection.h" />
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />

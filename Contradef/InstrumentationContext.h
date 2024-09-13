@@ -88,7 +88,8 @@
 #include "InstEnumProcessModules.h"
 #include "InstVirtualProtect.h"
 #include "InstVirtualProtectEx.h"
-
+#include "InstQueryPerformanceCounter.h"
+#include "InstNtQueryPerformanceCounter.h"
 
 
 typedef void (*RTNFunction)(RTN, Notifier&);

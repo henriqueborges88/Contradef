@@ -15,9 +15,12 @@
 #include "Observer.h"
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
+#include "ModulesDetection.h"
 
 struct GetModuleHandleAArgs {
     ADDRINT lpModuleName;
+    char originalLastChar;
+    bool isModified;
 };
 
 class InstGetModuleHandleA : public InstrumentationStrategy {

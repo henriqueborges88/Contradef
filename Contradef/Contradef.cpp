@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
 
     string filename;
     filename = KnobOutputFile.Value();
-    filename += "." + decstr(getpid()) + ".txt";
+    filename += "." + decstr(getpid()) + ".cdf";
     OutFile.open(filename.c_str());
 
     if (PIN_Init(argc, argv))

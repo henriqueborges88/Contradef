@@ -28,6 +28,21 @@ VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     GetModuleHandleAArgs args;
     args.lpModuleName = lpModuleName;
 
+    //// CONTRAMEDIDA
+    args.originalLastChar = *reinterpret_cast<char*>(lpModuleName + strlen(reinterpret_cast<char*>(lpModuleName)) - 1); // Salvar o �ltimo caractere original de lpSubKey
+
+    std::string ansiStringLpModuleName = ConvertAddrToAnsiString(lpModuleName);
+    if (isModulePartInList(ansiStringLpModuleName)) {
+        char* ansiCharStr = reinterpret_cast<char*>(lpModuleName);
+        size_t len = strlen(ansiCharStr);
+
+        if (len > 0) {
+            ansiCharStr[len - 1] = 'q';
+            args.isModified = true;
+        }
+    }
+    ////
+
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
@@ -56,6 +71,18 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         const GetModuleHandleAArgs* args = reinterpret_cast<GetModuleHandleAArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args->lpModuleName);
+
+        ////CONTRAMEDIDA
+        if (args->isModified) {
+            char* ansiCharStr = reinterpret_cast<char*>(args->lpModuleName);
+            size_t len = strlen(ansiCharStr);
+
+            if (len > 0) {
+                ansiCharStr[len - 1] = args->originalLastChar;
+            }
+        }
+        ////
+    
         // Obter a RTN da instru��o atual
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;

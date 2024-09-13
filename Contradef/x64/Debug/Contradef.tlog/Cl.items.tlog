@@ -40,6 +40,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenProcess.cpp;C:\Users\h
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationThread.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationThread.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryKey.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryObject.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryObject.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryPerformanceCounter.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryPerformanceCounter.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemInformation.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQuerySystemInformation.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQuerySystemTime.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQuerySystemTime.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryValueKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryValueKey.obj
@@ -56,6 +57,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstNtYieldExecution.cpp;C:\User
 C:\Users\henri\source\repos\Contradef\Contradef\InstOpenProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstOpenProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugStringA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstOutputDebugStringA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstOutputDebugStringW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstOutputDebugStringW.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstQueryPerformanceCounter.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstQueryPerformanceCounter.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegEnumKeyA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyExA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegEnumKeyExA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegEnumKeyExW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegEnumKeyExW.obj
