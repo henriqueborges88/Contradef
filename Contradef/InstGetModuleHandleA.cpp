@@ -72,7 +72,7 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         std::stringstream& stringStream = callContext->stringStream;
         std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args->lpModuleName);
 
-        ////CONTRAMEDIDA
+        ////CONTRAMEDIDA APLICADA - TECNICA EVASIVA DETECTADA
         if (args->isModified) {
             char* ansiCharStr = reinterpret_cast<char*>(args->lpModuleName);
             size_t len = strlen(ansiCharStr);
@@ -80,26 +80,26 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
             if (len > 0) {
                 ansiCharStr[len - 1] = args->originalLastChar;
             }
+
+            // Obter a RTN da instru��o atual
+            RTN rtnCurrent = RTN_FindByAddress(instAddress);
+            stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
+            stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+            stringStream << "    Thread: " << tid << std::endl;
+            stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+            stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+            stringStream << "    Par�metros: " << std::endl;
+            stringStream << "        lpModuleName: " << ansiStringLpModuleName << std::endl;
+            stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+            stringStream << "[*] Conclu�do" << std::endl << std::endl;
+
+            ExecutionInformation executionCompletedInfo = { stringStream.str() };
+            // Cria evento
+            ExecutionEventData executionEvent(executionCompletedInfo);
+            // Notifica os observers
+            globalNotifierPtr->NotifyAll(&executionEvent);
         }
         ////
-    
-        // Obter a RTN da instru��o atual
-        RTN rtnCurrent = RTN_FindByAddress(instAddress);
-        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
-        stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Par�metros: " << std::endl;
-        stringStream << "        lpModuleName: " << ansiStringLpModuleName << std::endl;
-        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Conclu�do" << std::endl << std::endl;
-
-        ExecutionInformation executionCompletedInfo = { stringStream.str() };
-        // Cria evento
-        ExecutionEventData executionEvent(executionCompletedInfo);
-        // Notifica os observers
-        globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
         PIN_UnlockClient();
