@@ -46,18 +46,18 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar par�metros
+        // Registrar Parámetros
         const InstRegQueryValueExAArgs* args = reinterpret_cast<InstRegQueryValueExAArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         std::string ansiStringlpValueName = ConvertAddrToAnsiString(args->lpValueName);
         // Obter a RTN da instru��o atual
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Par�metros: " << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parámetros: " << std::endl;
         stringStream << "        hKey: " << args->hKey << std::endl;
         stringStream << "        lpValueName: " << ansiStringlpValueName << std::endl;
         stringStream << "        lpReserved: " << args->lpReserved << std::endl;
@@ -65,7 +65,7 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         stringStream << "        lpData: " << args->lpData << std::endl;
         stringStream << "        lpcbData: " << args->lpcbData << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Conclu�do" << std::endl << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         // Cria evento
@@ -108,7 +108,7 @@ VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpReserved
@@ -124,7 +124,7 @@ VOID InstRegQueryValueExA::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_REG_REFERENCE, REG_GAX,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName

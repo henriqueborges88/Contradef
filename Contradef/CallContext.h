@@ -30,6 +30,6 @@ struct CallContext {
     CallContext(UINT32 cid, THREADID tid, ADDRINT rtnAddr, VOID* args) : callId(cid), threadId(tid), rtnAddress(rtnAddr), functionArgs(args) {}
 };
 
-STATIC bool instrumentOnlyMain = TRUE;
+STATIC bool instrumentOnlyMain = FALSE;
 
 #endif // CALL_CONTEXT_H

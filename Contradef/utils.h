@@ -3,6 +3,15 @@
 #define UTILS_H
 
 #include "pin.H"
+
+namespace WindowsAPI
+{
+#include <Windows.h>
+#include <unistd.h>
+}
+
+#include <iostream>
+#include <fstream>
 #include <clocale>
 #include "CallContext.h"
 #include <iostream>
@@ -19,5 +28,5 @@ std::string ExtractModuleName(const std::string& fullPath);
 std::string toUpperCase(const std::string& str);
 VOID PrintTrace(std::deque<std::string>& rtnTrace);
 void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap);
-
+const wchar_t* ConvertToWideString(const std::string& str);
 #endif // UTILS_H

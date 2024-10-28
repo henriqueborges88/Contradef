@@ -27,9 +27,9 @@
 #include "InstRegQueryValueA.h"
 #include "InstRegQueryValueExW.h"
 #include "InstRegQueryValueExA.h"
-#include "InstNtOpenKey.h"
+//#include "InstNtOpenKey.h"
 #include "InstNtEnumKey.h"
-#include "InstNtQueryValueKey.h"
+//#include "InstNtQueryValueKey.h"
 #include "InstGetModuleHandleW.h"
 #include "InstGetModuleHandleA.h"
 #include "InstGetModuleFileNameW.h"
@@ -39,8 +39,8 @@
 #include "InstGetWindowTextW.h"
 #include "InstGetWindowTextA.h"
 #include "InstGetTickCount.h"
-#include "InstVirtualQuery.h"
-#include "InstVirtualQueryEx.h"
+//#include "InstVirtualQuery.h"
+//#include "InstVirtualQueryEx.h"
 
 #include "InstWmi.h"
 #include "InstWmiEx.h"
@@ -48,7 +48,7 @@
 #include "InstCreateProcess.h"
 #include "InstCreateProcessAsUser.h"
 #include "InstShellExecute.h"
-#include "InstShellExecuteEx.h"
+//#include "InstShellExecuteEx.h"
 #include "InstWinExec.h"
 #include "InstNtCreateProcessEx.h"
 #include "InstNtCreateThreadEx.h"
@@ -90,6 +90,7 @@
 #include "InstVirtualProtectEx.h"
 #include "InstQueryPerformanceCounter.h"
 #include "InstNtQueryPerformanceCounter.h"
+#include "InstCreateFileW.h"
 
 
 typedef void (*RTNFunction)(RTN, Notifier&);
@@ -101,6 +102,12 @@ private:
 public:
     InstrumentationContext();
     ~InstrumentationContext();
+
+
+    std::vector<std::string> scanScope; 
+
+    bool IsStringInScanScope(const std::string& scope) const;
+    void InstrumentationContext::InitStrategies();
     void ExecuteStrategy(const std::string& name, RTN rtn, Notifier& globalNotifier);
     bool HasStrategy(const std::string& name) const;
     void ExecuteAllStrategies(IMG img, Notifier& globalNotifier);

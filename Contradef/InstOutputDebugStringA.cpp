@@ -50,11 +50,11 @@ VOID InstOutputDebugStringA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
         // Obter a RTN da instru��o atual
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Par�metros: " << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Parámetros: " << std::endl;
         stringStream << "        lpOutputString: " << outputString << std::endl;
 
 
@@ -77,7 +77,7 @@ VOID InstOutputDebugStringA::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpOutputString
             IARG_END);
 
@@ -87,7 +87,7 @@ VOID InstOutputDebugStringA::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpOutputString
             IARG_END);
 

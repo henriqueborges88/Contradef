@@ -9,9 +9,6 @@
 #define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
 #define NTAPI
 
-#ifndef BASETYPES
-#define BASETYPES
-
 #ifndef FALSE
 #define FALSE               0
 #endif
@@ -53,7 +50,7 @@ typedef void* HINSTANCE;
 typedef void* LPVOID;
 typedef void* HKEY;
 
-typedef BOOL near* PBOOL;
+typedef BOOL* PBOOL;
 typedef int LONG;
 typedef void* PVOID;
 typedef unsigned short USHORT;
@@ -67,7 +64,7 @@ typedef unsigned long ULONG;
 typedef ULONG* PULONG;
 typedef wchar_t* PWSTR; // Ponteiro para uma string de caracteres wide (Unicode)
 typedef void* HANDLE; // Um identificador para um objeto do Windows
-#endif  /* !BASETYPES */
+
 
 typedef unsigned long       DWORD;
 typedef unsigned char       BYTE;
@@ -76,6 +73,7 @@ typedef float               FLOAT;
 typedef int                 INT;
 typedef unsigned int        UINT;
 typedef unsigned int* PUINT;
+
 
 #include <cstdint>
 #if defined(_WIN64)
@@ -241,24 +239,24 @@ typedef enum _PROCESSINFOCLASS
     MaxProcessInfoClass
 } PROCESSINFOCLASS;
 
-/*
-classes usadas para detecção de debug e antianalise:
-    ProcessBasicInformation, // q: PROCESS_BASIC_INFORMATION, PROCESS_EXTENDED_BASIC_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessQuotaLimits, // qs: QUOTA_LIMITS, QUOTA_LIMITS_EX // Themida antianalisys, é antidebug?
-    ProcessVmCounters, // q: VM_COUNTERS, VM_COUNTERS_EX, VM_COUNTERS_EX2 // Themida antianalisys, é antidebug?
-    ProcessDebugPort, // q: HANDLE // Debug present
-    ProcessSessionInformation, // q: PROCESS_SESSION_INFORMATION // Themida antianalisys, é antidebug?
-    ProcessWow64Information, // q: ULONG_PTR // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessImageFileName, // q: UNICODE_STRING // Themida antianalisys, é antidebug? Pesquisar mais e ver o processamento posterior se tem algum tratamento para nomes de arquivos ou processos
-    ProcessDebugObjectHandle, // q: HANDLE // 30 // Debug present
-    ProcessDebugFlags, // qs: ULONG // Debug present
-    ProcessImageInformation, // q: SECTION_IMAGE_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessInstrumentationCallback, // s: PVOID or PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION // 40  // Debug present
-    ProcessTokenVirtualizationEnabled, // s: ULONG  // pode ser antidebug? Pesquisar mais
-    ProcessMitigationPolicy, // s: PROCESS_MITIGATION_POLICY_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
-    ProcessEnclaveInformation, // Themida antianalisys, é antidebug? Pesquisar mais <-----------------
-
-*/
+///*
+//classes usadas para detecção de debug e antianalise:
+//    ProcessBasicInformation, // q: PROCESS_BASIC_INFORMATION, PROCESS_EXTENDED_BASIC_INFORMATION // Themida antianalisys, é antidebug?
+//    ProcessQuotaLimits, // qs: QUOTA_LIMITS, QUOTA_LIMITS_EX // Themida antianalisys, é antidebug?
+//    ProcessVmCounters, // q: VM_COUNTERS, VM_COUNTERS_EX, VM_COUNTERS_EX2 // Themida antianalisys, é antidebug?
+//    ProcessDebugPort, // q: HANDLE // Debug present
+//    ProcessSessionInformation, // q: PROCESS_SESSION_INFORMATION // Themida antianalisys, é antidebug?
+//    ProcessWow64Information, // q: ULONG_PTR // Themida antianalisys, é antidebug? Pesquisar mais
+//    ProcessImageFileName, // q: UNICODE_STRING // Themida antianalisys, é antidebug? Pesquisar mais e ver o processamento posterior se tem algum tratamento para nomes de arquivos ou processos
+//    ProcessDebugObjectHandle, // q: HANDLE // 30 // Debug present
+//    ProcessDebugFlags, // qs: ULONG // Debug present
+//    ProcessImageInformation, // q: SECTION_IMAGE_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
+//    ProcessInstrumentationCallback, // s: PVOID or PROCESS_INSTRUMENTATION_CALLBACK_INFORMATION // 40  // Debug present
+//    ProcessTokenVirtualizationEnabled, // s: ULONG  // pode ser antidebug? Pesquisar mais
+//    ProcessMitigationPolicy, // s: PROCESS_MITIGATION_POLICY_INFORMATION // Themida antianalisys, é antidebug? Pesquisar mais
+//    ProcessEnclaveInformation, // Themida antianalisys, é antidebug? Pesquisar mais <-----------------
+//
+//*/
 
 typedef CHAR* PCHAR, * LPCH, * PCH;
 
@@ -268,7 +266,7 @@ typedef WCHAR* PWCHAR, * LPWCH, * PWCH;
 typedef struct _LIST_ENTRY {
     struct _LIST_ENTRY* Flink;
     struct _LIST_ENTRY* Blink;
-} LIST_ENTRY, * PLIST_ENTRY, * RESTRICTED_POINTER;
+} LIST_ENTRY, * PLIST_ENTRY;
 
 typedef struct _PEB_LDR_DATA {
     BYTE Reserved1[8];
@@ -322,45 +320,12 @@ typedef struct _PROCESS_BASIC_INFORMATION {
 } PROCESS_BASIC_INFORMATION;
 
 
-
-#if defined(_MAC) && defined(_MAC_INT_64)
-typedef __int64 LONGLONG;
-typedef unsigned __int64 ULONGLONG;
-
-#define MAXLONGLONG                      (0x7fffffffffffffff)
-
-
-#else
 typedef double LONGLONG;
 typedef double ULONGLONG;
-#endif //_MAC and int64
-
 typedef LONGLONG* PLONGLONG;
 typedef ULONGLONG* PULONGLONG;
-
-// Update Sequence Number
-
 typedef LONGLONG USN;
 
-#if defined(MIDL_PASS)
-typedef struct _LARGE_INTEGER {
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#else // MIDL_PASS
-typedef union _LARGE_INTEGER {
-    struct {
-        DWORD LowPart;
-        LONG HighPart;
-    } DUMMYSTRUCTNAME;
-    struct {
-        DWORD LowPart;
-        LONG HighPart;
-    } u;
-    LONGLONG QuadPart;
-} LARGE_INTEGER;
-#endif //MIDL_PASS
-
-typedef LARGE_INTEGER* PLARGE_INTEGER;
 
 
 // Memory Basic Info
@@ -491,6 +456,116 @@ typedef struct DECLSPEC_ALIGN(16) _MEMORY_BASIC_INFORMATION64 {
     DWORD     __alignment2;
 } MEMORY_BASIC_INFORMATION64, * PMEMORY_BASIC_INFORMATION64;
 // End Memory Basic Info
+
+
+// Definição do IMAGE_DATA_DIRECTORY
+typedef struct _IMAGE_DATA_DIRECTORY {
+    uint32_t VirtualAddress; // Endereço virtual
+    uint32_t Size;           // Tamanho
+} IMAGE_DATA_DIRECTORY;
+
+// Estrutura IMAGE_FILE_HEADER
+typedef struct _IMAGE_FILE_HEADER {
+    uint16_t Machine;              // Identifica a arquitetura do processador
+    uint16_t NumberOfSections;     // Número de seções no arquivo
+    uint32_t TimeDateStamp;        // Data e hora de criação
+    uint32_t PointerToSymbolTable; // Ponteiro para a tabela de símbolos (se aplicável)
+    uint32_t NumberOfSymbols;      // Número de símbolos (se aplicável)
+    uint16_t SizeOfOptionalHeader; // Tamanho do cabeçalho opcional
+    uint16_t Characteristics;       // Características do arquivo
+} IMAGE_FILE_HEADER;
+
+// Estrutura IMAGE_OPTIONAL_HEADER
+typedef struct _IMAGE_OPTIONAL_HEADER {
+    uint16_t Magic;                       // Identifica o formato do cabeçalho
+    uint8_t MajorLinkerVersion;           // Versão principal do vinculador
+    uint8_t MinorLinkerVersion;           // Versão secundária do vinculador
+    uint32_t SizeOfCode;                  // Tamanho da seção de código
+    uint32_t SizeOfInitializedData;       // Tamanho da seção de dados inicializados
+    uint32_t SizeOfUninitializedData;     // Tamanho da seção de dados não inicializados
+    uint32_t AddressOfEntryPoint;         // Endereço do ponto de entrada
+    uint32_t BaseOfCode;                  // Endereço base da seção de código
+    uint32_t BaseOfData;                  // Endereço base da seção de dados (opcional)
+    uint32_t ImageBase;                   // Endereço base do módulo na memória
+    uint32_t SectionAlignment;             // Alinhamento das seções na memória
+    uint32_t FileAlignment;                // Alinhamento das seções no arquivo
+    uint16_t MajorOperatingSystemVersion; // Versão principal do sistema operacional
+    uint16_t MinorOperatingSystemVersion; // Versão secundária do sistema operacional
+    uint16_t MajorImageVersion;           // Versão principal da imagem
+    uint16_t MinorImageVersion;           // Versão secundária da imagem
+    uint16_t MajorSubsystemVersion;       // Versão principal do subsistema
+    uint16_t MinorSubsystemVersion;       // Versão secundária do subsistema
+    uint32_t Win32VersionValue;           // Valor da versão do Windows
+    uint32_t SizeOfImage;                 // Tamanho da imagem (na memória)
+    uint32_t SizeOfHeaders;               // Tamanho dos cabeçalhos
+    uint32_t CheckSum;                    // Checksum do arquivo
+    uint16_t Subsystem;                   // Subsistema para o qual o arquivo foi criado
+    uint16_t DLLCharacteristics;          // Características do DLL
+    uint32_t SizeOfStackReserve;          // Tamanho da pilha reservada
+    uint32_t SizeOfStackCommit;           // Tamanho da pilha comprometida
+    uint32_t SizeOfHeapReserve;           // Tamanho do heap reservado
+    uint32_t SizeOfHeapCommit;            // Tamanho do heap comprometido
+    uint16_t LoaderFlags;                 // Indicadores de carregamento
+    uint16_t NumberOfRvaAndSizes;         // Número de RVA e tamanhos
+    IMAGE_DATA_DIRECTORY DataDirectory[16]; // Diretórios de dados
+} IMAGE_OPTIONAL_HEADER;
+
+
+
+// Estrutura IMAGE_DOS_HEADER
+typedef struct _IMAGE_DOS_HEADER {
+    uint16_t e_magic;     // 0x5A4D "MZ"
+    uint16_t e_cblp;      // Número de bytes no último página
+    uint16_t e_cp;        // Número de páginas
+    uint16_t e_crlc;      // Número de relocações
+    uint16_t e_cparhdr;   // Tamanho do cabeçalho em parágrafos
+    uint16_t e_minalloc;  // Tamanho mínimo da memória requerida
+    uint16_t e_maxalloc;  // Tamanho máximo da memória requerida
+    uint16_t e_ss;        // Número da seção de pilha
+    uint16_t e_sp;        // Offset da pilha
+    uint16_t e_csum;      // Checksum
+    uint16_t e_ip;        // Offset do programa
+    uint16_t e_cs;        // Número do segmento
+    uint16_t e_lfarlc;    // Offset do cabeçalho em bytes
+    uint16_t e_ovno;      // Número de número de versão
+    uint16_t e_res[4];    // Reservado
+    uint16_t e_oemid;     // ID do OEM
+    uint16_t e_oeminfo;   // Informação do OEM
+    uint16_t e_res2[10];  // Reservado
+    int32_t e_lfanew;     // Offset para o cabeçalho PE
+} IMAGE_DOS_HEADER;
+
+// Estrutura IMAGE_NT_HEADERS
+typedef struct _IMAGE_NT_HEADERS {
+    uint32_t Signature;                // 0x00004550 "PE\0\0"
+    IMAGE_FILE_HEADER FileHeader;      // Cabeçalho do arquivo
+    IMAGE_OPTIONAL_HEADER OptionalHeader; // Cabeçalho opcional
+} IMAGE_NT_HEADERS;
+
+// Estrutura IMAGE_SECTION_HEADER
+typedef struct _IMAGE_SECTION_HEADER {
+    uint8_t Name[8];                   // Nome da seção
+    union {
+        uint32_t PhysicalAddress;
+        uint32_t VirtualSize;
+    } Misc;
+    uint32_t VirtualAddress;           // Endereço virtual da seção
+    uint32_t SizeOfRawData;            // Tamanho dos dados brutos
+    uint32_t PointerToRawData;         // Ponteiro para os dados brutos
+    uint32_t PointerToRelocations;     // Ponteiro para relocação
+    uint32_t PointerToLinenumbers;     // Ponteiro para números de linha
+    uint16_t NumberOfRelocations;      // Número de relocação
+    uint16_t NumberOfLinenumbers;      // Número de números de linha
+    uint32_t Characteristics;           // Características da seção
+} IMAGE_SECTION_HEADER;
+#define IMAGE_FIRST_SECTION(ntHeader) ((IMAGE_SECTION_HEADER *)((BYTE *)(ntHeader) + sizeof(IMAGE_NT_HEADERS)))
+#ifndef IMAGE_DOS_SIGNATURE
+#define IMAGE_DOS_SIGNATURE 0x5A4D      // 'MZ' em ASCII
+#endif
+
+#ifndef IMAGE_NT_SIGNATURE
+#define IMAGE_NT_SIGNATURE 0x00004550  // 'PE\0\0' em ASCII
+#endif
 
 
 #endif // NT_STRUCTURES_H

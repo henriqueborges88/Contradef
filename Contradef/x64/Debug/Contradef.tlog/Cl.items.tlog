@@ -4,6 +4,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstBaseRegOpenKey.cpp;C:\Users\
 C:\Users\henri\source\repos\Contradef\Contradef\InstBlockInput.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstBlockInput.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCheckRemoteDebuggerPresent.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCheckRemoteDebuggerPresent.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCoCreateInstance.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCoCreateInstance.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstCreateFileW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateFileW.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateProcessAsUser.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateProcessAsUser.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstCreateService.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstCreateService.obj
@@ -37,6 +38,7 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstNtEnumKey.cpp;C:\Users\henri
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtGetContextThread.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtGetContextThread.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtOpenKey.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtOpenProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtOpenProcess.obj
+C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationThread.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationThread.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryKey.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryKey.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryObject.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryObject.obj
@@ -69,7 +71,6 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstRegOpenKeyW.cpp;C:\Users\hen
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExA.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueExA.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueExW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueExW.obj
-C:\Users\henri\source\repos\Contradef\Contradef\InstNtQueryInformationProcess.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstNtQueryInformationProcess.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstRegQueryValueW.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstRegQueryValueW.obj
 C:\Users\henri\source\repos\Contradef\Contradef\Instrumentation.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Instrumentation.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstrumentationContext.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstrumentationContext.obj
@@ -83,6 +84,9 @@ C:\Users\henri\source\repos\Contradef\Contradef\InstVirtualQueryEx.cpp;C:\Users\
 C:\Users\henri\source\repos\Contradef\Contradef\InstWinExec.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstWinExec.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstWmi.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstWmi.obj
 C:\Users\henri\source\repos\Contradef\Contradef\InstWmiEx.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\InstWmiEx.obj
-C:\Users\henri\source\repos\Contradef\Contradef\params.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\params.obj
+C:\Users\henri\source\repos\Contradef\Contradef\ModulesDetection.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\ModulesDetection.obj
+C:\Users\henri\source\repos\Contradef\Contradef\Params.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Params.obj
+C:\Users\henri\source\repos\Contradef\Contradef\PinDebugTrace.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\PinDebugTrace.obj
 C:\Users\henri\source\repos\Contradef\Contradef\RegistryKeys.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\RegistryKeys.obj
-C:\Users\henri\source\repos\Contradef\Contradef\utils.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\utils.obj
+C:\Users\henri\source\repos\Contradef\Contradef\Utils.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\Utils.obj
+C:\Users\henri\source\repos\Contradef\Contradef\YaraContradef.cpp;C:\Users\henri\source\repos\Contradef\Contradef\x64\Debug\YaraContradef.obj

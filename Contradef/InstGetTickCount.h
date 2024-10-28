@@ -15,6 +15,7 @@
 #include "Observer.h"
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
+#include "NtStructures.h"
 
 class InstGetTickCount : public InstrumentationStrategy {
 public:
@@ -23,7 +24,6 @@ public:
     static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    typedef unsigned long DWORD;
     static std::map<CallContextKey, CallContext*> callContextMap;
     static UINT32 imgCallId;
     static UINT32 fcnCallId;

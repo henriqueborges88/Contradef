@@ -42,17 +42,17 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar par�metros
+        // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         // Obter a RTN da instru��o atual
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Conclu�do" << std::endl << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         // Cria evento
@@ -81,7 +81,7 @@ VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifi
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_END);
 
         RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
@@ -91,7 +91,7 @@ VOID InstGetForegroundWindow::InstrumentFunction(RTN rtn, Notifier& globalNotifi
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_END);
 
         RTN_Close(rtn);

@@ -73,7 +73,7 @@ Notifier* InstNtQueryInformationProcess::globalNotifierPtr;
 
 
 VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
-
+    std::cout << "Chamada!!!!";
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -87,10 +87,12 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, 
     args.ProcessInformationLength = ProcessInformationLength;
     args.ReturnLength = ReturnLength;
 
+    std::cout << "BBBBProcessInformationClass: " << ProcessInformationClass << std::endl;
+    std::cout << "BBBBBProcessInformation: " << ProcessInformation << std::endl;
+    std::cout << "BBBBBProcessInformationLength: " << ProcessInformationLength << std::endl;
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
-
     
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
@@ -113,10 +115,39 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         IMG img = IMG_FindByAddress(instAddress);
 
         CallContext* callContext = it->second;
-        // Registrar par�metros
+        // Registrar Parámetros
         const NtQueryInformationProcessArgs* args = reinterpret_cast<NtQueryInformationProcessArgs*>(callContext->functionArgs);
 
         // ADDRINT ProcessInformation � alterado no retorno, posivelmente por alguma manipula��o do registrador durante a execu��o da fun�a�.
+    
+        //if (args->ProcessInformationClass == ProcessDebugPort) {
+        //    HANDLE debugPort = reinterpret_cast<HANDLE>(ProcessInformation);
+        //    debugPort = NULL;
+        //    std::cout << "DBGPORT: " << std::hex << debugPort << std::dec << std::endl;
+        //}
+        //if (args->ProcessInformationClass == ProcessDebugPort) {
+        //    HANDLE debugPort = reinterpret_cast<HANDLE>(ProcessInformation);
+        //    uintptr_t debugPortValue = reinterpret_cast<uintptr_t>(debugPort);
+        //    std::cout << "DBGPORT2: " << std::hex << debugPortValue << std::dec << std::endl;
+        //}
+
+        //if (args->ProcessInformationClass == ProcessDebugPort) {
+        //    ProcessInformation = NULL;
+        //}
+
+        if (args->ProcessInformationClass == ProcessDebugPort) {
+            HANDLE* debugPortPtr = reinterpret_cast<HANDLE*>(ProcessInformation);
+
+            // Imprimindo o valor atual de debugPort
+            std::cout << "DBGPORT Antes: " << std::hex << *debugPortPtr << std::dec << std::endl;
+
+            // Alterando o conteúdo apontado por debugPortPtr para NULL
+            *debugPortPtr = NULL;
+
+            // Verificando se debugPort foi alterado
+            std::cout << "DBGPORT Depois: " << *debugPortPtr << std::endl;
+        }
+
 
         if (ProcessInformationClass == ProcessBasicInformation) {
             // Verifica se ProcessInformation � um ponteiro v�lido
@@ -139,7 +170,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
                         TARGET_MEMORY_ADDRESS = reinterpret_cast<ADDRINT>(NtGlobalFlagPtr);
                         NtGlobalFlag = *NtGlobalFlagPtr; // Salvar o valor de NtGlobalFlag
 
-                        // Criar a fun��o de instrumenta��o apenas uma vez e enviar o ponteiro para o endere�o de memoria dque deve ser verificado. En
+                        // Criar a fun��o de instrumenta��o apenas uma vez e enviar o ponteiro para o Endereço de memoria dque deve ser verificado. En
                         INS_AddInstrumentFunction(Instruction, callContext);
                     }
                 }
@@ -197,7 +228,7 @@ VOID FetchInsCode(INS ins) {
     
     PIN_LockClient();
 
-    // Obter o endere�o da instru��o
+    // Obter o Endereço da instru��o
     ADDRINT address = INS_Address(ins);
 
     // Definir um buffer para armazenar o c�digo bin�rio da instru��o
@@ -285,7 +316,7 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         ADDRINT* stackPtr;
         PIN_GetContextRegval(ctxt, REG_STACK_PTR, reinterpret_cast<UINT8*>(&stackPtr));
 
-        // Obter o endere�o de retorno da pilha
+        // Obter o Endereço de retorno da pilha
         ADDRINT returnAddr = *stackPtr;
 
         // Obter a disassemblagem da instru��o
@@ -296,16 +327,16 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
 
         ADDRINT rtnAddress = RTN_Address(rtn);
         stringStream << std::endl << "[+] " << RTN_Name(rtn) << "..." << std::endl;
-        stringStream << "    Nome do m�dulo: " << IMG_Name(img) << std::endl;
+        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
         stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Endere�o da rotina: " << std::hex << rtnAddress << std::dec << std::endl;
+        stringStream << "    Endereço da rotina: " << std::hex << rtnAddress << std::dec << std::endl;
         if (RTN_Valid(rtn)) {
             stringStream << "    Nome da rotina: " + RTN_Name(rtn) << std::endl;
         }
         stringStream << "    Valor de retorno (NtQueryInformationProcess): " << retVal << std::endl;
         stringStream << "    Instru��o: " << disassembledInstruction << std::endl;
-        stringStream << "    Endere�o da instru��o: " << std::hex << std::showbase << instAddress << std::dec << std::endl;
-        stringStream << "    Endere�o do valor em mem�ria: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
+        stringStream << "    Endereço da instru��o: " << std::hex << std::showbase << instAddress << std::dec << std::endl;
+        stringStream << "    Endereço do valor em mem�ria: " << std::hex << std::showbase << memoryAddress << std::dec << std::endl;
         stringStream << "    Valor da flag NtGlobalFlag: " << valueAtNtGlobalFlagAddress << std::endl;
 
         PIN_UnlockClient();
@@ -319,7 +350,7 @@ VOID InstNtQueryInformationProcess::RegContentAnalysisRoutine(CONTEXT* ctxt, REG
     ADDRINT regValue = PIN_GetContextReg(ctxt, regToInspect);
     //std::cout << "Valor do registrador: " << REG_StringShort(regToInspect) << " = " << regValue << std::endl;
     if (InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS != 0 && InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS == regValue) {
-        std::cout << "-----Endere�o de mem�ria para o NtGlobalFlagPtr foi acessado em uma instru��o CMP por meio do registrador " << REG_StringShort(regToInspect) << "com valor " << regValue << std::endl;
+        std::cout << "-----Endereço de mem�ria para o NtGlobalFlagPtr foi acessado em uma instru��o CMP por meio do registrador " << REG_StringShort(regToInspect) << "com valor " << regValue << std::endl;
     }
 }
 
@@ -353,7 +384,7 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
                     REG reg = INS_OperandReg(ins, i);
                     if (IsRegisterAllowed(reg)) {
                         // Inserir o callback de an�lise antes da execu��o da instru��o
-                        // Habilitar no cado de uma verifica��o mais exaustiva. Pode reduzir a acuracia pois a verifica��o � aplicada sob o endere�o de memoria como valor do registrador
+                        // Habilitar no cado de uma verifica��o mais exaustiva. Pode reduzir a acuracia pois a verifica��o � aplicada sob o Endereço de memoria como valor do registrador
                         /*INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)RegContentAnalysisRoutine,
                             IARG_CONTEXT,
                             IARG_UINT32, reg,
@@ -385,7 +416,8 @@ VOID InstNtQueryInformationProcess::Instruction(INS ins, VOID* v) {
 VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
    std::string rtnName = RTN_Name(rtn);
-    if (rtnName == "NtQueryInformationProcess") {
+    if (rtnName == "NtQueryInformationProcess" || rtnName == "ZwQueryInformationProcess") {
+        std::cout << "Instrumentando: " << RTN_Name(rtn) << std::endl;
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
@@ -397,7 +429,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ProcessInformation
@@ -412,7 +444,7 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endere�o da fun��o chamante
+            IARG_RETURN_IP, // Endereço da fun��o chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // ProcessHandle
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // ProcessInformationClass
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // ProcessInformation

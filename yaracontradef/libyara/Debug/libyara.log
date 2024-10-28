@@ -1,0 +1,65 @@
+﻿  ahocorasick.c
+  arena.c
+  atoms.c
+  base64.c
+  bitmask.c
+  compiler.c
+  exec.c
+  exefiles.c
+  filemap.c
+  grammar.c
+  hash.c
+  hex_grammar.c
+  hex_lexer.c
+  lexer.c
+  libyara.c
+  mem.c
+  modules.c
+  notebook.c
+  object.c
+  parser.c
+  Gerando Código...
+  Compilando...
+  proc.c
+  re.c
+  re_grammar.c
+  re_lexer.c
+  rules.c
+  scan.c
+  scanner.c
+  sizedstr.c
+  stack.c
+  stopwatch.c
+  stream.c
+  strutils.c
+  threading.c
+  simple_str.c
+  Gerando Código...
+  console.c
+  cuckoo.c
+  dex.c
+  dotnet.c
+  elf.c
+  hash.c
+  math.c
+  macho.c
+  pe.c
+  pe_utils.c
+  Gerando Código...
+  authenticode.c
+  helper.c
+  countersignature.c
+  structs.c
+  certificate.c
+  Gerando Código...
+  string.c
+  tests.c
+  time.c
+  windows.c
+  tlsh_util.c
+  tlsh_impl.c
+  tlsh.c
+  Gerando Código...
+ws2_32.lib(WS2_32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR já definido no crypt32.lib(CRYPT32.dll); segunda definição ignorada
+advapi32.lib(ADVAPI32.dll) : warning LNK4006: __NULL_IMPORT_DESCRIPTOR já definido no crypt32.lib(CRYPT32.dll); segunda definição ignorada
+  libyara.vcxproj -> C:\Users\henri\source\repos\Contradef\yaracontradef\libyara\Debug\libyara64.lib

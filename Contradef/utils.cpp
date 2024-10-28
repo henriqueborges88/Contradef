@@ -98,3 +98,12 @@ void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap)
     }
 }
 
+// Função para converter std::string para const wchar_t*
+const wchar_t* ConvertToWideString(const std::string& str)
+{
+    using namespace WindowsAPI;
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
+    wchar_t* wideStr = new wchar_t[size_needed];
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wideStr, size_needed);
+    return wideStr;
+}
