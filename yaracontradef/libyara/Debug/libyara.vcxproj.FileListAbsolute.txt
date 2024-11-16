@@ -1,2 +1,0 @@
-C:\Users\henri\source\repos\Contradef\yara\windows\vs2019\libyara\Debug\libyara64.lib
-C:\Users\henri\source\repos\Contradef\yaracontradef\libyara\Debug\libyara64.lib
