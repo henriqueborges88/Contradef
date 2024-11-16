@@ -5,4 +5,4 @@ Contradef/x32/Debug/**
 contradef.out*
 Contradef/x64/Debug/*
 tmp/*
-x64/Debug/*
+x64/Debug
