@@ -116,13 +116,19 @@ int main(int argc, char* argv[]) {
 
     IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
-    InitTrace(TraceOutFile, pid);
+    InitInstrunctionsInstrumentation();
+
+    //InitTrace(TraceOutFile, pid);
 
     PIN_AddFiniFunction(Fini, 0);
 
     PIN_StartProgram();
 
     // string s = StringFromAddrint(address);
+    // Addrint2VoidStar
+    // AddrintFromString
+    // VoidStar2Addrint
+
 
     return 0;
 }

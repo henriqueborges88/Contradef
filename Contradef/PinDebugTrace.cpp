@@ -11,13 +11,14 @@
 #include "PinDebugTrace.h"
 
 KNOB< std::string > KnobTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "to", "contradef", "trace file");
-KNOB< BOOL > KnobPid(KNOB_MODE_WRITEONCE, "pintool", "i", "0", "append pid to output");
 KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "thread to watch, -1 for all");
-KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "0", "Flush output after every instruction");
+KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
+KNOB< BOOL > KnobFullImgName(KNOB_MODE_WRITEONCE, "pintool", "full_img_name", "0", "Include full image name");
 KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "0", "Include line number information");
-KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "0", "Trace instructions");
+KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
+KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
 KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "0", "Trace memory");
 KNOB< BOOL > KnobSilent(KNOB_MODE_WRITEONCE, "pintool", "silent", "0", "Do everything but write file (for debugging).");
 KNOB< BOOL > KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exit after tracing the first region.");
@@ -32,6 +33,7 @@ FILTER filter;
 ICOUNT icount;
 const UINT32 MaxEmitArgs = 4;
 AFUNPTR emitFuns[] = { AFUNPTR(EmitNoValues), AFUNPTR(Emit1Values), AFUNPTR(Emit2Values), AFUNPTR(Emit3Values), AFUNPTR(Emit4Values) };
+std::stack<ADDRINT> callStack;
 
 /* ===================================================================== */
 /* Function Implementations */
@@ -73,31 +75,31 @@ VOID Handler(EVENT_TYPE ev, VOID*, CONTEXT* ctxt, VOID*, THREADID, bool bcast) {
 
 VOID EmitNoValues(THREADID threadid, std::string* str) {
     if (!Emit(threadid)) return;
-    out << *str << std::endl;
+    out << *str << " | [T" << std::dec << threadid << std::hex << "]" << std::endl;
     Flush();
 }
 
 VOID Emit1Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val) {
     if (!Emit(threadid)) return;
-    out << *str << " | " << *reg1str << " = " << reg1val << std::endl;
+    out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << std::endl;
     Flush();
 }
 
 VOID Emit2Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val) {
     if (!Emit(threadid)) return;
-    out << *str << " | " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << std::endl;
+    out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << std::endl;
     Flush();
 }
 
 VOID Emit3Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val) {
     if (!Emit(threadid)) return;
-    out << *str << " | " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << std::endl;
+    out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << std::endl;
     Flush();
 }
 
 VOID Emit4Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val, std::string* reg4str, ADDRINT reg4val) {
     if (!Emit(threadid)) return;
-    out << *str << " | " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << ", " << *reg4str << " = " << reg4val << std::endl;
+    out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << ", " << *reg4str << " = " << reg4val << std::endl;
     Flush();
 }
 
@@ -279,7 +281,7 @@ VOID Indent()
 
 VOID EmitICount() { out << setw(10) << dec << icount.Count() << hex << " "; }
 
-VOID EmitDirectCall(THREADID threadid, string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1)
+VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
     if (!Emit(threadid)) return;
 
@@ -290,9 +292,13 @@ VOID EmitDirectCall(THREADID threadid, string* str, INT32 tailCall, ADDRINT arg0
         // A tail call is like an implicit return followed by an immediate call
         indent--;
     }
+    else
+    {
+        callStack.push(instAddress);
+    }
 
     Indent();
-    out << *str << "(" << arg0 << ", " << arg1 << ", ...)" << endl;
+    out << *str << " [T" << threadid << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", " << arg5 << ", " << arg6 << ", ...)" << endl;
 
     indent++;
 
@@ -309,7 +315,14 @@ string FormatAddress(ADDRINT address, RTN rtn)
         s += " ";
         if (IMG_Valid(img))
         {
-            s += IMG_Name(img) + ":";
+            if (KnobFullImgName)
+            {
+                s += IMG_Name(img) + ":";
+            }
+            else
+            {
+                s += getFileName(IMG_Name(img)) + ":";
+            }
         }
 
         s += RTN_Name(rtn);
@@ -336,9 +349,11 @@ string FormatAddress(ADDRINT address, RTN rtn)
     return s;
 }
 
-VOID EmitIndirectCall(THREADID threadid, string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1)
+VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
     if (!Emit(threadid)) return;
+
+    callStack.push(instAddress);
 
     EmitICount();
     Indent();
@@ -349,14 +364,14 @@ VOID EmitIndirectCall(THREADID threadid, string* str, ADDRINT target, ADDRINT ar
     string s = FormatAddress(target, RTN_FindByAddress(target));
 
     PIN_UnlockClient();
-
-    out << s << "(" << arg0 << ", " << arg1 << ", ...)" << endl;
+    
+    out << s << " [T" << threadid << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", " << arg5 << ", " << arg6 << ", ...)" << endl;
     indent++;
 
     Flush();
 }
 
-VOID EmitReturn(THREADID threadid, string* str, ADDRINT ret0)
+VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0)
 {
     if (!Emit(threadid)) return;
 
@@ -369,7 +384,14 @@ VOID EmitReturn(THREADID threadid, string* str, ADDRINT ret0)
     }
 
     Indent();
-    out << *str << " returns: " << ret0 << endl;
+
+    ADDRINT callAddr = 0;
+    if (!callStack.empty()) {
+        callAddr = callStack.top();
+        callStack.pop(); 
+    }
+
+    out << *str << " [T" << threadid << "] returns: " << ret0 << ", ret addr: " << retAddr << ", call addr: " << callAddr << endl;
 
     Flush();
 }
@@ -378,14 +400,16 @@ VOID CallTrace(TRACE trace, INS ins)
 {
     if (!KnobTraceCalls) return;
 
+    if (KnobTraceOnlyMain && !IsMainExecutable(INS_Address(ins))) return;
+
     if (INS_IsCall(ins) && !INS_IsDirectControlFlow(ins))
     {
         // Indirect call
         string s = "Call " + FormatAddress(INS_Address(ins), TRACE_Rtn(trace));
         s += " -> ";
 
-        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitIndirectCall), IARG_THREAD_ID, IARG_PTR, new string(s),
-            IARG_BRANCH_TARGET_ADDR, IARG_FUNCARG_CALLSITE_VALUE, 0, IARG_FUNCARG_CALLSITE_VALUE, 1, IARG_END);
+        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitIndirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s),
+            IARG_BRANCH_TARGET_ADDR, IARG_FUNCARG_CALLSITE_VALUE, 0, IARG_FUNCARG_CALLSITE_VALUE, 1, IARG_FUNCARG_CALLSITE_VALUE, 2, IARG_FUNCARG_CALLSITE_VALUE, 3, IARG_FUNCARG_CALLSITE_VALUE, 4, IARG_FUNCARG_CALLSITE_VALUE, 5, IARG_FUNCARG_CALLSITE_VALUE, 6, IARG_END);
     }
     else if (INS_IsDirectControlFlow(ins))
     {
@@ -424,8 +448,8 @@ VOID CallTrace(TRACE trace, INS ins)
 
             s += FormatAddress(target, RTN_FindByAddress(target));
 
-            INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitDirectCall), IARG_THREAD_ID, IARG_PTR, new string(s), IARG_BOOL,
-                tailcall, IARG_FUNCARG_CALLSITE_VALUE, 0, IARG_FUNCARG_CALLSITE_VALUE, 1, IARG_END);
+            INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitDirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s), IARG_BOOL,
+                tailcall, IARG_FUNCARG_CALLSITE_VALUE, 0, IARG_FUNCARG_CALLSITE_VALUE, 1, IARG_FUNCARG_CALLSITE_VALUE, 2, IARG_FUNCARG_CALLSITE_VALUE, 3, IARG_FUNCARG_CALLSITE_VALUE, 4, IARG_FUNCARG_CALLSITE_VALUE, 5, IARG_FUNCARG_CALLSITE_VALUE, 6, IARG_END);
         }
     }
     else if (INS_IsRet(ins))
@@ -437,8 +461,8 @@ VOID CallTrace(TRACE trace, INS ins)
         if (RTN_Valid(rtn) && RTN_Name(rtn) == "_dl_runtime_resolve") return;
 #endif
         string tracestring = "Return " + FormatAddress(INS_Address(ins), rtn);
-        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitReturn), IARG_THREAD_ID, IARG_PTR, new string(tracestring),
-            IARG_FUNCRET_EXITPOINT_VALUE, IARG_END);
+        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitReturn), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(tracestring),
+            IARG_RETURN_IP, IARG_FUNCRET_EXITPOINT_VALUE, IARG_END);
     }
 }
 

@@ -73,7 +73,7 @@ Notifier* InstNtQueryInformationProcess::globalNotifierPtr;
 
 
 VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength) {
-    std::cout << "Chamada!!!!";
+
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -87,9 +87,6 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, 
     args.ProcessInformationLength = ProcessInformationLength;
     args.ReturnLength = ReturnLength;
 
-    std::cout << "BBBBProcessInformationClass: " << ProcessInformationClass << std::endl;
-    std::cout << "BBBBBProcessInformation: " << ProcessInformation << std::endl;
-    std::cout << "BBBBBProcessInformationLength: " << ProcessInformationLength << std::endl;
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
@@ -417,7 +414,6 @@ VOID InstNtQueryInformationProcess::InstrumentFunction(RTN rtn, Notifier& global
 
    std::string rtnName = RTN_Name(rtn);
     if (rtnName == "NtQueryInformationProcess" || rtnName == "ZwQueryInformationProcess") {
-        std::cout << "Instrumentando: " << RTN_Name(rtn) << std::endl;
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 

@@ -16,11 +16,14 @@
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <stack>
+#include "utils.h"
 #include <unistd.h>
 #include "pin.H"
 #include "instlib.H"
 #include "control_manager.H"
 #include "regvalue_utils.h"
+#include "Instrumentation.h"
 
 using namespace CONTROLLER;
 using namespace INSTLIB;
@@ -73,10 +76,10 @@ VOID EmitWrite(THREADID threadid, UINT32 size);
 VOID EmitRead(THREADID threadid, VOID* ea, UINT32 size);
 VOID Indent();
 VOID EmitICount();
-VOID EmitDirectCall(THREADID threadid, std::string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1);
+VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, std::string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
 std::string FormatAddress(ADDRINT address, RTN rtn);
-VOID EmitIndirectCall(THREADID threadid, std::string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1);
-VOID EmitReturn(THREADID threadid, std::string* str, ADDRINT ret0);
+VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, std::string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
+VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0);
 VOID CallTrace(TRACE trace, INS ins);
 VOID InstructionTrace(TRACE trace, INS ins);
 VOID MemoryTrace(INS ins);

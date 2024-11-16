@@ -48,7 +48,7 @@
 #include "InstCreateProcess.h"
 #include "InstCreateProcessAsUser.h"
 #include "InstShellExecute.h"
-//#include "InstShellExecuteEx.h"
+#include "InstShellExecuteEx.h"
 #include "InstWinExec.h"
 #include "InstNtCreateProcessEx.h"
 #include "InstNtCreateThreadEx.h"
@@ -91,6 +91,13 @@
 #include "InstQueryPerformanceCounter.h"
 #include "InstNtQueryPerformanceCounter.h"
 #include "InstCreateFileW.h"
+#include "InstLstrcpynA.h"
+#include "InstLstrcpy.h"
+#include "InstWriteConsoleW.h"
+#include "InstExitProcess.h"
+#include "InstDeleteFileA.h"
+#include "InstGetWriteWatch.h"
+
 
 
 typedef void (*RTNFunction)(RTN, Notifier&);

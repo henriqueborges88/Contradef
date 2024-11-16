@@ -77,6 +77,8 @@ VOID InstCreateFileW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "CreateFileW") {
+        std::cout << "Instrumentando: " << RTN_Name(rtn) << std::endl;
+
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 

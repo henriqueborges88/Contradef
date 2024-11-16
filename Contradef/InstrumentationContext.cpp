@@ -79,7 +79,11 @@ bool InstrumentationContext::IsStringInScanScope(const std::string& scope) const
 }
 
 void InstrumentationContext::InitStrategies() {
-    //TODO: Alterar para o modo de instrumentação Probed (sonda)
+
+    
+
+
+
 
     for (const std::string& scope : scanScope) {
         if (scope == "Obsidium") {
@@ -97,7 +101,24 @@ void InstrumentationContext::InitStrategies() {
             //Estrategias de virtualizaçã
         }
     }
+    
+    
 
+
+    
+    
+    
+    /*strategyMap["lstrcpynA"] = &InstLstrcpynA::InstrumentFunction;
+    strategyMap["lstrcpy"] = &InstLstrcpy::InstrumentFunction;
+    strategyMap["WriteConsoleW"] = &InstWriteConsoleW::InstrumentFunction;
+    strategyMap["ExitProcess"] = &InstExitProcess::InstrumentFunction;
+    strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
+    strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
+    strategyMap["DeleteFileA"] = &InstDeleteFileA::InstrumentFunction;
+    strategyMap["ShellExecute"] = &InstShellExecute::InstrumentFunction;
+    strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;*/
+    
+    
     // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
 
 
@@ -136,6 +157,7 @@ void InstrumentationContext::InitStrategies() {
    // strategyMap["GetObject"] = &InstWmiEx::InstrumentFunction;
    // strategyMap["GetObjectA"] = &InstWmiEx::InstrumentFunction;
    // strategyMap["GetObjectW"] = &InstWmiEx::InstrumentFunction;
+    //strategyMap["GetWriteWatch"] = &InstGetWriteWatch::InstrumentFunction;
    //// // Fin Experimentando
 
    //// 
