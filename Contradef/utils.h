@@ -22,7 +22,6 @@ namespace WindowsAPI
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
 std::string ConvertWideStringToString(const std::wstring& wstr);
-std::wstring ReadWideString(ADDRINT addr);
 void LogWString(const std::wstring& wstr);
 std::string PrintNormalized(const std::wstring& wstr);
 std::string WStringToString(const std::wstring& wstr);
@@ -31,7 +30,6 @@ std::string toUpperCase(const std::string& str);
 VOID PrintTrace(std::deque<std::string>& rtnTrace);
 void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap);
 const wchar_t* ConvertToWideString(const std::string& str);
-std::wstring ReadWideStringFromAddrint(ADDRINT addr);
 std::string ConvertWStringToUTF8(const std::wstring& wstr);
-std::string PrintWideStringFromPointer(ADDRINT addr);
+std::string WideStringFromPointer(ADDRINT addr);
 #endif // UTILS_H

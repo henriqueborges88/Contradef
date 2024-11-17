@@ -324,6 +324,10 @@ string FormatAddress(ADDRINT address, RTN rtn)
                 s += getFileName(IMG_Name(img)) + ":";
             }
         }
+        else
+        {
+            s += "UNKNOW-IMG:";
+        }
 
         s += RTN_Name(rtn);
 

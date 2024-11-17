@@ -88,9 +88,9 @@ void InstrumentationContext::InitStrategies() {
     for (const std::string& scope : scanScope) {
         if (scope == "Obsidium") {
             std::cout << "Instrumentando o Obsidium" << std::endl;
-            strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
-            strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-            strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            //strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
+            //strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            //strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
         }
 
         if (scope == "Themida") {

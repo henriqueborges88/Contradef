@@ -79,34 +79,13 @@ VOID GetSectionInfo(IMG img, std::ofstream& OutFile)
 
 ///////////////////
 
-std::wstring aReadWStringFromAddrint(ADDRINT addr) {
-    std::wstring result;
-    wchar_t currentChar;
-    ADDRINT currentAddr = addr;
-
-    // Lê caractere por caractere a partir do endereço fornecido até encontrar o terminador nulo
-    while (PIN_SafeCopy(&currentChar, reinterpret_cast<wchar_t*>(currentAddr), sizeof(wchar_t)) == sizeof(wchar_t) && currentChar != L'\0') {
-        result += currentChar;
-        currentAddr += sizeof(wchar_t); // Incrementa o endereço para o próximo wchar_t
-    }
-
-    return result;
-}
-
-std::string awstringToHexString(const std::wstring& text) {
-    std::ostringstream oss;
-    for (wchar_t wc : text) {
-        oss << "\\x" << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(wc);
-    }
-    return oss.str();
-}
 
 EXCEPT_HANDLING_RESULT errCB (THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICAL_CONTEXT* pPhysCtxt, VOID* v)
 {
     return EXCEPT_HANDLING_RESULT::EHR_HANDLED;
 }
 
-string tgt = "WriteConsoleW";
+string tgt = "CreateFileW";
 bool isWstring = 1;
 
 VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
@@ -145,67 +124,37 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
 
         std::cout << s << " [T" << threadid << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", ...)" << std::endl;
 
+        ADDRINT addr = arg0;  // Substitua por um endereço válido em um contexto real.
 
-        //if (PIN_CheckReadAccess(arg0))
-        //{
-   
-        //}
-        //else
-        //{
-        //    std::cout << "Endereço " << StringFromAddrint(addr) << " não está apto para leitura." << std::endl;
-        //}
+        if (isWstring)
+        {
 
+            if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
+            {
+                // Leitura de uma wstring a partir do endereço dado
+                //wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
+                //wprintf(L" ** WString --> %ls\n", wideCharStr);
 
-        UINT8 dummy;
-        ADDRINT addr = arg2;  // Substitua por um endereço válido em um contexto real.
+                std::cout << " STRING -> " << WideStringFromPointer(addr) << std::endl;
 
-        //if (isWstring)
-        //{
-        //    if (PIN_SafeCopy(&dummy, reinterpret_cast<const VOID*>(addr), sizeof(dummy)) == sizeof(dummy))
-        //    {
-        //        // Leitura de uma wstring a partir do endereço dado
-
-        //        //PIN_TryStart(threadid, errCB, NULL);
-        //        wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
-        //        wprintf(L" ** WString --> %ls\n", wideCharStr);
-
-        //        std::wstring wsBuffer = ConvertAddrToWideString(addr);
-        //        wprintf(L" WSTRING -> %ls \n", wsBuffer);
-
-        //        std::wstring ws2Buffer = ReadWideString(addr);
-        //        wprintf(L" WSTRING2 -> %ls \n", ws2Buffer);
-
-        //        std::string buffer = WStringToString(wsBuffer);
-        //        std::cout << " STRING -> " << PrintNormalized(wsBuffer) << std::endl;
-
-        //        wprintf(L" ** ReadWideStringFromAddrint -> %ls \n", ReadWideStringFromAddrint(addr));
-
-        //        std::cout << " ** PrintWideStringFromPointer -> " << PrintWideStringFromPointer(addr) << std::endl;
-
-        //        // Leitura de uma wstring a partir do endereço dado
-        //        std::wstring texto = aReadWStringFromAddrint(addr);
-        //        wprintf(L" aReadWStringFromAddrint -> %ls \n", texto);
-        //        //std::string resultado = awstringToHexString(texto);
-        //        //std::cout << "hex ---> " << resultado << std::endl;  // Saída no formato: '\x00da\x00a5\x00c7\x00b5\x00d7\x00c7\x00fe\x0090\x00ac'
-        //        //PIN_TryEnd(threadid);
-        //    }
-        //    else
-        //    {
-        //        std::cout << "Endereço " << StringFromAddrint(addr) << " não está apto para leitura." << std::endl;
-        //    }
-        //}
-        //else
-        //{
-        //    if (PIN_SafeCopy(&dummy, reinterpret_cast<const VOID*>(addr), sizeof(dummy)) == sizeof(dummy))
-        //    {
-        //        std::string aBuffer = ConvertAddrToAnsiString(addr);
-        //        std::cout << " STRING -> " << aBuffer << std::endl;
-        //    }
-        //    else
-        //    {
-        //        std::cout << "Endereço " << StringFromAddrint(addr) << " não está apto para leitura." << std::endl;
-        //    }
-        //}
+            }
+            else
+            {
+                std::cout << "Endereço " << StringFromAddrint(addr) << " não está apto para leitura." << std::endl;
+            }
+        }
+        else
+        {
+            if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
+            {
+                std::string aBuffer = ConvertAddrToAnsiString(addr);
+                std::cout << " STRING -> " << aBuffer << std::endl;
+            }
+            else
+            {
+                std::cout << "Endereço " << StringFromAddrint(addr) << " não está apto para leitura." << std::endl;
+            }
+        }
     }
 
     PIN_UnlockClient();
@@ -223,9 +172,6 @@ VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADD
         if (RTN_Name(rtn) != tgt) return;
 
         std::cout << RTN_Name(rtn) << " [T" << threadid << "] returns: " << ret0 << ", ret addr: " << StringFromAddrint(retAddr) << std::endl;
-        //wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(arg0);
-        //wprintf(L" ** RETURN WString --> %ls\n", wideCharStr);
-        //std::cout << "param ret " << arg4 << std::endl;
 
     }
 
@@ -332,9 +278,6 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
 
 
 
-static ADDRINT region_start = 0x7ff6a5330000;
-static ADDRINT region_end = 0x7ff6a533ffff;
-
 VOID aEmitRead(THREADID threadid, VOID* ea, UINT32 size)
 {
     //ADDRINT address = reinterpret_cast<ADDRINT>(ea);
@@ -397,11 +340,6 @@ VOID aEmitRead(THREADID threadid, VOID* ea, UINT32 size)
 
 VOID aMemoryTrace(INS ins)
 {
-    //if (INS_MemoryOperandIsRead(ins, 0))
-    //{
-    //    INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)MemoryRead, IARG_INST_PTR, IARG_MEMORYOP_EA, 0, IARG_UINT32, INS_MemoryOperandSize(ins, 0), IARG_END);
-    //}
-
     if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins) && INS_IsStandardMemop(ins))
     {
         INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE,
@@ -602,28 +540,14 @@ InstructionSequenceDetector seq_detector;
 //}
 
 
-VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, const std::vector<std::string>& sequence)
+VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-
-    std::cout << "SEQUENCIA\n";
-    return;
-    //for (const auto& instr : sequence)
-    //{
-    //    std::cout << instr << "\n";
-    //}
-
-
-
-
-
-
-
     // Obter os flags atuais
     ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
 
     // Verificar o valor atual do ZF
     BOOL zf_before = (flags & (1 << 6)) != 0;
-    std::cout << "ZF antes da modificação: " << zf_before << std::endl;
+    //std::cout << "ZF antes da modificação: " << zf_before << std::endl;
 
     // Para setar o ZF para 1:
     flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
@@ -637,7 +561,7 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, const std::v
     // Obter os flags atualizados
     flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
     BOOL zf_after = (flags & (1 << 6)) != 0;
-    std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+    //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
 
     PIN_ExecuteAt(ctxt);
 
@@ -734,6 +658,34 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, const std::v
 }
 
 
+VOID Sequence2MatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+    //std::cout << "ZF antes da modificação: " << zf_before << std::endl;
+
+    // Para setar o ZF para 1:
+    flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+
+    // Para setar o ZF para 0:
+    //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+
+    // Atualizar os flags
+    PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+    // Obter os flags atualizados
+    flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+    BOOL zf_after = (flags & (1 << 6)) != 0;
+    //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+
+    PIN_ExecuteAt(ctxt);
+
+}
+
+
 VOID TraceFunc(TRACE trace, VOID* v)
 {
     for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl))
@@ -750,48 +702,70 @@ int InitInstrunctionsInstrumentation()
 {
 
     std::vector<std::string> sequence;
-
-    //sequence.push_back("jz 0x7ff6accd566e");
-    //sequence.push_back("jnbe 0x7ff6accd566c");
-    //sequence.push_back("movzx r11d, word ptr [rax+0x2]");
-    //sequence.push_back("lea rax, ptr [rax+r11*2+0x4]");
-
-    //sequence.push_back("jmp 0x7ff6accd5432");
-    //sequence.push_back("test rax, rax");
-    //sequence.push_back("jnz 0x7ff6accd5468");
-    //sequence.push_back("jmp 0x7ff6accd546e");
-    //sequence.push_back("lea r13, ptr [rax+0x4]");
-
-
-    //sequence.push_back("lea rax, ptr [rax+r11*2+0x4]");
-
-    
-    // Tecnicas evasivas
-    sequence.push_back("jmp 0x7ff6acccdc2a");
-    sequence.push_back("test word ptr [rdi+0xa], 0x2");
-    sequence.push_back("jmp 0x7ff6226ddc33");
-    sequence.push_back("jz 0x7ff6226dd7c2");
-    //sequence.push_back("jmp 0x7ff6226dd9b2");
-    //sequence.push_back("test rax, rax");
-    //sequence.push_back("jmp 0x7ff6226dd9b8");
+    //// Tecnicas evasivas obsiium 1.4.3 Antidbi
+    //sequence.push_back("jmp 0x7ff6acccdc2a");
+    //sequence.push_back("test word ptr [rdi+0xa], 0x2");
+    //sequence.push_back("jmp 0x7ff6226ddc33");
     //sequence.push_back("jz 0x7ff6226dd7c2");
+    ////sequence.push_back("jmp 0x7ff6226dd9b2");
+    ////sequence.push_back("test rax, rax");
+    ////sequence.push_back("jmp 0x7ff6226dd9b8");
+    ////sequence.push_back("jz 0x7ff6226dd7c2");
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+
+    //// Tecnicas evasivas obsiium 1.4.3 AntiVM
+    //std::vector<std::string> sequence2;
+    //sequence2.push_back("jmp 0x7ff6acccdc2a");
+    //sequence2.push_back("test word ptr [rsi+0xa], 0x2");
+    //sequence2.push_back("jmp 0x7ff6226ddc33");
+    //sequence2.push_back("jz 0x7ff6226dd7c2");
+    //seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
 
 
 
-    seq_detector.AddInstructionSequence(sequence);
+
+    // Tecnicas evasivas obsiium 1.8.5 Antidbi
+    sequence.push_back("jmp 0x7ff6f499d6e1");
+    sequence.push_back("test word ptr [rsi+0xa], 0x2");
+    sequence.push_back("jnb 0x7ff6f499d6eb");
+    sequence.push_back("jz 0x7ff6f499d2da");
+    //sequence.push_back("jmp 0x7ff6f499d928");
+    //sequence.push_back("test rax, rax");
+    //sequence.push_back("jo 0x7ff6f499d8cd");
+    //sequence.push_back("jz 0x7ff6f499d2da");
+    
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+
+
+    // Tecnicas evasivas obsiium 1.8.5 AntVM
+    std::vector<std::string> sequence2;
+    sequence2.push_back("jmp 0x7ff6f499d6e1");
+    sequence2.push_back("test word ptr [rdi+0xa], 0x2");
+    sequence2.push_back("jnb 0x7ff6f499d6eb");
+    sequence2.push_back("jz 0x7ff6f499d2da");
+
+    seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
+
+    // Tecnicas evasivas obsiium 1.8.5 Antidbi
+    std::vector<std::string> sequence3;
+    sequence3.push_back("jmp 0x7ff6f499d6e1");
+    sequence3.push_back("test word ptr [rdi+0xa], 0x2");
+    sequence3.push_back("jno 0x7ff6f499d6eb");
+    sequence3.push_back("jz 0x7ff6f499d2da");
+
+    seq_detector.AddInstructionSequence(sequence3, Sequence2MatchCallback);
+
+    // Tecnicas evasivas obsiium 1.8.5 Antidbi
+    std::vector<std::string> sequence4;
+    sequence4.push_back("jmp 0x7ff6f499d6e1");
+    sequence4.push_back("test word ptr [rsi+0xa], 0x2");
+    sequence4.push_back("jno 0x7ff6f499d6eb");
+    sequence4.push_back("jz 0x7ff6f499d2da");
+
+    seq_detector.AddInstructionSequence(sequence4, Sequence2MatchCallback);
 
     seq_detector.Initialize();
 
-
-    seq_detector.SetMatchCallback(SequenceMatchCallback);
-    
-    PIN_AddThreadStartFunction([](THREADID tid, CONTEXT* ctxt, INT32 flags, VOID* v) {
-        seq_detector.ThreadStart(tid, ctxt, flags);
-        }, NULL);
-
-    PIN_AddThreadFiniFunction([](THREADID tid, const CONTEXT* ctxt, INT32 code, VOID* v) {
-        seq_detector.ThreadFini(tid, ctxt, code);
-        }, NULL);
     
     TRACE_AddInstrumentFunction(TraceFunc, 0);
 

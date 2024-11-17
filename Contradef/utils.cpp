@@ -21,20 +21,6 @@ std::string ConvertAddrToAnsiString(ADDRINT addr) {
     }
 }
 
-std::wstring ReadWideString(ADDRINT addr) {
-    std::wstring result;
-    wchar_t currentChar;
-    ADDRINT currentAddr = addr; // Usar uma cópia do endereço para evitar alterar o original
-
-    // Lê caractere por caractere a partir do endereço fornecido até encontrar o terminador nulo
-    while (PIN_SafeCopy(&currentChar, reinterpret_cast<wchar_t*>(currentAddr), sizeof(wchar_t)) == sizeof(wchar_t) && currentChar != L'\0') {
-        result += currentChar;
-        currentAddr += sizeof(wchar_t); // Incrementa o endereço para o próximo wchar_t
-    }
-
-    return result;
-}
-
 std::string WStringToString(const std::wstring& wstr) {
     std::string str;
     for (wchar_t wc : wstr) {
@@ -65,6 +51,12 @@ void LogWString(const std::wstring& wstr) {
 }
 
 std::string PrintNormalized(const std::wstring& wstr) {
+    /*    
+        Converter de addrint:    
+        std::wstring wsBuffer = ConvertAddrToWideString(addr);
+        std::cout << " STRING -> " << PrintNormalized(wsBuffer) << std::endl;
+    */
+
     std::string str;
     for (wchar_t wc : wstr) {
         if (wc < 128) {
@@ -151,25 +143,6 @@ const wchar_t* ConvertToWideString(const std::string& str)
     return wideStr;
 }
 
-
-std::wstring ReadWideStringFromAddrint(ADDRINT addr)
-{
-    using namespace WindowsAPI;
-    wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
-    if (wideCharStr == nullptr)
-    {
-        return L"";
-    }
-
-    // Calcula o comprimento da string apontada
-    size_t length = wcslen(wideCharStr);
-
-    // Constrói uma wstring a partir do ponteiro
-    return std::wstring(wideCharStr, length);
-}
-
-
-
 std::string ConvertWStringToUTF8(const std::wstring& wstr)
 {
     std::string result;
@@ -194,7 +167,7 @@ std::string ConvertWStringToUTF8(const std::wstring& wstr)
     return result;
 }
 
-std::string PrintWideStringFromPointer(ADDRINT addr)
+std::string WideStringFromPointer(ADDRINT addr)
 {
     wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
     if (wideCharStr == nullptr)
