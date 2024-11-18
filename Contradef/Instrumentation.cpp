@@ -542,6 +542,7 @@ InstructionSequenceDetector seq_detector;
 
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
+    std::cout << "Enconte\n";
     // Obter os flags atuais
     ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
 
@@ -726,8 +727,8 @@ int InitInstrunctionsInstrumentation()
 
     // Tecnicas evasivas obsiium 1.8.5 Antidbi
     sequence.push_back("jmp 0x7ff6f499d6e1");
-    sequence.push_back("test word ptr [rsi+0xa], 0x2");
-    sequence.push_back("jnb 0x7ff6f499d6eb");
+    sequence.push_back("test word ptr [r?i+0xa], 0x2");
+    sequence.push_back("jn? 0x7ff6f499d6eb");
     sequence.push_back("jz 0x7ff6f499d2da");
     //sequence.push_back("jmp 0x7ff6f499d928");
     //sequence.push_back("test rax, rax");
@@ -737,32 +738,32 @@ int InitInstrunctionsInstrumentation()
     seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
 
 
-    // Tecnicas evasivas obsiium 1.8.5 AntVM
-    std::vector<std::string> sequence2;
-    sequence2.push_back("jmp 0x7ff6f499d6e1");
-    sequence2.push_back("test word ptr [rdi+0xa], 0x2");
-    sequence2.push_back("jnb 0x7ff6f499d6eb");
-    sequence2.push_back("jz 0x7ff6f499d2da");
+    //// Tecnicas evasivas obsiium 1.8.5 AntVM
+    //std::vector<std::string> sequence2;
+    //sequence2.push_back("jmp 0x7ff6f499d6e1");
+    //sequence2.push_back("test word ptr [rdi+0xa], 0x2");
+    //sequence2.push_back("jnb 0x7ff6f499d6eb");
+    //sequence2.push_back("jz 0x7ff6f499d2da");
 
-    seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
+    //seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
 
-    // Tecnicas evasivas obsiium 1.8.5 Antidbi
-    std::vector<std::string> sequence3;
-    sequence3.push_back("jmp 0x7ff6f499d6e1");
-    sequence3.push_back("test word ptr [rdi+0xa], 0x2");
-    sequence3.push_back("jno 0x7ff6f499d6eb");
-    sequence3.push_back("jz 0x7ff6f499d2da");
+    //// Tecnicas evasivas obsiium 1.8.5 Antidbi
+    //std::vector<std::string> sequence3;
+    //sequence3.push_back("jmp 0x7ff6f499d6e1");
+    //sequence3.push_back("test word ptr [rdi+0xa], 0x2");
+    //sequence3.push_back("jno 0x7ff6f499d6eb");
+    //sequence3.push_back("jz 0x7ff6f499d2da");
 
-    seq_detector.AddInstructionSequence(sequence3, Sequence2MatchCallback);
+    //seq_detector.AddInstructionSequence(sequence3, Sequence2MatchCallback);
 
-    // Tecnicas evasivas obsiium 1.8.5 Antidbi
-    std::vector<std::string> sequence4;
-    sequence4.push_back("jmp 0x7ff6f499d6e1");
-    sequence4.push_back("test word ptr [rsi+0xa], 0x2");
-    sequence4.push_back("jno 0x7ff6f499d6eb");
-    sequence4.push_back("jz 0x7ff6f499d2da");
+    //// Tecnicas evasivas obsiium 1.8.5 Antidbi
+    //std::vector<std::string> sequence4;
+    //sequence4.push_back("jmp 0x7ff6f499d6e1");
+    //sequence4.push_back("test word ptr [rsi+0xa], 0x2");
+    //sequence4.push_back("jno 0x7ff6f499d6eb");
+    //sequence4.push_back("jz 0x7ff6f499d2da");
 
-    seq_detector.AddInstructionSequence(sequence4, Sequence2MatchCallback);
+    //seq_detector.AddInstructionSequence(sequence4, Sequence2MatchCallback);
 
     seq_detector.Initialize();
 

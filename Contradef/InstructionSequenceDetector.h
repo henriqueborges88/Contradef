@@ -8,6 +8,8 @@
 #include <deque>
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
+#include <string>
 
 void NormalizeInstructionText(std::string& instr);
 
@@ -17,43 +19,39 @@ struct SequenceInstructions;
 // Definição do tipo de callback usando a declaração antecipada de SequenceInstruction
 using SeqMatchCallbackFunc = VOID(*)(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence);
 
-struct InstrumentedInstruction {
-    ADDRINT instAddr;
-    std::string instructionStr;
-    std::string normalizedInstructionStr;
-    int size;
-
-    InstrumentedInstruction(std::string instructionStr)
-        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), size(0)
-    {
-        NormalizeInstructionText(normalizedInstructionStr);
-        size = strlen(normalizedInstructionStr.c_str());
-    }
-};
-
 struct InstructionToMatch {
     ADDRINT matchAddr;
     std::string instructionStr;
     std::string normalizedInstructionStr;
     bool isAnyInst;
-    bool hasWilcard;
+    bool hasWildcard;
     int size;
+
+    // Implementação do operador de comparação para permitir o uso no unordered_set
+    bool operator==(const InstructionToMatch* other) const {
+        return instructionStr == other->instructionStr;
+    }
 
     // Construtor para inicializar o contexto com IDs
     InstructionToMatch(std::string instructionStr)
-        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWilcard(false), size(0)
+        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWildcard(false), size(0)
     {
         NormalizeInstructionText(normalizedInstructionStr);
-        const char* insChar = normalizedInstructionStr.c_str();
-        size = strlen(insChar);
-        if (size == 3 && normalizedInstructionStr[0] == '?' && normalizedInstructionStr[1] == '?' && normalizedInstructionStr[2] == '?')
-        {
+        size = static_cast<int>(normalizedInstructionStr.size());
+        if (size == 3 && normalizedInstructionStr[0] == '?' && normalizedInstructionStr[1] == '?' && normalizedInstructionStr[2] == '?') {
             isAnyInst = true;
         }
-        else if (normalizedInstructionStr.find("?") != std::wstring::npos)
-        {
-            hasWilcard = true;
+        else if (normalizedInstructionStr.find("?") != std::string::npos) {
+            hasWildcard = true;
         }
+    }
+};
+
+// Implementação da função hash para InstructionToMatch
+template<>
+struct std::hash<InstructionToMatch> {
+    std::size_t operator()(const InstructionToMatch* inst) const noexcept {
+        return std::hash<std::string>{}(inst->instructionStr);
     }
 };
 
@@ -75,7 +73,63 @@ struct SequenceInstructions {
             instruction_sequences.push_back(InstructionToMatch(instruction));
         }
     }
+
+    // Implementação do operador de comparação para permitir o uso no unordered_set
+    bool operator==(const SequenceInstructions other) const {
+        return &instruction_sequences == &(other.instruction_sequences);
+    }
 };
+
+// Implementação da função hash para SequenceInstructions
+template<>
+struct std::hash<SequenceInstructions> {
+    std::size_t operator()(const SequenceInstructions* seq) const noexcept {
+        std::size_t seed = 0;
+        for (auto& inst : seq->instruction_sequences) {
+            seed ^= std::hash<InstructionToMatch>{}(&inst)+0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+        return seed;
+    }
+};
+
+
+// Estrutura da instrução instrumentada
+struct InstrumentedInstruction {
+    ADDRINT instAddr;
+    std::string instructionStr;
+    std::string normalizedInstructionStr;
+    int size;
+
+    // Usando unordered_set para armazenar os ponteiros de InstructionToMatch de forma eficiente
+    std::tr1::unordered_set<SequenceInstructions*, std::hash<SequenceInstructions>> matchedSeqAddresses;
+    std::tr1::unordered_set<InstructionToMatch*, std::hash<InstructionToMatch>> matchedInstrAddresses;
+    
+    InstrumentedInstruction(std::string instructionStr)
+        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), size(static_cast<int>(normalizedInstructionStr.size()))
+    {
+        NormalizeInstructionText(normalizedInstructionStr);
+    }
+
+    void AddMatchedSeqAddress(SequenceInstructions* matchAddr) {
+        matchedSeqAddresses.insert(matchAddr);
+    }
+
+    bool HasMatchedSeqAddress(SequenceInstructions* matchAddr) const {
+        return matchedSeqAddresses.find(matchAddr) != matchedSeqAddresses.end();
+    }
+
+    void AddMatchedInstrAddress(InstructionToMatch* matchAddr) {
+        matchedInstrAddresses.insert(matchAddr);
+    }
+
+    bool HasMatchedInstrAddress(InstructionToMatch* matchAddr) const {
+        return matchedInstrAddresses.find(matchAddr) != matchedInstrAddresses.end();
+    }
+};
+
+
+BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst);
+
 
 class InstructionSequenceDetector
 {

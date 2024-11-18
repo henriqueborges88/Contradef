@@ -37,6 +37,29 @@ void NormalizeInstructionText(std::string& instr)
     }
 }
 
+BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
+    if (seq_inst.isAnyInst) {
+        return true; // Corresponde a qualquer instrução
+    }
+
+    if (seq_inst.hasWildcard) {
+        if (queue_inst.size != seq_inst.size) {
+            return false; // Tamanho diferente não pode corresponder
+        }
+        // Comparar caracter a caracter, considerando coringas
+        for (size_t x = 0; x < seq_inst.size; ++x) {
+            if (seq_inst.normalizedInstructionStr[x] != '?' &&
+                queue_inst.normalizedInstructionStr[x] != seq_inst.normalizedInstructionStr[x]) {
+                return false; // Encontrou um caractere que não corresponde
+            }
+        }
+        return true; // Todos os caracteres corresponderam
+    }
+
+    // Comparação direta quando não há coringas
+    return queue_inst.normalizedInstructionStr == seq_inst.normalizedInstructionStr;
+}
+
 InstructionSequenceDetector::InstructionSequenceDetector()
     : max_sequence_length(0)
 {
@@ -62,73 +85,39 @@ void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::
     }
 }
 
-
 VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr)
 {
     ThreadData* tdata = GetThreadData();
 
-    // Adicionar à fila
+    // Adicionar a instrução atual à fila (com limite fixo de tamanho)
     ins_instr->instAddr = ip;
+    if (tdata->instruction_queue.size() == max_sequence_length) {
+        tdata->instruction_queue.pop_front();
+    }
     tdata->instruction_queue.push_back(*ins_instr);
 
-    // Remover instruções antigas se necessário
-    if (tdata->instruction_queue.size() > max_sequence_length)
+    // Comparar a fila de instruções com as sequências armazenadas
+    for (auto* sequence : ins_instr->matchedSeqAddresses)
     {
-        if (!tdata->instruction_queue.empty()) {
-            tdata->instruction_queue.pop_front();
+        size_t seq_length = sequence->instruction_sequences.size();
+        if (tdata->instruction_queue.size() < seq_length) {
+            continue; // Não há instruções suficientes na fila para realizar a comparação
         }
-    }
 
-    // Comparar a fila com as sequências
-    for (auto& sequence : instruction_sequences)
-    {
-        size_t seq_length = sequence.instruction_sequences.size();
+        // Comparar a sequência da fila com a sequência armazenada
+        auto start_it = tdata->instruction_queue.end() - seq_length;
 
-        if (tdata->instruction_queue.size() >= seq_length)
-        {
-            auto start_it = tdata->instruction_queue.end() - seq_length;
-            std::vector<InstrumentedInstruction> queue_sequence(start_it, tdata->instruction_queue.end());
+        bool match = std::equal(start_it, tdata->instruction_queue.end(), sequence->instruction_sequences.begin(),
+            [](InstrumentedInstruction& queue_inst, InstructionToMatch& seq_inst) {
+                return queue_inst.HasMatchedInstrAddress(&seq_inst);
+            });
 
-            // Comparar as sequências
-            bool match = true;
-            for (size_t i = 0; i < seq_length; ++i)
-            {
-                if (!sequence.instruction_sequences[i].isAnyInst)
-                {
-                    if (sequence.instruction_sequences[i].hasWilcard)
-                    {
-                        if (queue_sequence[i].size != sequence.instruction_sequences[i].size)
-                        {
-                            match = false;
-                            break;
-                        }
-                        for (size_t x = 0; x < sequence.instruction_sequences[i].size; ++x)
-                        {
-                            if (sequence.instruction_sequences[i].normalizedInstructionStr[x] != '?' && queue_sequence[i].normalizedInstructionStr[x] != sequence.instruction_sequences[i].normalizedInstructionStr[x])
-                            {
-                                match = false;
-                                break;
-                            }
-                        }
-                    }
-                    else if (queue_sequence[i].normalizedInstructionStr != sequence.instruction_sequences[i].normalizedInstructionStr)
-                    {
-                        match = false;
-                        break;
-                    }
-                }
-                sequence.instruction_sequences[i].matchAddr = queue_sequence[i].instAddr;
-            }
 
-            if (match)
-            {
-                // Sequência encontrada, chamar o callback
-                sequence.matchCount++;
-            }
-            if (match && sequence.match_callback && (sequence.matchOcurrenceIndex == -1 || sequence.matchOcurrenceIndex == sequence.matchCount))
-            {
-                // Sequência encontrada, chamar o callback
-                sequence.match_callback(PIN_ThreadId(), ip, ctxt, sequence);
+        if (match) {
+            // Sequência encontrada, chamar o callback
+            sequence->matchCount++;
+            if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || sequence->matchOcurrenceIndex == sequence->matchCount)) {
+                sequence->match_callback(PIN_ThreadId(), ip, ctxt, *sequence);
             }
         }
     }
@@ -155,19 +144,16 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 
     bool add = false;
     // Comparar a fila com as sequências
-    for (const auto& sequence : instruction_sequences)
+    for (auto& sequence : instruction_sequences)
     {
-        for (const auto& instruction : sequence.instruction_sequences)
+        for (auto& instruction : sequence.instruction_sequences)
         {
-            if (ins_inst->normalizedInstructionStr == instruction.normalizedInstructionStr)
+            if (InstMatch(ins_inst->normalizedInstructionStr, instruction.normalizedInstructionStr))
             {
+                ins_inst->AddMatchedSeqAddress(&sequence);
+                ins_inst->AddMatchedInstrAddress(&instruction);
                 add = true;
-                break;
             }
-        }
-        if (add) // Interrompe o loop externo se o valor foi achado
-        {
-            break;
         }
     }
 
