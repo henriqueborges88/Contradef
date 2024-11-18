@@ -97,9 +97,9 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
     tdata->instruction_queue.push_back(*ins_instr);
 
     // Comparar a fila de instruções com as sequências armazenadas
-    for (auto* sequence : ins_instr->matchedSeqAddresses)
+    for (auto& sequence : instruction_sequences)
     {
-        size_t seq_length = sequence->instruction_sequences.size();
+        size_t seq_length = sequence.instruction_sequences.size();
         if (tdata->instruction_queue.size() < seq_length) {
             continue; // Não há instruções suficientes na fila para realizar a comparação
         }
@@ -107,17 +107,16 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
         // Comparar a sequência da fila com a sequência armazenada
         auto start_it = tdata->instruction_queue.end() - seq_length;
 
-        bool match = std::equal(start_it, tdata->instruction_queue.end(), sequence->instruction_sequences.begin(),
-            [](InstrumentedInstruction& queue_inst, InstructionToMatch& seq_inst) {
-                return queue_inst.HasMatchedInstrAddress(&seq_inst);
+        bool match = std::equal(start_it, tdata->instruction_queue.end(), sequence.instruction_sequences.begin(),
+            [](const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
+                return InstMatch(queue_inst, seq_inst);
             });
-
 
         if (match) {
             // Sequência encontrada, chamar o callback
-            sequence->matchCount++;
-            if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || sequence->matchOcurrenceIndex == sequence->matchCount)) {
-                sequence->match_callback(PIN_ThreadId(), ip, ctxt, *sequence);
+            sequence.matchCount++;
+            if (sequence.match_callback && (sequence.matchOcurrenceIndex == -1 || sequence.matchOcurrenceIndex == sequence.matchCount)) {
+                sequence.match_callback(PIN_ThreadId(), ip, ctxt, sequence);
             }
         }
     }
@@ -144,16 +143,19 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 
     bool add = false;
     // Comparar a fila com as sequências
-    for (auto& sequence : instruction_sequences)
+    for (const auto& sequence : instruction_sequences)
     {
-        for (auto& instruction : sequence.instruction_sequences)
+        for (const auto& instruction : sequence.instruction_sequences)
         {
             if (InstMatch(ins_inst->normalizedInstructionStr, instruction.normalizedInstructionStr))
             {
-                ins_inst->AddMatchedSeqAddress(&sequence);
-                ins_inst->AddMatchedInstrAddress(&instruction);
                 add = true;
+                break;
             }
+        }
+        if (add) // Interrompe o loop externo se o valor foi achado
+        {
+            break;
         }
     }
 
