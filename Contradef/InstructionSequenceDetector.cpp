@@ -87,6 +87,7 @@ void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::
 
 VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr)
 {
+
     ThreadData* tdata = GetThreadData();
 
     // Adicionar a instrução atual à fila (com limite fixo de tamanho)
@@ -94,11 +95,12 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
     if (tdata->instruction_queue.size() == max_sequence_length) {
         tdata->instruction_queue.pop_front();
     }
-    tdata->instruction_queue.push_back(*ins_instr);
+    tdata->instruction_queue.push_back(ins_instr);
 
     // Comparar a fila de instruções com as sequências armazenadas
     for (auto& sequence : instruction_sequences)
     {
+
         size_t seq_length = sequence.instruction_sequences.size();
         if (tdata->instruction_queue.size() < seq_length) {
             continue; // Não há instruções suficientes na fila para realizar a comparação
@@ -108,8 +110,8 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
         auto start_it = tdata->instruction_queue.end() - seq_length;
 
         bool match = std::equal(start_it, tdata->instruction_queue.end(), sequence.instruction_sequences.begin(),
-            [](const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
-                return InstMatch(queue_inst, seq_inst);
+            [](const InstrumentedInstruction* queue_inst, const InstructionToMatch* seq_inst) {
+                return InstMatch(*queue_inst, *seq_inst);
             });
 
         if (match) {
@@ -135,9 +137,9 @@ VOID InstructionSequenceDetector::seqInstCBWrapper(ADDRINT ip, CONTEXT* ctxt, In
 
 VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 {
-    std::string* instStr = new std::string(INS_Disassemble(ins));
+    std::string instStr = std::string(INS_Disassemble(ins));
 
-    InstrumentedInstruction* ins_inst = new InstrumentedInstruction(*instStr);
+    InstrumentedInstruction* ins_inst = new InstrumentedInstruction(instStr);
 
     InstructionSequenceDetector* detector = reinterpret_cast<InstructionSequenceDetector*>(v);
 
@@ -145,9 +147,9 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
     // Comparar a fila com as sequências
     for (const auto& sequence : instruction_sequences)
     {
-        for (const auto& instruction : sequence.instruction_sequences)
+        for (auto* instruction : sequence.instruction_sequences)
         {
-            if (InstMatch(ins_inst->normalizedInstructionStr, instruction.normalizedInstructionStr))
+            if (InstMatch(*ins_inst, *instruction))
             {
                 add = true;
                 break;

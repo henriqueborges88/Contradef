@@ -59,7 +59,7 @@ struct InstructionToMatch {
 
 struct SequenceInstructions {
     // Armazena as sequências de instruções normalizadas
-    std::vector<InstructionToMatch> instruction_sequences;
+    std::vector<InstructionToMatch*> instruction_sequences;
     int matchOcurrenceIndex;
     int matchCount;
 
@@ -72,7 +72,7 @@ struct SequenceInstructions {
     {
         for (const auto& instruction : instruction_seq)
         {
-            instruction_sequences.push_back(InstructionToMatch(instruction));
+            instruction_sequences.push_back(new InstructionToMatch(instruction));
         }
     }
 };
@@ -106,7 +106,7 @@ private:
     // Estrutura para armazenar dados específicos da thread
     struct ThreadData
     {
-        std::deque<InstrumentedInstruction> instruction_queue;
+        std::deque<InstrumentedInstruction*> instruction_queue;
     };
 
     // Key para o Thread-Local Storage
