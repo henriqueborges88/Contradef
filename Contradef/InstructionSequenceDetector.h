@@ -113,7 +113,7 @@ private:
     TLS_KEY tls_key;
 
     // Armazena as sequências de instruções normalizadas
-    std::vector<SequenceInstructions> instruction_sequences;
+    std::vector<SequenceInstructions*> instruction_sequences;
 
     // Tamanho máximo das sequências (para a fila)
     size_t max_sequence_length;
