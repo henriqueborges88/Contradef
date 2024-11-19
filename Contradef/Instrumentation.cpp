@@ -728,7 +728,7 @@ int InitInstrunctionsInstrumentation()
     // Tecnicas evasivas obsiium 1.8.5 Antidbi
     sequence.push_back("jmp 0x7ff6f499d6e1");
     sequence.push_back("test word ptr [r?i+0xa], 0x2");
-    sequence.push_back("jn? 0x7ff6f499d6eb");
+    sequence.push_back("j?? 0x7ff6f499d6eb");
     sequence.push_back("jz 0x7ff6f499d2da");
     //sequence.push_back("jmp 0x7ff6f499d928");
     //sequence.push_back("test rax, rax");
