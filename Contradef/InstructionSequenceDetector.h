@@ -61,14 +61,15 @@ struct SequenceInstructions {
     // Armazena as sequências de instruções normalizadas
     std::vector<InstructionToMatch*> instruction_sequences;
     int matchOcurrenceIndex;
+    int matchOcurrenceIndexEnd;
     int matchCount;
 
     // Callback a ser chamado quando uma sequência for encontrada
     SeqMatchCallbackFunc match_callback;
 
     // Construtor para inicializar o contexto com IDs
-    SequenceInstructions(const std::vector<std::string>& instruction_seq, SeqMatchCallbackFunc callback, int matchOcurrenceIndex = -1)
-        : instruction_sequences(), matchOcurrenceIndex(matchOcurrenceIndex), matchCount(0), match_callback(callback)
+    SequenceInstructions(const std::vector<std::string>& instruction_seq, SeqMatchCallbackFunc callback, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1)
+        : instruction_sequences(), matchOcurrenceIndex(matchOcurrenceIndex), matchOcurrenceIndexEnd(matchOcurrenceIndexEnd), matchCount(0), match_callback(callback)
     {
         for (const auto& instruction : instruction_seq)
         {
@@ -77,6 +78,34 @@ struct SequenceInstructions {
     }
 };
 
+
+struct InstructionKey {
+    ADDRINT address;
+    std::string disassembledInstruction;
+
+    // Construtor
+    InstructionKey(ADDRINT addr, const std::string& instr)
+        : address(addr), disassembledInstruction(instr) {
+    }
+
+    // Operador de igualdade para comparação no unordered_map
+    bool operator==(const InstructionKey& other) const {
+        return address == other.address &&
+            disassembledInstruction == other.disassembledInstruction;
+    }
+};
+
+// Função de hash personalizada
+struct InstructionKeyHash {
+    size_t operator()(const InstructionKey& key) const {
+        // Combinar o hash do endereço e da string
+        size_t hash1 = std::hash<ADDRINT>()(key.address);
+        size_t hash2 = std::hash<std::string>()(key.disassembledInstruction);
+        return hash1 ^ (hash2 << 1); // Combinação simples
+    }
+};
+
+
 class InstructionSequenceDetector
 {
 public:
@@ -84,7 +113,7 @@ public:
     ~InstructionSequenceDetector();
 
     // Adiciona uma nova sequência de instruções para detecção
-    void AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, int matchOcurrenceIndex = -1);
+    void AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1);
 
     // Inicializa a estrutura necessária (deve ser chamado após adicionar todas as sequências)
     void Initialize();
@@ -114,6 +143,8 @@ private:
 
     // Armazena as sequências de instruções normalizadas
     std::vector<SequenceInstructions*> instruction_sequences;
+
+    std::tr1::unordered_map<InstructionKey, InstrumentedInstruction*, InstructionKeyHash> instructionCache;
 
     // Tamanho máximo das sequências (para a fila)
     size_t max_sequence_length;

@@ -542,7 +542,7 @@ InstructionSequenceDetector seq_detector;
 
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    std::cout << "Enconte\n";
+    std::cout << "APLICANDO CONTRAMEDIDA...\n";
     // Obter os flags atuais
     ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
 
@@ -686,6 +686,27 @@ VOID Sequence2MatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceIns
 
 }
 
+VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    PIN_LockClient(); 
+    ADDRINT targetAddr = PIN_GetContextReg(ctxt, REG_R10);
+    IMG img = IMG_FindByAddress(targetAddr);
+
+    std::cout << "Chamada -> ";
+
+    if (IMG_Valid(img)) {
+        std::cout << IMG_Name(img) << ":";
+
+    }
+    RTN rtn = RTN_FindByAddress(targetAddr);
+    if (RTN_Valid(rtn)) {
+        std::cout << RTN_Name(rtn);
+    }
+    std::cout << std::endl;
+
+    PIN_UnlockClient();
+}
 
 VOID TraceFunc(TRACE trace, VOID* v)
 {
@@ -698,6 +719,12 @@ VOID TraceFunc(TRACE trace, VOID* v)
         }
     }
 }
+
+VOID TraceInst(INS ins, VOID* v)
+{
+    seq_detector.InstructionTrace(ins, &seq_detector);
+}
+
 
 int InitInstrunctionsInstrumentation()
 {
@@ -738,6 +765,19 @@ int InitInstrunctionsInstrumentation()
     seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
 
 
+
+
+    std::vector<std::string> sequence_call_fcn;
+
+    sequence_call_fcn.push_back("add rsp, 0x48");
+    sequence_call_fcn.push_back("pop r13");
+    sequence_call_fcn.push_back("pop r12");
+    sequence_call_fcn.push_back("jmp r10");
+
+    seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
+
+
+
     //// Tecnicas evasivas obsiium 1.8.5 AntVM
     //std::vector<std::string> sequence2;
     //sequence2.push_back("jmp 0x7ff6f499d6e1");
@@ -768,7 +808,10 @@ int InitInstrunctionsInstrumentation()
     seq_detector.Initialize();
 
     
-    TRACE_AddInstrumentFunction(TraceFunc, 0);
+    //TRACE_AddInstrumentFunction(TraceFunc, 0);
+
+    INS_AddInstrumentFunction(TraceInst, 0);
+
 
     return 0;
 }

@@ -71,10 +71,12 @@ InstructionSequenceDetector::~InstructionSequenceDetector()
     // Nada a destruir explicitamente
 }
 
-void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack, int matchOcurrenceIndex)
+void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
 {
-
-    SequenceInstructions* sequenceInstructions = new SequenceInstructions(sequence, matchCallBack, matchOcurrenceIndex);
+    if (matchOcurrenceIndex >= 0 && matchOcurrenceIndexEnd < 0) {
+        matchOcurrenceIndexEnd = matchOcurrenceIndex;
+    }
+    SequenceInstructions* sequenceInstructions = new SequenceInstructions(sequence, matchCallBack, matchOcurrenceIndex, matchOcurrenceIndexEnd);
 
     instruction_sequences.push_back(sequenceInstructions);
 
@@ -87,7 +89,6 @@ void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::
 
 VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr)
 {
-
     ThreadData* tdata = GetThreadData();
 
     // Adicionar a instrução atual à fila (com limite fixo de tamanho)
@@ -117,7 +118,7 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
         if (match) {
             // Sequência encontrada, chamar o callback
             sequence->matchCount++;
-            if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || sequence->matchOcurrenceIndex == sequence->matchCount)) {
+            if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || (sequence->matchCount >= sequence->matchOcurrenceIndex && sequence->matchCount <= sequence->matchOcurrenceIndexEnd))) {
                 sequence->match_callback(PIN_ThreadId(), ip, ctxt, *sequence);
             }
         }
@@ -137,39 +138,64 @@ VOID InstructionSequenceDetector::seqInstCBWrapper(ADDRINT ip, CONTEXT* ctxt, In
 
 VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 {
-    std::string instStr = std::string(INS_Disassemble(ins));
-
-    InstrumentedInstruction* ins_inst = new InstrumentedInstruction(instStr);
-
-    InstructionSequenceDetector* detector = reinterpret_cast<InstructionSequenceDetector*>(v);
-
     bool add = false;
-    // Comparar a fila com as sequências
-    for (auto* sequence : instruction_sequences)
-    {
-        for (auto* instruction : sequence->instruction_sequences)
-        {
-            if (InstMatch(*ins_inst, *instruction))
+
+    ADDRINT address = INS_Address(ins);
+    std::string disassembledInstr = INS_Disassemble(ins);
+
+    // Criar a chave para o cache
+    InstructionKey key(address, disassembledInstr);
+
+    // Verificar se já está no cache
+    auto cachedInstr = instructionCache.find(key);
+    InstrumentedInstruction* ins_inst = nullptr;
+
+    if (cachedInstr != instructionCache.end()) {
+        // Recuperar do cache
+        ins_inst = cachedInstr->second;
+        add = true;
+    }
+    else {
+        // Criar uma nova entrada
+        ins_inst = new InstrumentedInstruction(disassembledInstr);
+        // Comparar a fila com as sequências
+
+        for (auto* sequence : instruction_sequences) {
+            for (auto* instruction : sequence->instruction_sequences)
             {
-                add = true;
+                if (InstMatch(*ins_inst, *instruction))
+                {
+                    add = true;
+                    break;
+                }
+            }
+            if (add) // Interrompe o loop externo se o valor foi achado
+            {
                 break;
             }
         }
-        if (add) // Interrompe o loop externo se o valor foi achado
-        {
-            break;
+        if (add) {
+            instructionCache[key] = ins_inst;
         }
+        else {
+            delete ins_inst;
+        }
+
     }
 
-    if (add) 
-    {
+    InstructionSequenceDetector* detector = reinterpret_cast<InstructionSequenceDetector*>(v);
+
+
+    if (add) {
+        //std::cout << "add instru -> " << INS_Address(ins) << " - " << ins_inst->instructionStr << std::endl;
+
         INS_InsertCall(ins,
             IPOINT_BEFORE,
             AFUNPTR(seqInstCBWrapper),
             IARG_INST_PTR,
             IARG_CONTEXT,
             IARG_PTR, ins_inst,
-            IARG_PTR, detector,        // Passando o ponteiro da instância da classe
+            IARG_PTR, detector,
             IARG_END);
     }
 }
