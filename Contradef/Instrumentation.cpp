@@ -653,6 +653,37 @@ VOID SequenceMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceIns
 
 }
 
+VOID SequenceMatchCallback3(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+
+    if (zf_before == 1) {
+        std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << std::endl;
+
+        // Para setar o ZF para 1:
+        //flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+
+        // Para setar o ZF para 0:
+        flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        // Obter os flags atualizados
+        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+        BOOL zf_after = (flags & (1 << 6)) != 0;
+        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+
+        PIN_ExecuteAt(ctxt);
+    }
+
+
+}
+
 
 VOID Sequence2MatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
@@ -720,20 +751,16 @@ VOID TraceInst(INS ins, VOID* v)
     seq_detector.InstructionTrace(ins, &seq_detector);
 }
 
+namespace standard = __std_alias;
 
 int InitInstrunctionsInstrumentation()
 {
 
-    std::vector<std::string> sequence;
     //// Tecnicas evasivas obsiium 1.4.3 Antidbi
     //sequence.push_back("jmp 0x7ff6acccdc2a");
     //sequence.push_back("test word ptr [rdi+0xa], 0x2");
     //sequence.push_back("jmp 0x7ff6226ddc33");
     //sequence.push_back("jz 0x7ff6226dd7c2");
-    ////sequence.push_back("jmp 0x7ff6226dd9b2");
-    ////sequence.push_back("test rax, rax");
-    ////sequence.push_back("jmp 0x7ff6226dd9b8");
-    ////sequence.push_back("jz 0x7ff6226dd7c2");
     //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
 
     //// Tecnicas evasivas obsiium 1.4.3 AntiVM
@@ -746,44 +773,74 @@ int InitInstrunctionsInstrumentation()
 
 
 
-
     // Tecnicas evasivas obsiium 1.8.5 Antidbi
-    sequence.push_back("jmp 0x7ff6f499d6e1");
-    sequence.push_back("test word ptr [r?i+0xa], 0x2");
-    sequence.push_back("j?? 0x7ff6f499d6eb");
-    sequence.push_back("jz 0x7ff6f499d2da");
-    //sequence.push_back("jmp 0x7ff6f499d928");
-    //sequence.push_back("test rax, rax");
-    //sequence.push_back("jo 0x7ff6f499d8cd");
-    //sequence.push_back("jz 0x7ff6f499d2da");
+    std::vector<std::vector<std::string>> sequence;
+
+
+    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
+    sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
+    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb"));
+    sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+
+
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+
     
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
-
-
-
-    std::vector<std::string> sequence2;
     
-    sequence2.push_back("test word ptr [r?i+0xa], 0x2");
-    sequence2.push_back("j?? 0x7ff6f499d6eb");
-    sequence2.push_back("jz 0x7ff6f499d2da");
-    sequence2.push_back("jmp 0x7ff6f499d928");
-    sequence2.push_back("test rax, rax");
-    sequence2.push_back("jmp 0x7ff6f499d8cd"); // ou jo
-    sequence2.push_back("jz 0x7ff6f499d2da");
-
-    seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
 
 
+    //Funciona parcialmente 1.4 e 1.8
+    //std::vector<std::vector<std::string>> sequence2;
+
+    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
+    //sequence2.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
+    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb"));
+    //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d928"));
+    //sequence2.push_back(CreateInstVector("test rax, rax"));
+    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d8cd", "jo 0x7ff6f499d8cd"));
+    //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+
+    //seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
 
 
-    std::vector<std::string> sequence_call_fcn;
 
-    sequence_call_fcn.push_back("add rsp, 0x48");
-    sequence_call_fcn.push_back("pop r13");
-    sequence_call_fcn.push_back("pop r12");
-    sequence_call_fcn.push_back("jmp r10");
 
-    seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
+
+
+
+
+    ////Sequencia invalida, pesquisar mais sobre
+    //std::vector<std::vector<std::string>> sequence3;
+
+    //sequence3.push_back(CreateInstVector("test word ptr [rsi+0xa], 0x2"));
+    //sequence3.push_back(CreateInstVector("jno 0x7ff6889700d1"));
+    //sequence3.push_back(CreateInstVector("jz 0x7ff68896f179"));
+    //sequence3.push_back(CreateInstVector("jmp 0x7ff68896f9d4"));
+    //sequence3.push_back(CreateInstVector("test rax, rax"));
+    //sequence3.push_back(CreateInstVector("jnb 0x7ff68896f9dc"));
+    //sequence3.push_back(CreateInstVector("jnz 0x7ff68896f594"));
+
+    //seq_detector.AddInstructionSequence(sequence3, SequenceMatchCallback3);
+
+
+
+
+
+
+
+    //// Instrução para ver as funções que será chamadas
+    //std::vector<std::string> sequence_call_fcn;
+
+    //sequence_call_fcn.push_back("add rsp, 0x48");
+    //sequence_call_fcn.push_back("pop r13");
+    //sequence_call_fcn.push_back("pop r12");
+    //sequence_call_fcn.push_back("jmp r10");
+
+    //seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
+
+
+
 
 
 

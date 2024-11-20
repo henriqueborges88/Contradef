@@ -1,6 +1,23 @@
 #include "InstructionSequenceDetector.h"
 
 
+std::vector<std::string> CreateVectorFromArgs(const char* first, ...) {
+    std::vector<std::string> result;
+
+    va_list args;
+    va_start(args, first);
+
+    // Adiciona o primeiro argumento
+    const char* current = first;
+    while (current != NULL) { // Use NULL como delimitador
+        result.push_back(std::string(current));
+        current = va_arg(args, const char*);
+    }
+
+    va_end(args);
+    return result;
+}
+
 std::string CaptureAndConvertToUpper(const std::string& input) {
     std::string result;
 
@@ -51,14 +68,6 @@ void NormalizeInstructionText(std::string& instr)
 }
 
 BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
-    if (seq_inst.isAnyInst) {
-        return true; // Corresponde a qualquer instrução
-    }
-
-    if (!seq_inst.insHasWildcard && seq_inst.insClass != queue_inst.insClass) {
-        return false; // Se não é um wildcard as instruções devem ser do mesmo tipo
-    }
-
     if (seq_inst.hasWildcard) {
         if (queue_inst.size != seq_inst.size) {
             return false; // Tamanho diferente não pode corresponder
@@ -88,7 +97,7 @@ InstructionSequenceDetector::~InstructionSequenceDetector()
     // Nada a destruir explicitamente
 }
 
-void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
+void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
 {
     if (matchOcurrenceIndex >= 0 && matchOcurrenceIndexEnd < 0) {
         matchOcurrenceIndexEnd = matchOcurrenceIndex;
@@ -128,8 +137,22 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
         auto start_it = tdata->instruction_queue.end() - seq_length;
 
         bool match = std::equal(start_it, tdata->instruction_queue.end(), sequence->instruction_sequences.begin(),
-            [](const InstrumentedInstruction* queue_inst, const InstructionToMatch* seq_inst) {
-                return InstMatch(*queue_inst, *seq_inst);
+            [](const InstrumentedInstruction* queue_inst, std::vector<InstructionToMatch*>& seq_inst) {
+                bool match = false;
+                for (const auto* inst : seq_inst) {
+                    if (inst->isAnyInst) {
+                        match = true;
+                        break;
+                    }
+                    if (inst->insClass != queue_inst->insClass) {
+                        continue; // As instruções devem ser do mesmo tipo
+                    }
+                    if (InstMatch(*queue_inst, *inst)) {
+                        match = true;
+                        break;
+                    }
+                }
+                return match;
             });
 
         if (match) {
@@ -175,15 +198,32 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
     }
     else {
         // Criar uma nova entrada
-        ins_inst = new InstrumentedInstruction(iOpCode, disassembledInstr);
 
         // Comparar a fila com as sequências
-        for (auto* sequence : instruction_sequences) {
-            for (auto* instruction : sequence->instruction_sequences)
+        for (const auto* sequence : instruction_sequences) {
+            for (const auto& instructionArr : sequence->instruction_sequences)
             {
-                if (InstMatch(*ins_inst, *instruction))
+                for (const auto* inst : instructionArr)
                 {
-                    add = true;
+                    if (inst->isAnyInst) {
+                        add = true;
+                        break;
+                    }
+                    if (inst->insClass != iOpCode) {
+                        continue; // As instruções devem ser do mesmo tipo
+                    }
+                    if (ins_inst == nullptr)
+                    {
+                        ins_inst = new InstrumentedInstruction(iOpCode, disassembledInstr);
+                    }
+                    if (InstMatch(*ins_inst, *inst))
+                    {
+                        add = true;
+                        break;
+                    }
+                }
+                if (add) // Interrompe o loop externo se o valor foi achado
+                {
                     break;
                 }
             }

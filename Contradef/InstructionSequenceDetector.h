@@ -10,6 +10,10 @@
 #include <unordered_map>
 #include <cctype> // Para std::toupper
 
+#define CreateInstVector(...) CreateVectorFromArgs(__VA_ARGS__, NULL)
+
+std::vector<std::string> CreateVectorFromArgs(const char* first, ...);
+
 std::string CaptureAndConvertToUpper(const std::string& input);
 void NormalizeInstructionText(std::string& instr);
 
@@ -41,13 +45,12 @@ struct InstructionToMatch {
     std::string normalizedInstructionStr;
     bool isAnyInst;
     bool hasWildcard;
-    bool insHasWildcard;
     int size;
     OPCODE insClass;
 
     // Construtor para inicializar o contexto com IDs
     InstructionToMatch(std::string instructionStr)
-        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWildcard(false), insHasWildcard(false), size(0), insClass(XED_ICLASS_INVALID)
+        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWildcard(false), size(0), insClass(XED_ICLASS_INVALID)
     {
         NormalizeInstructionText(normalizedInstructionStr);
         const char* insChar = normalizedInstructionStr.c_str();
@@ -64,7 +67,8 @@ struct InstructionToMatch {
         std::string mnemonic = CaptureAndConvertToUpper(instructionStr);
         if (mnemonic.find("?") != std::wstring::npos)
         {
-            insHasWildcard = true;
+            std::cout << "Wildcards não são permitidos nas instruções, use somente nos operandos." << std::endl;
+            exit(1);
         }
         // Quando insHasWildcard == true -> insClass será inválida
         insClass = str2xed_iclass_enum_t(mnemonic.c_str());
@@ -73,7 +77,7 @@ struct InstructionToMatch {
 
 struct SequenceInstructions {
     // Armazena as sequências de instruções normalizadas
-    std::vector<InstructionToMatch*> instruction_sequences;
+    std::vector<std::vector<InstructionToMatch*>> instruction_sequences;
     int matchOcurrenceIndex;
     int matchOcurrenceIndexEnd;
     int matchCount;
@@ -82,12 +86,16 @@ struct SequenceInstructions {
     SeqMatchCallbackFunc match_callback;
 
     // Construtor para inicializar o contexto com IDs
-    SequenceInstructions(const std::vector<std::string>& instruction_seq, SeqMatchCallbackFunc callback, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1)
+    SequenceInstructions(const std::vector<std::vector<std::string>>& instruction_seq, SeqMatchCallbackFunc callback, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1)
         : instruction_sequences(), matchOcurrenceIndex(matchOcurrenceIndex), matchOcurrenceIndexEnd(matchOcurrenceIndexEnd), matchCount(0), match_callback(callback)
     {
-        for (const auto& instruction : instruction_seq)
+        for (const auto& instructionArr : instruction_seq)
         {
-            instruction_sequences.push_back(new InstructionToMatch(instruction));
+            std::vector<InstructionToMatch*> orLst;
+            for (const auto& inst: instructionArr) {
+                orLst.push_back(new InstructionToMatch(inst));
+            }
+            instruction_sequences.push_back(orLst);
         }
     }
 };
@@ -127,7 +135,7 @@ public:
     ~InstructionSequenceDetector();
 
     // Adiciona uma nova sequência de instruções para detecção
-    void AddInstructionSequence(const std::vector<std::string>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1);
+    void AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1);
 
     // Inicializa a estrutura necessária (deve ser chamado após adicionar todas as sequências)
     void Initialize();
