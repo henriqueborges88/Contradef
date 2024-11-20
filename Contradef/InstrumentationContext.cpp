@@ -88,9 +88,13 @@ void InstrumentationContext::InitStrategies() {
     for (const std::string& scope : scanScope) {
         if (scope == "Obsidium") {
             std::cout << "Instrumentando o Obsidium" << std::endl;
-            //strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
-            //strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-            //strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
+            strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
+            strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
+            strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
+
+            strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
         }
 
         if (scope == "Themida") {

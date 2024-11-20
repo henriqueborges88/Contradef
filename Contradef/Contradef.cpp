@@ -114,7 +114,7 @@ int main(int argc, char* argv[]) {
 
     PIN_InitSymbols();
 
-    IMG_AddInstrumentFunction(InstrumentFunctions, 0);
+    //IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
     InitInstrunctionsInstrumentation();
 

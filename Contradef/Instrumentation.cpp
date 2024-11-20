@@ -426,45 +426,6 @@ void SimulaJnzComoJz(ADDRINT enderecoDestino, BOOL desvioTomado, CONTEXT* ctxt) 
 
 }
 
-//Verificar jp 0x7ff73153dc34
-
-void aInstruction(INS ins, VOID* v)
-{
-
-    // Verifica se a instrução é do tipo LEA e se está no endereço desejado
-    //std::cout << "Addr " << INS_Address(ins) << std::endl;
-    if (INS_Disassemble(ins) == "lea rax, ptr [rax+r11*2+0x4]" && INS_Opcode(ins) == XED_ICLASS_LEA)
-    {
-        // Adiciona um callback antes da instrução ser executada
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)CaptureLeaData,
-            IARG_INST_PTR,     // Endereço da instrução
-            IARG_CONTEXT,      // Contexto atual
-            IARG_FUNCARG_CALLSITE_VALUE, 0,
-            IARG_FUNCARG_CALLSITE_VALUE, 1,
-            IARG_FUNCARG_CALLSITE_VALUE, 2,
-            IARG_FUNCARG_CALLSITE_VALUE, 3,
-            IARG_FUNCARG_CALLSITE_VALUE, 4,
-            IARG_FUNCARG_CALLSITE_VALUE, 5,
-            IARG_FUNCARG_CALLSITE_VALUE, 6,
-            IARG_FUNCARG_CALLSITE_VALUE, 7,
-            IARG_FUNCARG_CALLSITE_VALUE, 8,
-            IARG_END);
-    }
-    else if (INS_Opcode(ins) == XED_ICLASS_JNZ && search == true) {
-        // Obtém o endereço de destino da instrução jnz
-        ADDRINT enderecoDestino = INS_DirectBranchOrCallTargetAddress(ins);
-
-        // Insere uma chamada antes da execução de cada jnz
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)SimulaJnzComoJz,
-            IARG_ADDRINT, enderecoDestino,
-            IARG_BRANCH_TAKEN,
-            IARG_CONTEXT,
-            IARG_END);
-        search == false;
-
-    }
-}
-
 
 InstructionSequenceDetector seq_detector;
 //
@@ -542,29 +503,32 @@ InstructionSequenceDetector seq_detector;
 
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    std::cout << "APLICANDO CONTRAMEDIDA...\n";
     // Obter os flags atuais
     ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
 
     // Verificar o valor atual do ZF
     BOOL zf_before = (flags & (1 << 6)) != 0;
-    //std::cout << "ZF antes da modificação: " << zf_before << std::endl;
 
-    // Para setar o ZF para 1:
-    flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+    if (zf_before == 0) {
+        std::cout << "APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
 
-    // Para setar o ZF para 0:
-    //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+        // Para setar o ZF para 1:
+        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+
+        // Para setar o ZF para 0:
+        //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        // Obter os flags atualizados
+        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+        BOOL zf_after = (flags & (1 << 6)) != 0;
+        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+
+        PIN_ExecuteAt(ctxt);
+    }
     
-    // Atualizar os flags
-    PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
-
-    // Obter os flags atualizados
-    flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-    BOOL zf_after = (flags & (1 << 6)) != 0;
-    //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
-
-    PIN_ExecuteAt(ctxt);
 
 
 
@@ -656,6 +620,37 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
     //    CharStr[7] = L'Q';
     //    CharStr[9] = L'Y';
     //}
+}
+
+VOID SequenceMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+
+    if (zf_before == 0) {
+        std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << std::endl;
+
+        // Para setar o ZF para 1:
+        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+
+        // Para setar o ZF para 0:
+        //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        // Obter os flags atualizados
+        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+        BOOL zf_after = (flags & (1 << 6)) != 0;
+        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+
+        PIN_ExecuteAt(ctxt);
+    }
+
+
 }
 
 
@@ -762,7 +757,21 @@ int InitInstrunctionsInstrumentation()
     //sequence.push_back("jo 0x7ff6f499d8cd");
     //sequence.push_back("jz 0x7ff6f499d2da");
     
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+
+
+
+    std::vector<std::string> sequence2;
+    
+    sequence2.push_back("test word ptr [r?i+0xa], 0x2");
+    sequence2.push_back("j?? 0x7ff6f499d6eb");
+    sequence2.push_back("jz 0x7ff6f499d2da");
+    sequence2.push_back("jmp 0x7ff6f499d928");
+    sequence2.push_back("test rax, rax");
+    sequence2.push_back("jmp 0x7ff6f499d8cd"); // ou jo
+    sequence2.push_back("jz 0x7ff6f499d2da");
+
+    seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
 
 
 

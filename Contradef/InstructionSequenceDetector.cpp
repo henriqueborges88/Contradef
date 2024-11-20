@@ -1,6 +1,19 @@
 #include "InstructionSequenceDetector.h"
 
 
+std::string CaptureAndConvertToUpper(const std::string& input) {
+    std::string result;
+
+    for (char ch : input) {
+        if (ch == ' ') {
+            break;
+        }
+        result += std::toupper(ch);
+    }
+
+    return result;
+}
+
 void NormalizeInstructionText(std::string& instr)
 {
     // Converter para minúsculas
@@ -40,6 +53,10 @@ void NormalizeInstructionText(std::string& instr)
 BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
     if (seq_inst.isAnyInst) {
         return true; // Corresponde a qualquer instrução
+    }
+
+    if (!seq_inst.insHasWildcard && seq_inst.insClass != queue_inst.insClass) {
+        return false; // Se não é um wildcard as instruções devem ser do mesmo tipo
     }
 
     if (seq_inst.hasWildcard) {
@@ -139,6 +156,7 @@ VOID InstructionSequenceDetector::seqInstCBWrapper(ADDRINT ip, CONTEXT* ctxt, In
 VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 {
     bool add = false;
+    OPCODE iOpCode = INS_Opcode(ins);
 
     ADDRINT address = INS_Address(ins);
     std::string disassembledInstr = INS_Disassemble(ins);
@@ -157,9 +175,9 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
     }
     else {
         // Criar uma nova entrada
-        ins_inst = new InstrumentedInstruction(disassembledInstr);
-        // Comparar a fila com as sequências
+        ins_inst = new InstrumentedInstruction(iOpCode, disassembledInstr);
 
+        // Comparar a fila com as sequências
         for (auto* sequence : instruction_sequences) {
             for (auto* instruction : sequence->instruction_sequences)
             {

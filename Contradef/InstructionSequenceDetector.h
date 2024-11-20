@@ -8,7 +8,9 @@
 #include <deque>
 #include <algorithm>
 #include <unordered_map>
+#include <cctype> // Para std::toupper
 
+std::string CaptureAndConvertToUpper(const std::string& input);
 void NormalizeInstructionText(std::string& instr);
 
 // Forward declaration
@@ -21,10 +23,12 @@ struct InstrumentedInstruction {
     ADDRINT instAddr;
     std::string instructionStr;
     std::string normalizedInstructionStr;
+    bool insHasWildcard;
     int size;
+    OPCODE insClass;
 
-    InstrumentedInstruction(std::string instructionStr)
-        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), size(0)
+    InstrumentedInstruction(OPCODE insCl, std::string instructionStr)
+        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), insHasWildcard(false), size(0), insClass(insCl)
     {
         NormalizeInstructionText(normalizedInstructionStr);
         size = strlen(normalizedInstructionStr.c_str());
@@ -37,11 +41,13 @@ struct InstructionToMatch {
     std::string normalizedInstructionStr;
     bool isAnyInst;
     bool hasWildcard;
+    bool insHasWildcard;
     int size;
+    OPCODE insClass;
 
     // Construtor para inicializar o contexto com IDs
     InstructionToMatch(std::string instructionStr)
-        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWildcard(false), size(0)
+        : matchAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), isAnyInst(false), hasWildcard(false), insHasWildcard(false), size(0), insClass(XED_ICLASS_INVALID)
     {
         NormalizeInstructionText(normalizedInstructionStr);
         const char* insChar = normalizedInstructionStr.c_str();
@@ -54,6 +60,14 @@ struct InstructionToMatch {
         {
             hasWildcard = true;
         }
+
+        std::string mnemonic = CaptureAndConvertToUpper(instructionStr);
+        if (mnemonic.find("?") != std::wstring::npos)
+        {
+            insHasWildcard = true;
+        }
+        // Quando insHasWildcard == true -> insClass será inválida
+        insClass = str2xed_iclass_enum_t(mnemonic.c_str());
     }
 };
 
