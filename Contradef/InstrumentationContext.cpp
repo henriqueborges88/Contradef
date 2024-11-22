@@ -87,14 +87,20 @@ void InstrumentationContext::InitStrategies() {
 
     for (const std::string& scope : scanScope) {
         if (scope == "Obsidium") {
+            
             std::cout << "Instrumentando o Obsidium" << std::endl;
             strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
             strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
             strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
             strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
+            strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
+            strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
+            strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
 
-            strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-            strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            //Cai o desempenho -> strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            //strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+
+
         }
 
         if (scope == "Themida") {
@@ -117,7 +123,6 @@ void InstrumentationContext::InitStrategies() {
     strategyMap["WriteConsoleW"] = &InstWriteConsoleW::InstrumentFunction;
     strategyMap["ExitProcess"] = &InstExitProcess::InstrumentFunction;
     strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
-    strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
     strategyMap["DeleteFileA"] = &InstDeleteFileA::InstrumentFunction;
     strategyMap["ShellExecute"] = &InstShellExecute::InstrumentFunction;
     strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;*/
@@ -166,7 +171,6 @@ void InstrumentationContext::InitStrategies() {
 
    //// 
    //// // Falta implementar a lógica de detecção
-   // strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
    // strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
    // strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
    // strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction;

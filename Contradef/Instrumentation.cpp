@@ -90,6 +90,46 @@ bool isWstring = 1;
 
 VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
+
+    if (IsMainExecutable(instAddress)) {
+        PIN_LockClient(); 
+        RTN rtnTgt = RTN_FindByAddress(targetRtn);
+        std::string s;
+        bool print = true;
+        if (RTN_Valid(rtnTgt))
+        {
+            IMG img = SEC_Img(RTN_Sec(rtnTgt));
+            std::string imgName = "";
+            if (IMG_Valid(img))
+            {
+                imgName = IMG_Name(img);
+                s += imgName;
+                if (imgName == IMG_Name(IMG_FindImgById(1))) {
+                    print = false;
+                }
+            }
+            std::string rtnName = RTN_Name(rtnTgt);
+            s += ":" + rtnName;
+            if (rtnName.empty() || imgName.empty()) {
+                print = false;
+            }
+        }
+        else {
+            print = false;
+        }
+        if (print) {
+            std::cout << "----> " << instAddress << " -> " << targetRtn << s << std::endl;
+        }
+
+        PIN_UnlockClient();
+        
+    }
+    return;
+
+
+
+
+
     if (tailCall)
     {
         // A tail call is like an implicit return followed by an immediate call
@@ -135,7 +175,7 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
                 //wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
                 //wprintf(L" ** WString --> %ls\n", wideCharStr);
 
-                std::cout << " STRING -> " << WideStringFromPointer(addr) << std::endl;
+                std::cout << " STRING -> " << WideStringToStringFromPointer(addr) << std::endl;
 
             }
             else
@@ -163,6 +203,8 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
 
 VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADDRINT ret0, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
+    return; // desativando para outros testes
+
     PIN_LockClient();
     RTN rtn = RTN_FindByAddress(instAddress);
     PIN_UnlockClient();
@@ -508,12 +550,13 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
 
     // Verificar o valor atual do ZF
     BOOL zf_before = (flags & (1 << 6)) != 0;
+    //std::cout << "1 - ZF ->" << zf_before << std::endl;
 
     if (zf_before == 0) {
-        std::cout << "APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
 
         // Para setar o ZF para 1:
         flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+        std::cout << "1 - APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
 
         // Para setar o ZF para 0:
         //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
@@ -629,25 +672,25 @@ VOID SequenceMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceIns
 
     // Verificar o valor atual do ZF
     BOOL zf_before = (flags & (1 << 6)) != 0;
+    std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << " - ZF ->" << zf_before << std::endl;
 
     if (zf_before == 0) {
-        std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << std::endl;
 
-        // Para setar o ZF para 1:
-        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+        //// Para setar o ZF para 1:
+        //flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
 
-        // Para setar o ZF para 0:
+        //// Para setar o ZF para 0:
         //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
 
-        // Atualizar os flags
-        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+        //// Atualizar os flags
+        //PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
 
-        // Obter os flags atualizados
-        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-        BOOL zf_after = (flags & (1 << 6)) != 0;
-        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+        //// Obter os flags atualizados
+        //flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+        //BOOL zf_after = (flags & (1 << 6)) != 0;
+        ////std::cout << "ZF depois da modificação: " << zf_after << std::endl;
 
-        PIN_ExecuteAt(ctxt);
+        //PIN_ExecuteAt(ctxt);
     }
 
 
@@ -734,14 +777,14 @@ VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, Seque
     PIN_UnlockClient();
 }
 
+
 VOID TraceFunc(TRACE trace, VOID* v)
 {
     for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl))
     {
         for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins))
         {
-            //InstrumentFuncCall(trace, ins);
-            seq_detector.InstructionTrace(ins, &seq_detector);
+            InstrumentFuncCall(trace, ins);
         }
     }
 }
@@ -773,20 +816,6 @@ int InitInstrunctionsInstrumentation()
 
 
 
-    // Tecnicas evasivas obsiium 1.8.5 Antidbi
-    std::vector<std::vector<std::string>> sequence;
-
-
-    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
-    sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb"));
-    sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-
-
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
-
-    
-    
 
 
     //Funciona parcialmente 1.4 e 1.8
@@ -794,7 +823,7 @@ int InitInstrunctionsInstrumentation()
 
     //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
     //sequence2.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb"));
+    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
     //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d928"));
     //sequence2.push_back(CreateInstVector("test rax, rax"));
@@ -802,8 +831,6 @@ int InitInstrunctionsInstrumentation()
     //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
 
     //seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
-
-
 
 
 
@@ -822,22 +849,6 @@ int InitInstrunctionsInstrumentation()
     //sequence3.push_back(CreateInstVector("jnz 0x7ff68896f594"));
 
     //seq_detector.AddInstructionSequence(sequence3, SequenceMatchCallback3);
-
-
-
-
-
-
-
-    //// Instrução para ver as funções que será chamadas
-    //std::vector<std::string> sequence_call_fcn;
-
-    //sequence_call_fcn.push_back("add rsp, 0x48");
-    //sequence_call_fcn.push_back("pop r13");
-    //sequence_call_fcn.push_back("pop r12");
-    //sequence_call_fcn.push_back("jmp r10");
-
-    //seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
 
 
 
@@ -870,6 +881,52 @@ int InitInstrunctionsInstrumentation()
     //sequence4.push_back("jz 0x7ff6f499d2da");
 
     //seq_detector.AddInstructionSequence(sequence4, Sequence2MatchCallback);
+
+
+
+
+
+
+        // Tecnicas evasivas obsiium 1.8.5 Antidbi
+    std::vector<std::vector<std::string>> sequence;
+    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
+    sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
+    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
+    sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+
+    // parte 2 da anterior
+    std::vector<std::vector<std::string>> sequence2;
+    sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d928"));
+    sequence2.push_back(CreateInstVector("test rax, rax"));
+    sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d8cd", "jo 0x7ff6f499d8cd"));
+    sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+    //seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
+
+
+    // Instrução para ver as funções que será chamadas
+    std::vector<std::vector<std::string>> sequence_call_fcn;
+    sequence_call_fcn.push_back(CreateInstVector("add rsp, 0x?8"));
+    sequence_call_fcn.push_back(CreateInstVector("pop r13"));
+    sequence_call_fcn.push_back(CreateInstVector("pop r12"));
+    sequence_call_fcn.push_back(CreateInstVector("jmp r10"));
+    //seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
+
+
+    std::vector<std::vector<std::string>> sequence_print_fcn;
+    sequence_print_fcn.push_back(CreateInstVector("movzx r10d, word ptr [rax]")); // <- 0x7ff6a5335780
+    sequence_print_fcn.push_back(CreateInstVector("test r10d, r10d"));
+    sequence_print_fcn.push_back(CreateInstVector("jz 0x7ff6a533579c"));
+    sequence_print_fcn.push_back(CreateInstVector("cmp r10b, cl"));
+    sequence_print_fcn.push_back(CreateInstVector("jz 0x7ff6a533579e")); // <- se é a string procurada ele salta
+    sequence_print_fcn.push_back(CreateInstVector("jnbe 0x7ff6a533579c"));
+    sequence_print_fcn.push_back(CreateInstVector("movzx r11d, word ptr [rax+0x2]"));
+    sequence_print_fcn.push_back(CreateInstVector("lea rax, ptr [rax+r11*2+0x4]"));
+    sequence_print_fcn.push_back(CreateInstVector("jmp 0x7ff6a5335780")); // <- volta para: movzx r10d, word ptr [rax]
+    //seq_detector.AddInstructionSequence(sequence_print_fcn, SequenceMatchPrintFcnCallback);
+
+
+
 
     seq_detector.Initialize();
 

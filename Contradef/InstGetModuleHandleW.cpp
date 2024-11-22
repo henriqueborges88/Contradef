@@ -21,11 +21,23 @@ VOID InstGetModuleHandleW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
 
-    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    }
+    std::stringstream& stringStream = callContext->stringStream;
+    std::wstring wsModuleName = lpModuleName ? ConvertAddrToWideString(lpModuleName) : L"NULL (Executável Principal)";
+    stringStream << std::endl << "[+] GetModuleHandleW..." << std::endl;
+    stringStream << "    Thread: " << tid << std::endl;
+    stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+    stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+    stringStream << "    Parâmetros: " << std::endl;
+    stringStream << "        lpModuleName: " << WStringToString(wsModuleName) << std::endl;
+    stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
+    stringStream << "  [-] Início da consulta ao módulo" << std::endl;
+
+
+
+}
 
 VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpModuleName) {
 
@@ -38,23 +50,10 @@ VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
-        PIN_LockClient();
-        IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar Parámetros
-        const GetModuleHandleWArgs* args = reinterpret_cast<GetModuleHandleWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        std::wstring wslpModuleName = ConvertAddrToWideString(args->lpModuleName);
-        // Obter a RTN da instru��o atual
-        RTN rtnCurrent = RTN_FindByAddress(instAddress);
-        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
-        stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parámetros: " << std::endl;
-        stringStream << "        lpModuleName: " << WStringToString(wslpModuleName) << std::endl;
-        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+        stringStream << "    Handle do módulo retornado: " << std::hex << *retValAddr << std::dec << std::endl;
+        stringStream << "  [-] Consulta ao módulo concluída" << std::endl << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
@@ -64,7 +63,6 @@ VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
-        PIN_UnlockClient();
     }
 
     fcnCallId++;
@@ -73,7 +71,7 @@ VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 VOID InstGetModuleHandleW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
    std::string rtnName = RTN_Name(rtn);
-    if (rtnName == "GetModuleHandleA") {
+    if (rtnName == "GetModuleHandleW") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 

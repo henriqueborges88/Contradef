@@ -62,10 +62,21 @@ VOID InstrumentFunctions(IMG img, VOID* v) {
     context.ExecuteAllStrategies(img, globalNotifier);
 }
 
+VOID configOutput() {
+    using namespace WindowsAPI;
+    std::setlocale(LC_ALL, "en_US.UTF-8"); // Definir o local adequado
+    SetConsoleOutputCP(CP_UTF8); // Configura o console para UTF-8
+    std::wcout.imbue(std::locale("")); // Configura a saída wide para usar a codificação local
+    std::cout.imbue(std::locale("")); // Configura a saída wide para usar a codificação local
+    OutFile.imbue(std::locale(""));
+    OutFile << "\xEF\xBB\xBF"; // Adiciona BOM para indicar UTF-8
+}
+
 VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
     if (data->type != EventData::ExecutionCompleted) {
         return;
     }
+
     auto executionEvent = static_cast<const ExecutionEventData*>(data);
     auto executionOutputText = executionEvent->executionInformation.outputText;
     OutFile << executionOutputText;
@@ -79,13 +90,16 @@ VOID Fini(int, VOID* v)
     //TraceOutFile->close();
 }
 
+
 int main(int argc, char* argv[]) {
+
+    configOutput();
 
     string filename;
     string pid = decstr(WindowsAPI::getpid());
     filename = KnobOutputFile.Value();
     filename += "." + pid + ".log.cdf";
-    OutFile.open(filename.c_str());
+    OutFile.open(filename.c_str(), std::ios::binary);
 
     // Recuperar o valor do caminho do arquivo YARA
     std::string yaraRulesPath = KnobYaraRulesFile.Value();
@@ -114,7 +128,7 @@ int main(int argc, char* argv[]) {
 
     PIN_InitSymbols();
 
-    //IMG_AddInstrumentFunction(InstrumentFunctions, 0);
+    IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
     InitInstrunctionsInstrumentation();
 

@@ -132,18 +132,22 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         //    ProcessInformation = NULL;
         //}
 
-        if (args->ProcessInformationClass == ProcessDebugPort) {
-            HANDLE* debugPortPtr = reinterpret_cast<HANDLE*>(ProcessInformation);
 
-            // Imprimindo o valor atual de debugPort
-            std::cout << "DBGPORT Antes: " << std::hex << *debugPortPtr << std::dec << std::endl;
 
-            // Alterando o conteúdo apontado por debugPortPtr para NULL
-            *debugPortPtr = NULL;
 
-            // Verificando se debugPort foi alterado
-            std::cout << "DBGPORT Depois: " << *debugPortPtr << std::endl;
-        }
+        //// Esse pode estar funcionando
+        //if (args->ProcessInformationClass == ProcessDebugPort) {
+        //    HANDLE* debugPortPtr = reinterpret_cast<HANDLE*>(ProcessInformation);
+
+        //    // Imprimindo o valor atual de debugPort
+        //    std::cout << "DBGPORT Antes: " << std::hex << *debugPortPtr << std::dec << std::endl;
+
+        //    // Alterando o conteúdo apontado por debugPortPtr para NULL
+        //    *debugPortPtr = NULL;
+
+        //    // Verificando se debugPort foi alterado
+        //    std::cout << "DBGPORT Depois: " << *debugPortPtr << std::endl;
+        //}
 
 
         if (ProcessInformationClass == ProcessBasicInformation) {
@@ -303,10 +307,12 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         PIN_LockClient();
         
         IMG img = IMG_FindByAddress(instAddress);
-        std::string moduleName = ExtractModuleName(IMG_Name(img));
-        if (toUpperCase(moduleName) == "NTDLL.DLL") {
-            // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar fun��es em modulos diferentes ao principal, se for o caso, desativar o return
-            return;
+        if (IMG_Valid(img)) {
+            std::string moduleName = ExtractModuleName(IMG_Name(img));
+            if (toUpperCase(moduleName) == "NTDLL.DLL") {
+                // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar fun��es em modulos diferentes ao principal, se for o caso, desativar o return
+                return;
+            }
         }
 
         // Obter o ponteiro para a pilha atual
@@ -323,8 +329,10 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
         RTN rtn = INS_Rtn(ins);
 
         ADDRINT rtnAddress = RTN_Address(rtn);
-        stringStream << std::endl << "[+] " << RTN_Name(rtn) << "..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        stringStream << std::endl << "[+] NtQueryInformationProcess..." << std::endl;
+        if (IMG_Valid(img)) {
+            stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
+        }
         stringStream << "    Thread: " << tid << std::endl;
         stringStream << "    Endereço da rotina: " << std::hex << rtnAddress << std::dec << std::endl;
         if (RTN_Valid(rtn)) {

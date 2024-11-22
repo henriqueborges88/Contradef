@@ -6,7 +6,7 @@ UINT32 InstCreateFileW::fcnCallId = 0;
 Notifier* InstCreateFileW::globalNotifierPtr;
 
 VOID InstCreateFileW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpFileName, ADDRINT dwDesiredAccess, ADDRINT dwShareMode, ADDRINT lpSecurityAttributes, ADDRINT dwCreationDisposition, ADDRINT dwFlagsAndAttributes, ADDRINT hTemplateFile) {
-    std::cout << "Chamando Create file" << std::endl;
+
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -26,6 +26,23 @@ VOID InstCreateFileW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
+
+    // Registrando os parï¿½metros de CreateFileW e o endereï¿½o da funï¿½ï¿½o chamante
+    std::stringstream& stringStream = callContext->stringStream;
+    std::wstring wsFileName = ConvertAddrToWideString(lpFileName);
+    stringStream << std::endl << "[+] CreateFileW..." << std::endl;
+    stringStream << "    Thread: " << tid << std::endl;
+    stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+    stringStream << "    EndereÃ§oo da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+    stringStream << "    ParÃ¢metros: " << std::endl;
+    stringStream << "        lpFileName: " << WStringToString(wsFileName) << std::endl;
+    stringStream << "        dwDesiredAccess: " << dwDesiredAccess << std::endl;
+    stringStream << "        dwShareMode: " << dwShareMode << std::endl;
+    stringStream << "        dwCreationDisposition: " << dwCreationDisposition << std::endl;
+    stringStream << "        dwFlagsAndAttributes: " << dwFlagsAndAttributes << std::endl;
+    stringStream << "    EndereÃ§o da funÃ§Ã£o chamante: " << std::hex << returnAddress << std::dec << std::endl;
+    stringStream << "  [-] InÃ­cio do acesso ao arquivo" << std::endl;
+
 }
 
 VOID InstCreateFileW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpFileName) {
@@ -39,28 +56,12 @@ VOID InstCreateFileW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
         PIN_LockClient();
-        IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        const CreateFileWArgs* args = reinterpret_cast<CreateFileWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        std::wstring wsFileName = ConvertAddrToWideString(args->lpFileName);
-        RTN rtnCurrent = RTN_FindByAddress(instAddress);
 
-        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
-        stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parâmetros: " << std::endl;
-        stringStream << "        wsFileName: " << WStringToString(wsFileName) << std::endl;
-        stringStream << "        dwDesiredAccess: " << args->dwDesiredAccess << std::endl;
-        stringStream << "        dwShareMode: " << args->dwShareMode << std::endl;
-        stringStream << "        lpSecurityAttributes: " << args->lpSecurityAttributes << std::endl;
-        stringStream << "        dwCreationDisposition: " << args->dwCreationDisposition << std::endl;
-        stringStream << "        dwFlagsAndAttributes: " << args->dwFlagsAndAttributes << std::endl;
-        stringStream << "        hTemplateFile: " << args->hTemplateFile << std::endl;
-        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Concluído" << std::endl << std::endl;
+        stringStream << "    Handle retornado: " << std::hex << *retValAddr << std::dec << std::endl;
+        stringStream << "  [-] Acesso ao arquivo concluï¿½do" << std::endl;
+        stringStream << "[*] Concluï¿½do" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);
@@ -77,38 +78,36 @@ VOID InstCreateFileW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "CreateFileW") {
-        std::cout << "Instrumentando: " << RTN_Name(rtn) << std::endl;
-
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
         RTN_Open(rtn);
 
-        RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+        RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CallbackBefore,
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpFileName
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // dwDesiredAccess
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // dwShareMode
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 3, // lpSecurityAttributes
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 4, // dwCreationDisposition
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 5, // dwFlagsAndAttributes
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 6, // hTemplateFile
+            IARG_RETURN_IP,                        // Endereï¿½o da funï¿½ï¿½o chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0,      // lpFileName
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1,      // dwDesiredAccess
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2,      // dwShareMode
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 3,      // lpSecurityAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 4,      // dwCreationDisposition
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 5,      // dwFlagsAndAttributes
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 6,      // hTemplateFile
             IARG_END);
 
-        RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+        RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)CallbackAfter,
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP,
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // lpFileName
+            IARG_REG_REFERENCE, REG_GAX,           // Handle retornado
+            IARG_RETURN_IP,                        // Endereï¿½o da funï¿½ï¿½o chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0,      // lpFileName
             IARG_END);
 
         RTN_Close(rtn);

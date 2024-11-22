@@ -32,6 +32,7 @@ VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     args.originalLastChar = *reinterpret_cast<char*>(lpModuleName + strlen(reinterpret_cast<char*>(lpModuleName)) - 1); // Salvar o �ltimo caractere original de lpSubKey
 
     std::string ansiStringLpModuleName = ConvertAddrToAnsiString(lpModuleName);
+
     if (isModulePartInList(ansiStringLpModuleName)) {
         char* ansiCharStr = reinterpret_cast<char*>(lpModuleName);
         size_t len = strlen(ansiCharStr);
@@ -51,7 +52,18 @@ VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    }
+    // Registrando os parâmetros de GetModuleHandleA e o endereço da função chamante
+    std::stringstream& stringStream = callContext->stringStream;
+    stringStream << std::endl << "[+] GetModuleHandleA..." << std::endl;
+    stringStream << "    Thread: " << tid << std::endl;
+    stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+    stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+    stringStream << "    Parâmetros: " << std::endl;
+    stringStream << "        lpModuleName: " << (!ansiStringLpModuleName.empty() ? ansiStringLpModuleName : "NULL (Executável Principal)") << std::endl;
+    stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
+    stringStream << "  [-] Início da consulta ao módulo" << std::endl;
+
+}
 
 VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpModuleName) {
 
@@ -69,37 +81,32 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         CallContext* callContext = it->second;
         // Registrar Parámetros
         const GetModuleHandleAArgs* args = reinterpret_cast<GetModuleHandleAArgs*>(callContext->functionArgs);
-        std::stringstream& stringStream = callContext->stringStream;
-        std::string ansiStringLpModuleName = ConvertAddrToAnsiString(args->lpModuleName);
+
+        std::string ansiStringLpModuleName = ConvertAddrToAnsiString(lpModuleName);
 
         ////CONTRAMEDIDA APLICADA - TECNICA EVASIVA DETECTADA
         if (args->isModified) {
-            char* ansiCharStr = reinterpret_cast<char*>(args->lpModuleName);
-            size_t len = strlen(ansiCharStr);
+            size_t len = strlen(ansiStringLpModuleName.c_str());
 
             if (len > 0) {
-                ansiCharStr[len - 1] = args->originalLastChar;
+                ansiStringLpModuleName[len - 1] = args->originalLastChar;
             }
-
-            // Obter a RTN da instru��o atual
-            RTN rtnCurrent = RTN_FindByAddress(instAddress);
-            stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-            stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
-            stringStream << "    Thread: " << tid << std::endl;
-            stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-            stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-            stringStream << "    Parámetros: " << std::endl;
-            stringStream << "        lpModuleName: " << ansiStringLpModuleName << std::endl;
-            stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-            stringStream << "[*] Concluído" << std::endl << std::endl;
-
-            ExecutionInformation executionCompletedInfo = { stringStream.str() };
-            // Cria evento
-            ExecutionEventData executionEvent(executionCompletedInfo);
-            // Notifica os observers
-            globalNotifierPtr->NotifyAll(&executionEvent);
         }
         ////
+
+
+        // Obter a RTN da instru��o atual
+        std::stringstream& stringStream = callContext->stringStream;
+        stringStream << "    Handle do módulo retornado: " << std::hex << *retValAddr << std::dec << std::endl;
+        stringStream << "  [-] Consulta ao módulo concluída" << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
+
+
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        // Cria evento
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        // Notifica os observers
+        globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
         PIN_UnlockClient();

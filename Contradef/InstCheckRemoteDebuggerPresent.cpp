@@ -7,7 +7,7 @@ UINT32 InstCheckRemoteDebuggerPresent::imgCallId = 0;
 UINT32 InstCheckRemoteDebuggerPresent::fcnCallId = 0;
 Notifier* InstCheckRemoteDebuggerPresent::globalNotifierPtr;
 
-VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
+VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hProcess, PBOOL   pbDebuggerPresent) {
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -26,7 +26,7 @@ VOID InstCheckRemoteDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId,
 
 }
 
-VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, ADDRINT pbDebuggerPresent) {
+VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hProcess, PBOOL pbDebuggerPresent) {
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
@@ -41,8 +41,6 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         const InstCheckRemoteDebuggerPresentArgs* args = reinterpret_cast<const InstCheckRemoteDebuggerPresentArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 
-        PBOOL debuggerPresent = reinterpret_cast<PBOOL>(args->pbDebuggerPresent);
-
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
         stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
@@ -53,15 +51,18 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         stringStream << "        hProcess: " << args->hProcess << std::endl;
 
         std::string dp = "NULL";
-        if (debuggerPresent != nullptr) {
-            dp = (*debuggerPresent ? "TRUE" : "FALSE");
+        if (pbDebuggerPresent == nullptr) {
+            dp = "FALSE";
+        }
+        else 
+        {
+            dp = (*pbDebuggerPresent ? "TRUE" : "FALSE");
+            // CONTRAMEDIDA
+            *pbDebuggerPresent = 0;
         }
         stringStream << "        pbDebuggerPresent: " << dp << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
-
-        // CONTRAMEDIDA
-        *debuggerPresent = 0;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);

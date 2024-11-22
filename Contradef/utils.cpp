@@ -45,6 +45,33 @@ std::string WStringToString(const std::wstring& wstr) {
     return str;
 }
 
+std::string CopyLPCSTR(ADDRINT addr) {
+    const size_t MAX_STRING_LENGTH = 1024; // Defina o tamanho máximo da string
+    char buffer[MAX_STRING_LENGTH];       // Buffer para armazenar a string copiada
+    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
+
+    size_t copied = 0;                    // Contador de bytes copiados
+
+    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
+        // Use PIN_SafeCopy para copiar um único caractere por vez
+        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i), 1);
+
+        // Se a cópia falhar ou encontrar o terminador nulo, finalize
+        if (result == 0 || buffer[i] == '\0') {
+            break;
+        }
+
+        copied++;
+    }
+
+    // Verifica se o tamanho máximo foi excedido
+    if (copied == MAX_STRING_LENGTH - 1) {
+        std::cerr << "Warning: String copy reached the maximum limit." << std::endl;
+    }
+
+    return std::string(buffer); // Retorna a string copiada como um std::string
+}
+
 void LogWString(const std::wstring& wstr) {
     std::string str = WStringToString(wstr);
     LOG("Converted String: %s\n", str.c_str());
@@ -167,7 +194,7 @@ std::string ConvertWStringToUTF8(const std::wstring& wstr)
     return result;
 }
 
-std::string WideStringFromPointer(ADDRINT addr)
+std::string WideStringToStringFromPointer(ADDRINT addr)
 {
     wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
     if (wideCharStr == nullptr)

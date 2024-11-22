@@ -5,13 +5,11 @@ UINT32 InstGetModuleFileNameW::imgCallId = 0;
 UINT32 InstGetModuleFileNameW::fcnCallId = 0;
 Notifier* InstGetModuleFileNameW::globalNotifierPtr;
 
+VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
 
-VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
-
-    ADDRINT rtnAddress = GetRtnAddr(instAddress);
 
     GetModuleFileNameWArgs args;
     args.hModule = hModule;
@@ -20,50 +18,48 @@ VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
-    auto* callContext = new CallContext(callCtxId, tid, rtnAddress, &args);
+    auto* callContext = new CallContext(callCtxId, tid, instAddress, &args);
 
-    
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    }
+    // Registrando os parâmetros de GetModuleFileNameW e o endereço da função chamante
+    std::stringstream& stringStream = callContext->stringStream;
+    stringStream << std::endl << "[+] GetModuleFileNameW..." << std::endl;
+    stringStream << "    Thread: " << tid << std::endl;
+    stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+    stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
+    stringStream << "    Parâmetros: " << std::endl;
+    stringStream << "        hModule: " << std::hex << hModule << std::dec << std::endl;
+    stringStream << "        lpFilename (Endereço do Buffer): " << std::hex << lpFilename << std::dec << std::endl;
+    stringStream << "        nSize (Tamanho do Buffer): " << nSize << " caracteres" << std::endl;
+    stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
+    stringStream << "  [-] Início da obtenção do caminho do módulo" << std::endl;
 
-VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
+}
+
+VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT returnAddress, CONTEXT* ctx, ADDRINT retValAddr, ADDRINT lpFilename, ADDRINT nSize) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }
 
-    // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
         PIN_LockClient();
-        IMG img = IMG_FindByAddress(instAddress);
         CallContext* callContext = it->second;
-        // Registrar Parámetros
-        const GetModuleFileNameWArgs* args = reinterpret_cast<GetModuleFileNameWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
-        std::wstring ansiStringLpFilename = ConvertAddrToWideString(args->lpFilename);
-        // Obter a RTN da instru��o atual
-        RTN rtnCurrent = RTN_FindByAddress(instAddress);
-        stringStream << std::endl << "[+] " << RTN_Name(rtnCurrent) << "..." << std::endl;
-        stringStream << "    Nome do módulo: " << IMG_Name(img) << std::endl;
-        stringStream << "    Thread: " << tid << std::endl;
-        stringStream << "    Id de chamada: " << fcnCallId << std::endl;
-        stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
-        stringStream << "    Parámetros: " << std::endl;
-        stringStream << "        hModule: " << hModule << std::endl;
-        stringStream << "        lpFilename: " << WStringToString(ansiStringLpFilename) << std::endl;
-        stringStream << "        nSize: " << nSize << std::endl;
-        stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
+
+        std::wstring wsFilename = ConvertAddrToWideString(lpFilename);
+        stringStream << "    Caminho do Módulo Retornado: " << WStringToString(wsFilename) << std::endl;
+        stringStream << "    Número de caracteres copiados: " << retValAddr << std::endl;
+        stringStream << "  [-] Operação concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
-        // Cria evento
         ExecutionEventData executionEvent(executionCompletedInfo);
-        // Notifica os observers
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
@@ -88,38 +84,36 @@ VOID InstGetModuleFileNameW::InstrumentFunction(RTN rtn, Notifier& globalNotifie
         return;
     }
 
-   std::string rtnName = RTN_Name(rtn);
+    std::string rtnName = RTN_Name(rtn);
     if (rtnName == "GetModuleFileNameW") {
         imgCallId++;
         globalNotifierPtr = &globalNotifier;
 
         RTN_Open(rtn);
-        RTN_InsertCall(rtn, IPOINT_BEFORE, AFUNPTR(CallbackBefore),
+
+        RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CallbackBefore,
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_RETURN_IP, // Endereço da fun��o chamante
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hModule
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpFilename
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // nSize
+            IARG_RETURN_IP,                        // Endereço da função chamante
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 0,      // hModule
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1,      // lpFilename
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2,      // nSize
             IARG_END);
 
-        RTN_InsertCall(rtn, IPOINT_AFTER, AFUNPTR(CallbackAfter),
+        RTN_InsertCall(rtn, IPOINT_AFTER, (AFUNPTR)CallbackAfter,
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_REG_REFERENCE, REG_GAX,
-            IARG_RETURN_IP, // Endereço da fun��o chamante
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hModule
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpFilename
-            IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // nSize
+            IARG_REG_REFERENCE, REG_GAX,           // Valor de retorno (número de caracteres copiados)
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 1,      // lpFilename
+            IARG_FUNCARG_ENTRYPOINT_VALUE, 2,      // nSize
             IARG_END);
 
         RTN_Close(rtn);
     }
-
 }
