@@ -51,15 +51,20 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         stringStream << "        hProcess: " << args->hProcess << std::endl;
 
         std::string dp = "NULL";
-        if (pbDebuggerPresent == nullptr) {
+        
+        BOOL* ppbDebuggerPresent = reinterpret_cast<BOOL*>(args->pbDebuggerPresent);
+
+        if (ppbDebuggerPresent == nullptr) {
             dp = "FALSE";
         }
-        else 
+        else
         {
-            dp = (*pbDebuggerPresent ? "TRUE" : "FALSE");
+            dp = (*ppbDebuggerPresent ? "TRUE" : "FALSE");
             // CONTRAMEDIDA
-            *pbDebuggerPresent = 0;
+            *ppbDebuggerPresent = 0;
         }
+
+        
         stringStream << "        pbDebuggerPresent: " << dp << std::endl;
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;

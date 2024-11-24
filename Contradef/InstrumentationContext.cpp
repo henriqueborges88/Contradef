@@ -97,9 +97,30 @@ void InstrumentationContext::InitStrategies() {
             strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
             strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
 
-            //Cai o desempenho -> strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-            //strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+            strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
 
+            strategyMap["GetCurrentProcess"] = &InstGetCurrentProcess::InstrumentFunction;
+
+            strategyMap["GetCurrentThread"] = &InstGetCurrentThread::InstrumentFunction;
+            strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
+            strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
+
+
+            //Seq 13
+            strategyMap["OpenThread"] = &InstOpenThread::InstrumentFunction;
+            strategyMap["RtlInstallFunctionTableCallback"] = &InstRtlInstallFunctionTableCallback::InstrumentFunction;
+            strategyMap["CreateEventW"] = &InstCreateEventW::InstrumentFunction;
+            strategyMap["CreateThread"] = &InstCreateThread::InstrumentFunction;
+            strategyMap["WaitForSingleObject"] = &InstWaitForSingleObject::InstrumentFunction;
+            strategyMap["SuspendThread"] = &InstSuspendThread::InstrumentFunction;
+            strategyMap["GetThreadContext"] = &InstGetThreadContext::InstrumentFunction;
+            strategyMap["SetThreadContext"] = &InstSetThreadContext::InstrumentFunction;
+            strategyMap["ResumeThread"] = &InstResumeThread::InstrumentFunction;
+            strategyMap["SetEvent"] = &InstSetEvent::InstrumentFunction;
+            strategyMap["ResetEvent"] = &InstResetEvent::InstrumentFunction;
+            strategyMap["RtlDeleteFunctionTable"] = &InstRtlDeleteFunctionTable::InstrumentFunction;
+            //EndSeq
 
         }
 

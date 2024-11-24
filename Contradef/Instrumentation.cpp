@@ -665,6 +665,38 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
     //}
 }
 
+VOID SequenceMatchCallbackx(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+    //std::cout << "1 - ZF ->" << zf_before << std::endl;
+
+    if (zf_before == 0) {
+
+        // Para setar o ZF para 1:
+        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+        std::cout << "2 - APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
+
+        // Para setar o ZF para 0:
+        //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        // Obter os flags atualizados
+        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+        BOOL zf_after = (flags & (1 << 6)) != 0;
+        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
+
+        PIN_ExecuteAt(ctxt);
+    }
+
+
+}
+
 VOID SequenceMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
     // Obter os flags atuais
@@ -758,23 +790,69 @@ VOID Sequence2MatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceIns
 VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
     // Obter os flags atuais
-    PIN_LockClient(); 
     ADDRINT targetAddr = PIN_GetContextReg(ctxt, REG_R10);
-    IMG img = IMG_FindByAddress(targetAddr);
 
-    std::cout << "Chamada -> ";
 
-    if (IMG_Valid(img)) {
-        std::cout << IMG_Name(img) << ":";
+
+    //////
+
+    if (IsMainExecutable(ip)) {
+        PIN_LockClient();
+        RTN rtnTgt = RTN_FindByAddress(targetAddr);
+        std::string s;
+        bool print = true;
+        if (RTN_Valid(rtnTgt))
+        {
+            IMG img = SEC_Img(RTN_Sec(rtnTgt));
+            std::string imgName = "";
+            if (IMG_Valid(img))
+            {
+                imgName = IMG_Name(img);
+                s += imgName;
+                if (imgName == IMG_Name(IMG_FindImgById(1))) {
+                    print = false;
+                }
+            }
+            std::string rtnName = RTN_Name(rtnTgt);
+            s += ":" + rtnName;
+            if (rtnName.empty() || imgName.empty()) {
+                print = false;
+            }
+        }
+        else {
+            print = false;
+        }
+        if (print) {
+            std::cout << "----> " << ip << " -> " << targetAddr << s << std::endl;
+        }
+
+        PIN_UnlockClient();
 
     }
-    RTN rtn = RTN_FindByAddress(targetAddr);
-    if (RTN_Valid(rtn)) {
-        std::cout << RTN_Name(rtn);
-    }
-    std::cout << std::endl;
+    return;
 
-    PIN_UnlockClient();
+    //////
+
+
+
+    //PIN_LockClient();
+
+    //ADDRINT targetAddr = PIN_GetContextReg(ctxt, REG_R10);
+
+    //IMG img = IMG_FindByAddress(targetAddr);
+
+
+    //if (IMG_Valid(img)) {
+    //    std::cout << "Chamada -> " << IMG_Name(img) << ":";
+
+    //}
+    //RTN rtn = RTN_FindByAddress(targetAddr);
+    //if (RTN_Valid(rtn)) {
+    //    std::cout << RTN_Name(rtn);
+    //}
+    //std::cout << std::endl;
+
+    //PIN_UnlockClient();
 }
 
 
@@ -893,7 +971,34 @@ int InitInstrunctionsInstrumentation()
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 13, 13); 
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
+
+
+
+
+    ///TESTE
+
+    std::vector<std::vector<std::string>> sequencex;
+    sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
+    sequencex.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
+    sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
+    sequencex.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
+    seq_detector.AddInstructionSequence(sequencex, SequenceMatchCallbackx, 31, 31);
+    ///FIM Teste
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     // parte 2 da anterior
     std::vector<std::vector<std::string>> sequence2;
@@ -913,6 +1018,7 @@ int InitInstrunctionsInstrumentation()
     //seq_detector.AddInstructionSequence(sequence_call_fcn, SequenceMatchCallFcnCallback);
 
 
+    // Função que escolhe o texto de erro que aparece na tela na tela
     std::vector<std::vector<std::string>> sequence_print_fcn;
     sequence_print_fcn.push_back(CreateInstVector("movzx r10d, word ptr [rax]")); // <- 0x7ff6a5335780
     sequence_print_fcn.push_back(CreateInstVector("test r10d, r10d"));

@@ -318,6 +318,51 @@
     <ClCompile Include="InstructionSequenceDetector.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
+    <ClCompile Include="InstRtlGetNativeSystemInformation.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetCurrentProcess.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetCurrentThread.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstOpenThread.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlInstallFunctionTableCallback.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstCreateEventW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstCreateThread.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstWaitForSingleObject.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstSuspendThread.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetThreadContext.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstSetThreadContext.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstResumeThread.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstSetEvent.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstResetEvent.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlDeleteFunctionTable.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InstrumentationStrategy.h">
@@ -628,6 +673,51 @@
     </ClInclude>
     <ClInclude Include="InstructionSequenceDetector.h">
       <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlGetNativeSystemInformation.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetCurrentProcess.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetCurrentThread.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstOpenThread.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlInstallFunctionTableCallback.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstCreateEventW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstCreateThread.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstWaitForSingleObject.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstSuspendThread.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetThreadContext.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstSetThreadContext.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstResumeThread.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstSetEvent.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstResetEvent.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlDeleteFunctionTable.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -117,11 +117,38 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
 
         // ADDRINT ProcessInformation � alterado no retorno, posivelmente por alguma manipula��o do registrador durante a execu��o da fun�a�.
     
-        //if (args->ProcessInformationClass == ProcessDebugPort) {
-        //    HANDLE debugPort = reinterpret_cast<HANDLE>(ProcessInformation);
-        //    debugPort = NULL;
-        //    std::cout << "DBGPORT: " << std::hex << debugPort << std::dec << std::endl;
-        //}
+        if (args->ProcessInformationClass == ProcessDebugPort) {
+            DWORD* debugPort = reinterpret_cast<DWORD*>(args->ProcessInformation);
+            std::cout << "DBGPORT: " << *debugPort << std::dec << std::endl;
+            //*debugPort = -1;
+        }
+
+        if (args->ProcessInformationClass == ProcessDebugObjectHandle) {
+            HANDLE* debugHandle = reinterpret_cast<HANDLE*>(args->ProcessInformation);
+            std::cout << "DBGHDL: " << *debugHandle << std::dec << std::endl;
+            //debugHandle = 0;
+        }
+
+        if (args->ProcessInformationClass == ProcessDebugFlags) {
+            /*DWORD* debugFlags = reinterpret_cast<DWORD*>(ProcessInformation);
+            DWORD ddebugFlags = reinterpret_cast<DWORD>(debugFlags);
+            if (ddebugFlags == 0) {
+                std::cout << "O processo está sendo depurado.\n";
+            }
+            else {
+                std::cout << "O processo NÃO está sendo depurado.\n";
+            }
+            std::cout << "DBGFL: " << ddebugFlags << std::endl;
+            ddebugFlags = 0x1f;*/
+            DWORD* ddebugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
+            std::cout << "DBGFL: " << *ddebugFlags << std::endl;
+            *ddebugFlags = 0x1f;
+
+
+        }
+
+        std::cout << "QueryInformationProcess - ProcessInformationClass -> " << args->ProcessInformationClass << std::endl;
+
         //if (args->ProcessInformationClass == ProcessDebugPort) {
         //    HANDLE debugPort = reinterpret_cast<HANDLE>(ProcessInformation);
         //    uintptr_t debugPortValue = reinterpret_cast<uintptr_t>(debugPort);
@@ -150,7 +177,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         //}
 
 
-        if (ProcessInformationClass == ProcessBasicInformation) {
+        if (false && ProcessInformationClass == ProcessBasicInformation) { // desativado
             // Verifica se ProcessInformation � um ponteiro v�lido
             if (args->ProcessInformation != NULL) {
                 PROCESS_BASIC_INFORMATION* pbi = reinterpret_cast<PROCESS_BASIC_INFORMATION*>(args->ProcessInformation);

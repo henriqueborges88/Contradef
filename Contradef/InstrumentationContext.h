@@ -97,6 +97,21 @@
 #include "InstExitProcess.h"
 #include "InstDeleteFileA.h"
 #include "InstGetWriteWatch.h"
+#include "InstRtlGetNativeSystemInformation.h"
+#include "InstGetCurrentProcess.h"
+#include "InstGetCurrentThread.h"
+#include "InstOpenThread.h"
+#include "InstSetThreadContext.h"
+#include "InstGetThreadContext.h"
+#include "InstSuspendThread.h"
+#include "InstWaitForSingleObject.h"
+#include "InstCreateThread.h"
+#include "InstCreateEventW.h"
+#include "InstRtlInstallFunctionTableCallback.h"
+#include "InstResumeThread.h"
+#include "InstSetEvent.h"
+#include "InstResetEvent.h"
+#include "InstRtlDeleteFunctionTable.h"
 
 
 

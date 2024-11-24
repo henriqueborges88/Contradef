@@ -16,7 +16,7 @@ KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush outp
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
 KNOB< BOOL > KnobFullImgName(KNOB_MODE_WRITEONCE, "pintool", "full_img_name", "0", "Include full image name");
 KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "0", "Include line number information");
-KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "0", "Trace instructions");
+KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
 KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
 KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "0", "Trace memory");
