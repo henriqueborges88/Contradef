@@ -1,5 +1,4 @@
 #include "InstWaitForSingleObject.h"
-#include <WinBase.h>
 
 
 std::map<CallContextKey, CallContext*> InstWaitForSingleObject::callContextMap;
@@ -24,7 +23,6 @@ VOID InstWaitForSingleObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
 
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
-
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] WaitForSingleObject..." << std::endl;
@@ -42,15 +40,17 @@ VOID InstWaitForSingleObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
     }
     stringStream << std::endl;
     stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
-    stringStream << "  [-] Início da chamada WaitForSingleObject" << std::endl;
+    stringStream << "[*] Concluído (AGUARDANDO RETORNO)" << std::endl << std::endl;
 
+    ExecutionInformation executionCompletedInfo = { stringStream.str() };
+    ExecutionEventData executionEvent(executionCompletedInfo);
+    globalNotifierPtr->NotifyAll(&executionEvent);
 }
 
 VOID InstWaitForSingleObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT retVal) {
     if (instrumentOnlyMain && !IsMainExecutable(ADDRINT(returnAddress))) {
         return;
     }
-
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
@@ -58,6 +58,7 @@ VOID InstWaitForSingleObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
         PIN_LockClient();
         CallContext* callContext = it->second;
         std::stringstream& stringStream = callContext->stringStream;
+        stringStream << std::endl << "[+] [RETORNO] WaitForSingleObject..." << std::endl;
         stringStream << "    Valor de retorno: ";
         switch (retVal) {
         case WAIT_OBJECT_0:
@@ -76,7 +77,6 @@ VOID InstWaitForSingleObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
             stringStream << std::hex << retVal << std::dec;
         }
         stringStream << std::endl;
-        stringStream << "  [-] Chamada WaitForSingleObject concluída" << std::endl << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };

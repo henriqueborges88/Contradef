@@ -971,20 +971,20 @@ int InitInstrunctionsInstrumentation()
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 13, 13); 
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 11, 11); 
     //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
 
 
     ///TESTE
-
+    // Testar em outra release do obsidium o motivo de ter funcionado apenas com uma alteração (mais acima)
     std::vector<std::vector<std::string>> sequencex;
     sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
     sequencex.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequencex.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    seq_detector.AddInstructionSequence(sequencex, SequenceMatchCallbackx, 31, 31);
+    //seq_detector.AddInstructionSequence(sequencex, SequenceMatchCallbackx, 31, 31); // não é mais necessário nessa release do obsidium, verificar o motivo
     ///FIM Teste
 
 

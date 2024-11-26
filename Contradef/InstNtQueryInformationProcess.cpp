@@ -109,72 +109,40 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
         PIN_LockClient();
-        IMG img = IMG_FindByAddress(instAddress);
 
         CallContext* callContext = it->second;
-        // Registrar Parámetros
         const NtQueryInformationProcessArgs* args = reinterpret_cast<NtQueryInformationProcessArgs*>(callContext->functionArgs);
 
-        // ADDRINT ProcessInformation � alterado no retorno, posivelmente por alguma manipula��o do registrador durante a execu��o da fun�a�.
-    
+        //CONTRAMEDIDAS
         if (args->ProcessInformationClass == ProcessDebugPort) {
             DWORD* debugPort = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            std::cout << "DBGPORT: " << *debugPort << std::dec << std::endl;
-            //*debugPort = -1;
+            std::cout << "A debugPort - " << *debugPort  << std::endl;
+            if (*debugPort != 0) {
+                std::cout << "debugPort\n";
+                *debugPort = 0;
+            }
         }
 
         if (args->ProcessInformationClass == ProcessDebugObjectHandle) {
             HANDLE* debugHandle = reinterpret_cast<HANDLE*>(args->ProcessInformation);
-            std::cout << "DBGHDL: " << *debugHandle << std::dec << std::endl;
-            //debugHandle = 0;
+            std::cout << "A debugHandle - " << *debugHandle << std::endl;
+
+            if (*debugHandle != 0) {
+                std::cout << "debugHandle\n";
+                *debugHandle = 0;
+            }
         }
 
         if (args->ProcessInformationClass == ProcessDebugFlags) {
-            /*DWORD* debugFlags = reinterpret_cast<DWORD*>(ProcessInformation);
-            DWORD ddebugFlags = reinterpret_cast<DWORD>(debugFlags);
-            if (ddebugFlags == 0) {
-                std::cout << "O processo está sendo depurado.\n";
-            }
-            else {
-                std::cout << "O processo NÃO está sendo depurado.\n";
-            }
-            std::cout << "DBGFL: " << ddebugFlags << std::endl;
-            ddebugFlags = 0x1f;*/
-            DWORD* ddebugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            std::cout << "DBGFL: " << *ddebugFlags << std::endl;
-            *ddebugFlags = 0x1f;
+            DWORD* debugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
+            std::cout << "A debugFlags - " << *debugFlags << std::endl;
 
-
+            if (*debugFlags == 0) {
+                std::cout << "debugFlags\n";
+                *debugFlags = -1;
+            }
         }
 
-        std::cout << "QueryInformationProcess - ProcessInformationClass -> " << args->ProcessInformationClass << std::endl;
-
-        //if (args->ProcessInformationClass == ProcessDebugPort) {
-        //    HANDLE debugPort = reinterpret_cast<HANDLE>(ProcessInformation);
-        //    uintptr_t debugPortValue = reinterpret_cast<uintptr_t>(debugPort);
-        //    std::cout << "DBGPORT2: " << std::hex << debugPortValue << std::dec << std::endl;
-        //}
-
-        //if (args->ProcessInformationClass == ProcessDebugPort) {
-        //    ProcessInformation = NULL;
-        //}
-
-
-
-
-        //// Esse pode estar funcionando
-        //if (args->ProcessInformationClass == ProcessDebugPort) {
-        //    HANDLE* debugPortPtr = reinterpret_cast<HANDLE*>(ProcessInformation);
-
-        //    // Imprimindo o valor atual de debugPort
-        //    std::cout << "DBGPORT Antes: " << std::hex << *debugPortPtr << std::dec << std::endl;
-
-        //    // Alterando o conteúdo apontado por debugPortPtr para NULL
-        //    *debugPortPtr = NULL;
-
-        //    // Verificando se debugPort foi alterado
-        //    std::cout << "DBGPORT Depois: " << *debugPortPtr << std::endl;
-        //}
 
 
         if (false && ProcessInformationClass == ProcessBasicInformation) { // desativado
