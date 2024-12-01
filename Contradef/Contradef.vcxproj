@@ -199,6 +199,8 @@
     <ClCompile Include="InstFindWindowW.cpp" />
     <ClCompile Include="InstGetCurrentProcess.cpp" />
     <ClCompile Include="InstGetCurrentThread.cpp" />
+    <ClCompile Include="InstGetEnvironmentStringsW.cpp" />
+    <ClCompile Include="InstGetEnvironmentVariableW.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
     <ClCompile Include="InstGetLocalTime.cpp" />
     <ClCompile Include="InstGetModuleFileNameExA.cpp" />
@@ -235,6 +237,7 @@
     <ClCompile Include="InstNtQueryObject.cpp" />
     <ClCompile Include="InstNtQueryPerformanceCounter.cpp" />
     <ClCompile Include="InstNtQuerySystemInformation.cpp" />
+    <ClCompile Include="InstNtQuerySystemInformationEx.cpp" />
     <ClCompile Include="InstNtQuerySystemTime.cpp" />
     <ClCompile Include="InstNtQueryValueKey.cpp" />
     <ClCompile Include="InstNtQueryVirtualMemory.cpp" />
@@ -316,6 +319,8 @@
     <ClInclude Include="InstFindWindowW.h" />
     <ClInclude Include="InstGetCurrentProcess.h" />
     <ClInclude Include="InstGetCurrentThread.h" />
+    <ClInclude Include="InstGetEnvironmentStringsW.h" />
+    <ClInclude Include="InstGetEnvironmentVariableW.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
     <ClInclude Include="InstGetLocalTime.h" />
     <ClInclude Include="InstGetModuleFileNameExA.h" />
@@ -351,6 +356,7 @@
     <ClInclude Include="InstNtQueryObject.h" />
     <ClInclude Include="InstNtQueryPerformanceCounter.h" />
     <ClInclude Include="InstNtQuerySystemInformation.h" />
+    <ClInclude Include="InstNtQuerySystemInformationEx.h" />
     <ClInclude Include="InstNtQuerySystemTime.h" />
     <ClInclude Include="InstNtQueryValueKey.h" />
     <ClInclude Include="InstNtSetContextThread.h" />

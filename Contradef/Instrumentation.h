@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <deque>
+#include <cwctype> // Para funções de verificação de caracteres wide, como iswalnum
 #include "regvalue_utils.h"
 #include "Utils.h"
 #include "InstructionSequenceDetector.h"

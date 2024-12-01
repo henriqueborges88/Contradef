@@ -15,6 +15,7 @@
 #include "Observer.h"
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
+#include "NtStructures.h"
 
 struct RtlGetNativeSystemInformationArgs {
     ADDRINT SystemInformationClass;

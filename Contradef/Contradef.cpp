@@ -1,11 +1,5 @@
 #include "pin.H"
 
-namespace WindowsAPI
-{
-    #include <Windows.h>
-    #include <unistd.h>
-}
-
 #include <iostream>
 #include <fstream>
 #include <set>
@@ -32,7 +26,7 @@ PIN_LOCK lock;
 static std::ofstream OutFile;
 static std::ofstream* TraceOutFile;
 KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "contradef", "specify file name for output log ");
-KNOB<string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "y", "yaraContradef.yar", "specify file name for YARA rules ");
+KNOB<string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "y", "", "specify file name for YARA rules ");
 
 InstrumentationContext context; // As estratégias já estão adicionadas no contexto
 
@@ -54,7 +48,12 @@ VOID InstrumentFunctions(IMG img, VOID* v) {
 
         std::string execName = IMG_Name(img);
         std::string rules_file = KnobYaraRulesFile.Value(); //"C:\\Users\\henri\\OneDrive\\Escritorio\\Yara Teste\\contradef.yar";
-        RunYara(rules_file, execName, OutFile, context);
+        
+        std::string yaraRulesPath = KnobYaraRulesFile.Value();
+        if (!yaraRulesPath.empty())
+        {
+            RunYara(rules_file, execName, OutFile, context);
+        }
         
         context.InitStrategies();
     }
@@ -93,7 +92,7 @@ VOID Fini(int, VOID* v)
 
 int main(int argc, char* argv[]) {
 
-    configOutput();
+    //configOutput();
 
     string filename;
     string pid = decstr(WindowsAPI::getpid());
@@ -107,8 +106,8 @@ int main(int argc, char* argv[]) {
     {
         //PIN_VmFullPath()
         //PIN_ToolFullPath() para obter o yara rules file do mesmo diretorio do PIN tool
-        std::cerr << "Por favor, forneça o caminho para o arquivo de regras YARA usando -y." << std::endl;
-        return 1;
+        //std::cerr << "Por favor, forneça o caminho para o arquivo de regras YARA usando -y." << std::endl;
+        //return 1;
     }
 
     PIN_InitSymbols();

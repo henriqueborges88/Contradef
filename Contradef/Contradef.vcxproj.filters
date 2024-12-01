@@ -363,6 +363,15 @@
     <ClCompile Include="InstRtlDeleteFunctionTable.cpp">
       <Filter>Arquivos de Origem\Strategies</Filter>
     </ClCompile>
+    <ClCompile Include="InstNtQuerySystemInformationEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetEnvironmentStringsW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetEnvironmentVariableW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InstrumentationStrategy.h">
@@ -717,6 +726,15 @@
       <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
     <ClInclude Include="InstRtlDeleteFunctionTable.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstNtQuerySystemInformationEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetEnvironmentStringsW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetEnvironmentVariableW.h">
       <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
   </ItemGroup>

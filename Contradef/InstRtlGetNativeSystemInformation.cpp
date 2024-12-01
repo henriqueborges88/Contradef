@@ -1,10 +1,39 @@
 #include "InstRtlGetNativeSystemInformation.h"
-#include "NtStructures.h"
+
 
 std::map<CallContextKey, CallContext*> InstRtlGetNativeSystemInformation::callContextMap;
 UINT32 InstRtlGetNativeSystemInformation::imgCallId = 0;
 UINT32 InstRtlGetNativeSystemInformation::fcnCallId = 0;
 Notifier* InstRtlGetNativeSystemInformation::globalNotifierPtr;
+
+
+VOID printParentProcess(DWORD parentProcessId) {
+    using namespace WindowsAPI;
+
+    // Abrir o processo pai para obter o nome
+    HANDLE hParentProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, parentProcessId);
+    if (hParentProcess) {
+
+        WCHAR parentProcessName[MAX_PATH] = { 0 };
+        if (GetModuleBaseName(hParentProcess, nullptr, parentProcessName, MAX_PATH)) {
+            std::wstring ppName(parentProcessName);
+            std::string pName = ConvertWideStringToString(ppName);
+            if (ppName == L"pin.exe") {
+                std::cout << "[CONTRADEF] Instrumentador PIN detectado. (nome do processo pai: " << pName << ")" << std::endl;
+            }
+            else {
+                std::cout << "[CONTRADEF] Instrumentador PIN não detectado. (nome do processo pai: " << pName << ")" << std::endl;
+            }
+        }
+        else {
+            std::cerr << "[CONTRADEF] Erro ao obter o nome do processo pai.\n";
+        }
+        CloseHandle(hParentProcess);
+    }
+    else {
+        std::cerr << "[CONTRADEF] Erro ao abrir o processo pai.\n";
+    }
+}
 
 VOID InstRtlGetNativeSystemInformation::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength) {
@@ -74,8 +103,32 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
         ExecutionEventData executionEvent(executionCompletedInfo);
         globalNotifierPtr->NotifyAll(&executionEvent);
 
-        // Contramedida
-        //if ()
+        // CONTRAMEDIDA
+        if (args->SystemInformationClass == 5) {
+            using namespace WindowsAPI;
+            DWORD currentProcessId = GetCurrentProcessId();
+
+            PSYSTEM_PROCESS_INFORMATION processInfo = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(args->SystemInformation);
+
+            while (processInfo) {
+
+                if (reinterpret_cast<DWORD>(processInfo->UniqueProcessId) == currentProcessId) {
+                    DWORD* parentProcessId = reinterpret_cast<DWORD*>(&(processInfo->Reserved2));
+                    DWORD fakePID = GetProcessIdByName("explorer.exe");
+                    std::cout << "[CONTRADEF] Substituindo o PID do processo pai (pin.exe - " << *parentProcessId << ") pelo do explorer.exe (" << fakePID << ")" << std::endl;
+                    *parentProcessId = fakePID;
+                    break;
+                }
+
+                // Avançar para o próximo processo
+                if (processInfo->NextEntryOffset == 0) {
+                    break;
+                }
+                processInfo = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(
+                    reinterpret_cast<BYTE*>(processInfo) + processInfo->NextEntryOffset
+                    );
+            }
+        }
         /////
 
         delete callContext;

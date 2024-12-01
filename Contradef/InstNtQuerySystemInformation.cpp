@@ -1,10 +1,10 @@
 #include "InstNtQuerySystemInformation.h"
+#include "NtStructures.h"
 
 std::map<CallContextKey, CallContext*> InstNtQuerySystemInformation::callContextMap;
 UINT32 InstNtQuerySystemInformation::imgCallId = 0;
 UINT32 InstNtQuerySystemInformation::fcnCallId = 0;
 Notifier* InstNtQuerySystemInformation::globalNotifierPtr;
-
 
 VOID InstNtQuerySystemInformation::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT SystemInformationClass, ADDRINT SystemInformation, ADDRINT SystemInformationLength, ADDRINT ReturnLength) {
@@ -77,6 +77,7 @@ VOID InstNtQuerySystemInformation::CallbackAfter(THREADID tid, UINT32 callId, AD
 }
 
 VOID InstNtQuerySystemInformation::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
+
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "NtQuerySystemInformation" || rtnName == "ZwQuerySystemInformation") {
         imgCallId++;

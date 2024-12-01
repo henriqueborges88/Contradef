@@ -112,8 +112,9 @@
 #include "InstSetEvent.h"
 #include "InstResetEvent.h"
 #include "InstRtlDeleteFunctionTable.h"
-
-
+#include "InstNtQuerySystemInformationEx.h"
+#include "InstGetEnvironmentStringsW.h"
+#include "InstGetEnvironmentVariableW.h"
 
 typedef void (*RTNFunction)(RTN, Notifier&);
 

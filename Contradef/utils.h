@@ -8,6 +8,9 @@ namespace WindowsAPI
 {
 #include <Windows.h>
 #include <unistd.h>
+#include <tlhelp32.h>
+#include <psapi.h>
+#include <Winternl.h>
 }
 
 #include <iostream>
@@ -18,6 +21,7 @@ namespace WindowsAPI
 #include <string>
 #include <cctype>
 #include <deque>
+#include "NtStructures.h"
 
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
@@ -33,4 +37,6 @@ void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap)
 const wchar_t* ConvertToWideString(const std::string& str);
 std::string ConvertWStringToUTF8(const std::wstring& wstr);
 std::string WideStringToStringFromPointer(ADDRINT addr);
+void GetParentProcessName();
+DWORD GetProcessIdByName(std::string processName);
 #endif // UTILS_H

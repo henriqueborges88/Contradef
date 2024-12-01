@@ -122,6 +122,10 @@ void InstrumentationContext::InitStrategies() {
             strategyMap["RtlDeleteFunctionTable"] = &InstRtlDeleteFunctionTable::InstrumentFunction;
             //EndSeq
 
+
+
+
+            
         }
 
         if (scope == "Themida") {
@@ -132,10 +136,14 @@ void InstrumentationContext::InitStrategies() {
             //Estrategias de virtualizaçã
         }
     }
-    
-    
 
-
+    strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["ZwQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["NtQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
+    strategyMap["ZwQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
+    strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
+    strategyMap["GetEnvironmentStringsW"] = &InstGetEnvironmentStringsW::InstrumentFunction;
+    strategyMap["GetEnvironmentVariableW"] = &InstGetEnvironmentVariableW::InstrumentFunction;
     
     
     
