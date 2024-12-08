@@ -1,5 +1,9 @@
 #include "Instrumentation.h"
 
+//CallStackManager callStackManager;
+std::map<THREADID, CallStackManager> callStacks;
+DllFunctionTracker callTracker(1000); // Máximo de 10 funções rastreadas
+
 BOOL IsMainExecutable(ADDRINT address) {
     PIN_LockClient();
     IMG img = IMG_FindByAddress(address);
@@ -171,18 +175,20 @@ EXCEPT_HANDLING_RESULT errCB (THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICA
 string tgt = "CreateFileW";
 bool isWstring = 1;
 
-VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
+VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT returnAddress, ADDRINT rspValue, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
 
     if (IsMainExecutable(instAddress)) {
         PIN_LockClient(); 
-        RTN rtnTgt = RTN_FindByAddress(targetRtn);
+        RTN rtnTgt = RTN_FindByAddress(targetRtnAddr);
         std::string s;
         bool print = true;
+        std::string rtnName = "";
+        std::string imgName = "";
+
         if (RTN_Valid(rtnTgt))
         {
             IMG img = SEC_Img(RTN_Sec(rtnTgt));
-            std::string imgName = "";
             if (IMG_Valid(img))
             {
                 imgName = IMG_Name(img);
@@ -191,7 +197,8 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
                     print = false;
                 }
             }
-            std::string rtnName = RTN_Name(rtnTgt);
+            rtnName = RTN_Name(rtnTgt);
+            
             s += ":" + rtnName;
             if (rtnName.empty() || imgName.empty()) {
                 print = false;
@@ -200,13 +207,39 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
         else {
             print = false;
         }
+
+        UINT64 stackValue = *reinterpret_cast<UINT64*>(rspValue);
+        callStacks[threadid].pushFunction(instAddress, returnAddress, stackValue, tailCall, rtnName);
+
         if (print) {
-            std::cout << "----> " << instAddress << " -> " << targetRtn << s << std::endl;
+            //std::cout << "----> " << instAddress << " -> " << targetRtn << s << std::endl;
         }
 
         PIN_UnlockClient();
         
     }
+
+    PIN_LockClient();
+    if (IsMainExecutable(instAddress) && !IsMainExecutable(targetRtnAddr)) {
+        string tgtRtnName = "";
+        string imgName = "";
+        RTN tgtRtn = RTN_FindByAddress(targetRtnAddr);
+        if (RTN_Valid(tgtRtn))
+        {
+            tgtRtnName = RTN_Name(tgtRtn);
+            IMG tgtImg = SEC_Img(RTN_Sec(tgtRtn));
+            if (IMG_Valid(tgtImg))
+            {
+                imgName = IMG_Name(tgtImg);
+            }
+        }
+        if (!tgtRtnName.empty()) {
+            callTracker.addFunctionCall(threadid, imgName, tgtRtnName, RTN_Address(tgtRtn));
+        }
+    }
+    PIN_UnlockClient();
+
+
     return;
 
 
@@ -225,9 +258,9 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
 
     PIN_LockClient();
 
-    RTN rtn = RTN_FindByAddress(targetRtn);
+    RTN rtn = RTN_FindByAddress(targetRtnAddr);
 
-    string s = StringFromAddrint(targetRtn);
+    string s = StringFromAddrint(targetRtnAddr);
 
     if (RTN_Valid(rtn))
     {
@@ -286,8 +319,16 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
 
 VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADDRINT ret0, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
-    return; // desativando para outros testes
+    if (IsMainExecutable(retAddr)) {
+        callStacks[threadid].popUntilAddress(retAddr);
+        //callStacks[threadid].popFunction();
+        //callStackManager.peekTopFunction();
+    }
+    //std::cout << " returns: " << ret0 << ", ret addr: " << retAddr << std::endl;
 
+
+    
+    return;
     PIN_LockClient();
     RTN rtn = RTN_FindByAddress(instAddress);
     PIN_UnlockClient();
@@ -302,13 +343,13 @@ VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADD
 
 }
 
-
 VOID InstrumentFuncCall(TRACE trace, INS ins)
 {
     //if (KnobTraceOnlyMain && !IsMainExecutable(INS_Address(ins))) return;
 
     if (INS_IsCall(ins) && !INS_IsDirectControlFlow(ins))
     {
+        //std::cout << INS_Disassemble(ins) << std::endl;
         BOOL isCall = INS_IsCall(ins);
         // Indirect call
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitFuncCall),
@@ -318,6 +359,8 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
             IARG_BOOL, isCall, // isCall
             IARG_BOOL, FALSE, // isDirect
             IARG_BOOL, FALSE, // tailCall
+            IARG_ADDRINT, INS_NextAddress(ins), // Endereço da próxima instrução
+            IARG_REG_VALUE, REG_STACK_PTR,
             IARG_FUNCARG_CALLSITE_VALUE, 0,
             IARG_FUNCARG_CALLSITE_VALUE, 1,
             IARG_FUNCARG_CALLSITE_VALUE, 2,
@@ -330,6 +373,7 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
     else if (!INS_IsRet(ins) && INS_IsIndirectControlFlow(ins))
     {
         BOOL isCall = INS_IsCall(ins);
+        //std::cout << INS_Disassemble(ins) << std::endl;
 
          // Indirect call
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitFuncCall),
@@ -339,6 +383,8 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
             IARG_BOOL, isCall, // isCall
             IARG_BOOL, FALSE, // isDirect
             IARG_BOOL, FALSE, // tailCall
+            IARG_ADDRINT, INS_NextAddress(ins), // Endereço da próxima instrução
+            IARG_REG_VALUE, REG_STACK_PTR,
             IARG_FUNCARG_CALLSITE_VALUE, 0,
             IARG_FUNCARG_CALLSITE_VALUE, 1,
             IARG_FUNCARG_CALLSITE_VALUE, 2,
@@ -353,6 +399,7 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
         // Is this a tail call?
         RTN sourceRtn = TRACE_Rtn(trace);
         RTN destRtn = RTN_FindByAddress(INS_DirectControlFlowTargetAddress(ins));
+        //std::cout << INS_Disassemble(ins) << std::endl;
 
         if (INS_IsCall(ins)         // conventional call
             || sourceRtn != destRtn // tail call
@@ -367,6 +414,8 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
                 IARG_BOOL, isCall, // isCall
                 IARG_BOOL, TRUE, // isDirect
                 IARG_BOOL, tailcall,
+                IARG_ADDRINT, INS_NextAddress(ins), // Endereço da próxima instrução
+                IARG_REG_VALUE, REG_STACK_PTR,
                 IARG_FUNCARG_CALLSITE_VALUE, 0,
                 IARG_FUNCARG_CALLSITE_VALUE, 1,
                 IARG_FUNCARG_CALLSITE_VALUE, 2,
@@ -400,76 +449,23 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
             IARG_END);
 
     }
-}
+    else {
+        if (INS_IsDirectControlFlow(ins)) {
 
-
-
-
-
-
-
-
-
-static const ADDRINT target_address = 140699663292309;
-static bool search = false;
-
-// Função chamada antes da execução da instrução desejada
-void CaptureLeaData(ADDRINT ins_addr, CONTEXT* ctxt, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6, ADDRINT arg7, ADDRINT arg8)
-{
-    if (true)
-    {
-        //RETORNE STRINGS DE UMA LISTA, PROVALVELMENTE AS QUE ESTAVAM ENCRIPTADAS
-
-        // Obtém os valores dos registradores RAX e R11 do contexto
-        ADDRINT rax = PIN_GetContextReg(ctxt, REG_RAX);
-        ADDRINT r11 = PIN_GetContextReg(ctxt, REG_R11);
-
-        // Calcula o valor do ponteiro usado na instrução LEA
-        ADDRINT result = rax + (r11 * 2) + 0x4;
-
-        // Imprime os valores capturados
-        std::cout << "Instruction at address: " << std::hex << ins_addr << std::endl;
-        std::cout << "RAX: " << std::hex << rax << ", R11: " << std::hex << r11 << std::endl;
-        std::cout << "Calculated LEA result: " << std::hex << result << std::endl;
-
-        wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-        wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-
-        std::wstring wstr(CharStr);
-        wprintf(L" ** RETURN WString --> %ls <-\n", wstr.c_str());
-
-        if (wstr.find(L"CDebugger detected - please disable it and restart the application.") != std::wstring::npos) {
-            std::cout << "Debug achado: " << std::endl;
-
-            search = true;
+            std::cout << INS_Disassemble(ins) << "não \n";
         }
-
-        ADDRINT arg = arg7;
-
-        //wchar_t* CharStr1 = reinterpret_cast<wchar_t*>(arg);
-        //wprintf(L" ** RETURN WStringArg --> %ls\n", CharStr1);
-
-
-        //char* CharStr2 = reinterpret_cast<char*>(arg);
-        //std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-
-        /*int* CharStr3 = reinterpret_cast<int*>(arg);
-        std::cout << " ** RETURN INTArg --> " << *CharStr3 << std::endl;*/
-
-
-        //char* CharStr = reinterpret_cast<char*>(result);
-        //std::cout << " result - " << CharStr << std::endl;
     }
 }
+
+
+
+
+
 
 
 // Função que redireciona a execução para o endereço de destino caso o desvio (jnz) não seja tomado
 void SimulaJnzComoJz(ADDRINT enderecoDestino, BOOL desvioTomado, CONTEXT* ctxt) {
 
-    if (search == false) {
-        return;
-    }
-    search == false;
 
     //std::cout << "INST " << std::endl;
 
@@ -561,6 +557,14 @@ InstructionSequenceDetector seq_detector;
 
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
+    // Obtém as últimas 2 chamadas
+    auto lastCalls = callTracker.getLastNCalls(100);
+    std::cout << "Últimas 100 chamadas:\n";
+    for (const auto& call : lastCalls) {
+        std::cout << "[" << call.threadId << "] " << std::hex << call.address << " - " << std::dec << "DLL: " << call.dllName << ", Função: " << call.functionName << "\n";
+    }
+
+
     // Obter os flags atuais
     ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
 
@@ -587,7 +591,6 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
 
         PIN_ExecuteAt(ctxt);
     }
-    
 
 
 
@@ -874,31 +877,14 @@ VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, Seque
 
 VOID SequenceMatchReadStringFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    //lea rax, ptr [rip+0x25e]
-    //ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RAX);
-    //ADDRINT rip_value = PIN_GetContextReg(ctxt, REG_RIP);
+    ADDRINT regRcx = PIN_GetContextReg(ctxt, REG_RCX);
 
-    ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = rdx_value;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
+    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(regRcx)))
     {
-        wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-        std::cout << "R9 = 0x" << std::hex << rdx_value << std::endl;
-
-        std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        //wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
+        std::cout << "R9 = 0x" << std::hex << regRcx << std::endl;
+        char* CharStr = reinterpret_cast<char*>(regRcx);
+        std::cout << "Nome da função --> " << CharStr << std::endl;
     }
-
-    
 }
 
 
@@ -1295,9 +1281,37 @@ VOID RecordLEA(VOID* ip, std::string* insstr, REG reg, ADDRINT regValue) {
     }
 }
 
+
+
+/////
+#include <set>
+constexpr BYTE SPECIAL_VALUE = 0xFFF34433;    // Valor a interceptar
+constexpr BYTE MODIFIED_VALUE = 0xFFFFFFFF;  // Novo valor a ser escrito
+
+std::set<ADDRINT> interceptedAddresses; // Endereços modificados
+
+VOID ModifyValue(ADDRINT addr) {
+    BYTE* target = reinterpret_cast<BYTE*>(addr);
+    if (*target == SPECIAL_VALUE) {
+        *target = MODIFIED_VALUE; // Altera o valor especial
+        interceptedAddresses.insert(addr);
+        std::cout << "Valor especial interceptado e alterado no endereço: " << std::hex << addr << std::endl;
+    }
+}
+
+/////
+
 VOID TraceInst(INS ins, VOID* v)
 {
     seq_detector.InstructionTrace(ins, &seq_detector);
+
+    // Intercepta instruções de escrita em memória
+    //if (INS_IsMemoryWrite(ins)) {
+    //    INS_InsertCall(
+    //        ins, IPOINT_BEFORE, (AFUNPTR)ModifyValue,
+    //        IARG_MEMORYWRITE_EA, // Endereço efetivo de escrita
+    //        IARG_END);
+    //}
 
     return;
 
@@ -1417,7 +1431,7 @@ int InitInstrunctionsInstrumentation()
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 11, 11); 
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 33, 33); 
     //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
@@ -1563,7 +1577,7 @@ int InitInstrunctionsInstrumentation()
     seq_detector.Initialize();
 
     
-    //TRACE_AddInstrumentFunction(TraceFunc, 0);
+    TRACE_AddInstrumentFunction(TraceFunc, 0);
 
     INS_AddInstrumentFunction(TraceInst, 0);
 

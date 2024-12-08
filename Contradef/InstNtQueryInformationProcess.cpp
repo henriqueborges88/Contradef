@@ -116,29 +116,25 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         //CONTRAMEDIDAS
         if (args->ProcessInformationClass == ProcessDebugPort) {
             DWORD* debugPort = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            std::cout << "A debugPort - " << *debugPort  << std::endl;
             if (*debugPort != 0) {
-                std::cout << "debugPort\n";
+                //std::cout << "debugPort\n";
                 *debugPort = 0;
             }
         }
 
         if (args->ProcessInformationClass == ProcessDebugObjectHandle) {
             HANDLE* debugHandle = reinterpret_cast<HANDLE*>(args->ProcessInformation);
-            std::cout << "A debugHandle - " << *debugHandle << std::endl;
 
             if (*debugHandle != 0) {
-                std::cout << "debugHandle\n";
+                //std::cout << "debugHandle\n";
                 *debugHandle = 0;
             }
         }
 
         if (args->ProcessInformationClass == ProcessDebugFlags) {
             DWORD* debugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            std::cout << "A debugFlags - " << *debugFlags << std::endl;
-
             if (*debugFlags == 0) {
-                std::cout << "debugFlags\n";
+                //std::cout << "debugFlags\n";
                 *debugFlags = -1;
             }
         }

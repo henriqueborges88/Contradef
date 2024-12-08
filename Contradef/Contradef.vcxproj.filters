@@ -372,6 +372,15 @@
     <ClCompile Include="InstGetEnvironmentVariableW.cpp">
       <Filter>Arquivos de Origem\Strategies</Filter>
     </ClCompile>
+    <ClCompile Include="InstGetEnvironmentVariableA.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="CallStackManager.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="DllFunctionTracker.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InstrumentationStrategy.h">
@@ -736,6 +745,15 @@
     </ClInclude>
     <ClInclude Include="InstGetEnvironmentVariableW.h">
       <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetEnvironmentVariableA.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="CallStackManager.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="DllFunctionTracker.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

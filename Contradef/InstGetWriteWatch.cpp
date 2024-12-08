@@ -71,12 +71,12 @@ VOID InstGetWriteWatch::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         //    Esse método cria uma resposta previsível para GetWriteWatch, independentemente das escritas reais, reduzindo a probabilidade de que o software evasivo identifique o ambiente de análise.
         // Modifica o retorno para um conjunto vazio ou controle específico de páginas
         ULONG_PTR* lpdwCountMod = reinterpret_cast<ULONG_PTR*>(lpdwCount);
-        *lpdwCountMod = 0; // Define zero endereços como "escritos"
+        //*lpdwCountMod = 0; // Define zero endereços como "escritos"
         DWORD* lpdwGranularityMod = reinterpret_cast<DWORD*>(lpdwGranularity);
-        *lpdwGranularityMod = PAGE_SIZE; // Define a granularidade
+        //*lpdwGranularityMod = PAGE_SIZE; // Define a granularidade
         
         // Alterar o valor de retorno como sucesso = 
-        *retValAddr = 0;
+        //*retValAddr = 0;
 
         delete callContext;
         PIN_UnlockClient();

@@ -179,7 +179,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CallStackManager.cpp" />
     <ClCompile Include="Contradef.cpp" />
+    <ClCompile Include="DllFunctionTracker.cpp" />
     <ClCompile Include="InstBaseRegEnumKey.cpp" />
     <ClCompile Include="InstBaseRegOpenKey.cpp" />
     <ClCompile Include="InstBlockInput.cpp" />
@@ -200,6 +202,7 @@
     <ClCompile Include="InstGetCurrentProcess.cpp" />
     <ClCompile Include="InstGetCurrentThread.cpp" />
     <ClCompile Include="InstGetEnvironmentStringsW.cpp" />
+    <ClCompile Include="InstGetEnvironmentVariableA.cpp" />
     <ClCompile Include="InstGetEnvironmentVariableW.cpp" />
     <ClCompile Include="InstGetForegroundWindow.cpp" />
     <ClCompile Include="InstGetLocalTime.cpp" />
@@ -299,6 +302,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallContext.h" />
+    <ClInclude Include="CallStackManager.h" />
+    <ClInclude Include="DllFunctionTracker.h" />
     <ClInclude Include="EventData.h" />
     <ClInclude Include="InstBaseRegEnumKey.h" />
     <ClInclude Include="InstBaseRegOpenKey.h" />
@@ -320,6 +325,7 @@
     <ClInclude Include="InstGetCurrentProcess.h" />
     <ClInclude Include="InstGetCurrentThread.h" />
     <ClInclude Include="InstGetEnvironmentStringsW.h" />
+    <ClInclude Include="InstGetEnvironmentVariableA.h" />
     <ClInclude Include="InstGetEnvironmentVariableW.h" />
     <ClInclude Include="InstGetForegroundWindow.h" />
     <ClInclude Include="InstGetLocalTime.h" />

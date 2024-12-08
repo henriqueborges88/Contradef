@@ -97,11 +97,6 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
             stringStream << "    ReturnLength: " << returnLengthValue << " bytes" << std::endl;
         }
         stringStream << "  [-] Obtenção de informações do sistema concluída" << std::endl;
-        stringStream << "[*] Concluído" << std::endl << std::endl;
-
-        ExecutionInformation executionCompletedInfo = { stringStream.str() };
-        ExecutionEventData executionEvent(executionCompletedInfo);
-        globalNotifierPtr->NotifyAll(&executionEvent);
 
         // CONTRAMEDIDA
         if (args->SystemInformationClass == 5) {
@@ -113,10 +108,14 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
             while (processInfo) {
 
                 if (reinterpret_cast<DWORD>(processInfo->UniqueProcessId) == currentProcessId) {
+                    stringStream << "  [-] Aplicando contramedida" << std::endl;
+
                     DWORD* parentProcessId = reinterpret_cast<DWORD*>(&(processInfo->Reserved2));
                     DWORD fakePID = GetProcessIdByName("explorer.exe");
-                    std::cout << "[CONTRADEF] Substituindo o PID do processo pai (pin.exe - " << *parentProcessId << ") pelo do explorer.exe (" << fakePID << ")" << std::endl;
+                    stringStream << "    Substituindo o PID do processo pai (pin.exe - " << *parentProcessId << ") pelo do explorer.exe (" << fakePID << ")" << std::endl;
                     *parentProcessId = fakePID;
+                    stringStream << "  [-] Contramedida aplicada" << std::endl;
+
                     break;
                 }
 
@@ -130,6 +129,12 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
             }
         }
         /////
+
+        stringStream << "[*] Concluído" << std::endl << std::endl;
+
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
         callContextMap.erase(it);
