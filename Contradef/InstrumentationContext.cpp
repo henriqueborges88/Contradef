@@ -94,7 +94,6 @@ void InstrumentationContext::InitStrategies() {
             strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
             strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
             strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
-            strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
             strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
 
             strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
@@ -104,10 +103,13 @@ void InstrumentationContext::InitStrategies() {
 
             strategyMap["GetCurrentThread"] = &InstGetCurrentThread::InstrumentFunction;
             strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
+            strategyMap["ZwSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
             strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
+            
+            strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
 
 
-            //Seq 13
+            //Seq ANTIDBI
             strategyMap["OpenThread"] = &InstOpenThread::InstrumentFunction;
             strategyMap["RtlInstallFunctionTableCallback"] = &InstRtlInstallFunctionTableCallback::InstrumentFunction;
             strategyMap["CreateEventW"] = &InstCreateEventW::InstrumentFunction;
@@ -119,13 +121,37 @@ void InstrumentationContext::InitStrategies() {
             strategyMap["ResumeThread"] = &InstResumeThread::InstrumentFunction;
             strategyMap["SetEvent"] = &InstSetEvent::InstrumentFunction;
             strategyMap["ResetEvent"] = &InstResetEvent::InstrumentFunction;
+            strategyMap["RtlAddFunctionTable"] = &InstRtlAddFunctionTable::InstrumentFunction;
             strategyMap["RtlDeleteFunctionTable"] = &InstRtlDeleteFunctionTable::InstrumentFunction;
             //EndSeq
 
+            strategyMap["VirtualAlloc"] = &InstVirtualAlloc::InstrumentFunction;
+            strategyMap["VirtualFree"] = &InstVirtualFree::InstrumentFunction;
 
+            strategyMap["ReadFile"] = &InstReadFile::InstrumentFunction;
 
+            strategyMap["GetProcAddress"] = &InstGetProcAddress::InstrumentFunction;
+            strategyMap["QueueUserAPC2"] = &InstQueueUserAPC2::InstrumentFunction;
+            strategyMap["SleepEx"] = &InstSleepEx::InstrumentFunction;
+            strategyMap["RtlAddVectoredExceptionHandler"] = &InstRtlAddVectoredExceptionHandler::InstrumentFunction;
+            strategyMap["RaiseException"] = &InstRaiseException::InstrumentFunction;
+            strategyMap["RtlRemoveVectoredExceptionHandler"] = &InstRtlRemoveVectoredExceptionHandler::InstrumentFunction;
+            strategyMap["GetVersionExW"] = &InstGetVersionExW::InstrumentFunction;
+            strategyMap["NtdllDefWindowProc_W"] = &InstNtdllDefWindowProc_W::InstrumentFunction;
+            strategyMap["CreateToolhelp32Snapshot"] = &InstCreateToolhelp32Snapshot::InstrumentFunction;
+            strategyMap["GetFileSizeEx"] = &InstGetFileSizeEx::InstrumentFunction;
+            strategyMap["SetFilePointerEx"] = &InstSetFilePointerEx::InstrumentFunction;
+            strategyMap["QueryDosDeviceW"] = &InstQueryDosDeviceW::InstrumentFunction;
+            strategyMap["GetSystemFirmwareTable"] = &InstGetSystemFirmwareTable::InstrumentFunction;
+            strategyMap["BasepConstructSxsCreateProcessMessage"] = &InstBasepConstructSxsCreateProcessMessage::InstrumentFunction;
+            strategyMap["InstGetVolumePathNameW"] = &InstGetVolumePathNameW::InstrumentFunction;
+            strategyMap["DeviceIoControl"] = &InstDeviceIoControl::InstrumentFunction;
+            strategyMap["RtlQueryPerformanceCounter"] = &InstRtlQueryPerformanceCounter::InstrumentFunction;
+            strategyMap["GetCommandLineA"] = &InstGetCommandLineA::InstrumentFunction;
+            strategyMap["GetCommandLineW"] = &InstGetCommandLineW::InstrumentFunction;
+            strategyMap["GetComputerNameA"] = &InstGetComputerNameA::InstrumentFunction;
+            strategyMap["LCMapStringEx"] = &InstLCMapStringEx::InstrumentFunction;
 
-            
         }
 
         if (scope == "Themida") {
@@ -297,6 +323,8 @@ void InstrumentationContext::ExecuteAllStrategies(IMG img, Notifier& globalNotif
         RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
         if (RTN_Valid(rtn)) {
             std::string funcName = RTN_Name(rtn);
+            if (funcName == "VirtualProtect")
+                std::cout << "--------------->" << funcName << " - " << std::hex << RTN_Address(rtn) << std::dec << std::endl;
             for (const auto& pair : strategyMap) {
                 std::string strategyName = pair.first.c_str();
                 if (strategyName == funcName) {

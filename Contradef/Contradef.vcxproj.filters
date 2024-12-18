@@ -381,6 +381,81 @@
     <ClCompile Include="DllFunctionTracker.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
+    <ClCompile Include="InstVirtualAlloc.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstReadFile.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstVirtualFree.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlAddFunctionTable.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetProcAddress.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstQueueUserAPC2.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstSleepEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlAddVectoredExceptionHandler.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRaiseException.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlRemoveVectoredExceptionHandler.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetVersionExW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstNtdllDefWindowProc_W.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstCreateToolhelp32Snapshot.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetFileSizeEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstSetFilePointerEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstQueryDosDeviceW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetSystemFirmwareTable.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstBasepConstructSxsCreateProcessMessage.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetVolumePathNameW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstDeviceIoControl.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstRtlQueryPerformanceCounter.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetCommandLineA.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetCommandLineW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetComputerNameA.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstLCMapStringEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InstrumentationStrategy.h">
@@ -754,6 +829,81 @@
     </ClInclude>
     <ClInclude Include="DllFunctionTracker.h">
       <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="InstVirtualAlloc.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstReadFile.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstVirtualFree.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlAddFunctionTable.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetProcAddress.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstQueueUserAPC2.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstSleepEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlAddVectoredExceptionHandler.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRaiseException.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlRemoveVectoredExceptionHandler.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetVersionExW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstNtdllDefWindowProc_W.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstCreateToolhelp32Snapshot.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetFileSizeEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstSetFilePointerEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstQueryDosDeviceW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetSystemFirmwareTable.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstBasepConstructSxsCreateProcessMessage.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetVolumePathNameW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstDeviceIoControl.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstRtlQueryPerformanceCounter.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetCommandLineA.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetCommandLineW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetComputerNameA.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstLCMapStringEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

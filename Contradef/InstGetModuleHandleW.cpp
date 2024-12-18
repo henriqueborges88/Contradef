@@ -53,7 +53,7 @@ VOID InstGetModuleHandleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         CallContext* callContext = it->second;
         std::stringstream& stringStream = callContext->stringStream;
         stringStream << "    Handle do módulo retornado: " << std::hex << *retValAddr << std::dec << std::endl;
-        stringStream << "  [-] Consulta ao módulo concluída" << std::endl << std::endl;
+        stringStream << "  [-] Consulta ao módulo concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };

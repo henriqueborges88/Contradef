@@ -66,7 +66,7 @@ VOID InstGetEnvironmentStringsW::CallbackAfter(THREADID tid, UINT32 callId, ADDR
             stringStream << "    Falha ao obter as strings de ambiente." << std::endl;
         }
 
-        stringStream << "  [-] Chamada GetEnvironmentStringsW concluída" << std::endl << std::endl;
+        stringStream << "  [-] Chamada GetEnvironmentStringsW concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };

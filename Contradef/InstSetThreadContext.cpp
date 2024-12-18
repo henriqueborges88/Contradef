@@ -99,11 +99,8 @@ VOID InstSetThreadContext::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     }
 
     stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
-    stringStream << "[*] Início da chamada SetThreadContext" << std::endl << std::endl;
+    stringStream << "  [-] Início da chamada SetThreadContext" << std::endl;
 
-    ExecutionInformation executionCompletedInfo = { stringStream.str() };
-    ExecutionEventData executionEvent(executionCompletedInfo);
-    globalNotifierPtr->NotifyAll(&executionEvent);
 }
 
 VOID InstSetThreadContext::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT retVal) {
@@ -129,7 +126,8 @@ VOID InstSetThreadContext::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
             stringStream << "    Falha ao configurar o contexto da thread." << std::endl;
         }
 
-        stringStream << "[*] Chamada SetThreadContext concluída" << std::endl << std::endl;
+        stringStream << "  [-] Chamada SetThreadContext concluída" << std::endl;
+        stringStream << "[*] Concluído" << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);

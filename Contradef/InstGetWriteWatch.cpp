@@ -25,7 +25,8 @@ VOID InstGetWriteWatch::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
-    std::stringstream stringStream;
+    std::stringstream& stringStream = callContext->stringStream;
+
     stringStream << std::endl << "[+] GetWriteWatch..." << std::endl;
     stringStream << "    Thread: " << tid << std::endl;
     stringStream << "    Id de chamada: " << fcnCallId << std::endl;
@@ -37,11 +38,7 @@ VOID InstGetWriteWatch::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
     stringStream << "        dwRegionSize: " << dwRegionSize << " bytes" << std::endl;
     stringStream << "        lpAddresses (Endereço de Escritas): " << std::hex << lpAddresses << std::dec << std::endl;
     stringStream << "        lpdwCount (Contagem de Páginas): " << std::hex << lpdwCount << std::dec << std::endl;
-    
-
-    ExecutionInformation executionCompletedInfo = { stringStream.str() };
-    ExecutionEventData executionEvent(executionCompletedInfo);
-    globalNotifierPtr->NotifyAll(&executionEvent);
+   
 }
 
 VOID InstGetWriteWatch::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT dwFlags, ADDRINT lpBaseAddress, ADDRINT dwRegionSize, ADDRINT lpAddresses, ADDRINT lpdwCount, ADDRINT lpdwGranularity) {
@@ -59,7 +56,8 @@ VOID InstGetWriteWatch::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Valor de retorno original: " << *retValAddr << std::endl;
-        stringStream << "[*] Monitoramento de páginas escritas concluído" << std::endl << std::endl;
+        stringStream << "  [-] Monitoramento de páginas escritas concluído" << std::endl << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);

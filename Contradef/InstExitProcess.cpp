@@ -29,8 +29,9 @@ VOID InstExitProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
     stringStream << "    Parâmetros: " << std::endl;
     stringStream << "        uExitCode: " << args.uExitCode << std::endl;
-    stringStream << "[*] Processo sendo finalizado" << std::endl << std::endl;
-
+    stringStream << "  [-] Processo sendo finalizado" << std::endl;
+    stringStream << "[*] Concluído" << std::endl;
+    
     ExecutionInformation executionCompletedInfo = { stringStream.str() };
     ExecutionEventData executionEvent(executionCompletedInfo);
     globalNotifierPtr->NotifyAll(&executionEvent);

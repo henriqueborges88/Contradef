@@ -55,7 +55,7 @@ VOID InstSetEvent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddres
         else {
             stringStream << "    Falha ao sinalizar o evento." << std::endl;
         }
-        stringStream << "  [-] Chamada SetEvent concluída" << std::endl << std::endl;
+        stringStream << "  [-] Chamada SetEvent concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };

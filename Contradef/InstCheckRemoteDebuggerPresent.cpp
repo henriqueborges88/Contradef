@@ -61,7 +61,12 @@ VOID InstCheckRemoteDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, 
         {
             dp = (*ppbDebuggerPresent ? "TRUE" : "FALSE");
             // CONTRAMEDIDA
-            *ppbDebuggerPresent = 0;
+            //std::cout << "ppbDebuggerPresent -> " << *ppbDebuggerPresent << std::endl;
+
+            if (*ppbDebuggerPresent) {
+                //std::cout << "Aplicando contramedida\n";
+                *ppbDebuggerPresent = 0;
+            }
         }
 
         

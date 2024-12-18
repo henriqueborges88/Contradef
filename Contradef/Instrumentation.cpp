@@ -2,7 +2,7 @@
 
 //CallStackManager callStackManager;
 std::map<THREADID, CallStackManager> callStacks;
-DllFunctionTracker callTracker(1000); // Máximo de 10 funções rastreadas
+DllFunctionTracker callTracker(100000); // Máximo de 100000 funções rastreadas
 
 BOOL IsMainExecutable(ADDRINT address) {
     PIN_LockClient();
@@ -235,6 +235,13 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr,
         }
         if (!tgtRtnName.empty()) {
             callTracker.addFunctionCall(threadid, imgName, tgtRtnName, RTN_Address(tgtRtn));
+            string retRtnName = "INVALID_RTN";
+            RTN rtnt = RTN_FindByAddress(returnAddress);
+            if (RTN_Valid(rtnt)) {
+                retRtnName = RTN_Name(rtnt);
+            }
+            std::cout << std::hex << RTN_Address(tgtRtn) << " - " << imgName << ":" << tgtRtnName << " T[" << threadid << "] - Return to: " << retRtnName << " (" << returnAddress << ")" << std::dec << std::endl;
+            PIN_UnlockClient();
         }
     }
     PIN_UnlockClient();
@@ -558,11 +565,11 @@ InstructionSequenceDetector seq_detector;
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
     // Obtém as últimas 2 chamadas
-    auto lastCalls = callTracker.getLastNCalls(100);
-    std::cout << "Últimas 100 chamadas:\n";
-    for (const auto& call : lastCalls) {
-        std::cout << "[" << call.threadId << "] " << std::hex << call.address << " - " << std::dec << "DLL: " << call.dllName << ", Função: " << call.functionName << "\n";
-    }
+    //auto lastCalls = callTracker.getLastNCalls(100);
+    //std::cout << "Últimas 100 chamadas:\n";
+    //for (const auto& call : lastCalls) {
+    //    std::cout << "[" << call.threadId << "] " << std::hex << call.address << " - " << std::dec << "DLL: " << call.dllName << ", Função: " << call.functionName << "\n";
+    //}
 
 
     // Obter os flags atuais
@@ -576,7 +583,7 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
 
         // Para setar o ZF para 1:
         flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-        std::cout << "1 - APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
+        std::cout << "[CONTRADEF] APLICANDO CONTRAMEDIDA NO INDICE " << sequence.matchCount << std::endl;
 
         // Para setar o ZF para 0:
         //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
@@ -1332,11 +1339,12 @@ VOID TraceInst(INS ins, VOID* v)
     }
 }
 
-namespace standard = __std_alias;
+void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile) {
+    callTracker.saveAllExternalCalls(ExternalCallTraceOutFile);
+}
 
-int InitInstrunctionsInstrumentation()
+int InitInstrumentation()
 {
-
     //// Tecnicas evasivas obsiium 1.4.3 Antidbi
     //sequence.push_back("jmp 0x7ff6acccdc2a");
     //sequence.push_back("test word ptr [rdi+0xa], 0x2");
@@ -1431,7 +1439,8 @@ int InitInstrunctionsInstrumentation()
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 33, 33); 
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 23, 23);
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 32, 32);
     //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 

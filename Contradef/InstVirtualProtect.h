@@ -36,7 +36,7 @@ private:
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
     static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpAddress, ADDRINT dwSize, ADDRINT flNewProtect, ADDRINT lpflOldProtect);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpflOldProtect);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT retVal, ADDRINT lpflOldProtect);
 };
 
 #endif // INST_VIRTUAL_PROTECT_H

@@ -27,6 +27,7 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOO
 VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADDRINT ret0, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
 VOID InstrumentFuncCall(TRACE trace, INS ins);
 VOID TraceFunc(TRACE trace, VOID* v);
-int InitInstrunctionsInstrumentation();
+void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
+int InitInstrumentation();
 
 #endif // INSTRUMENTATION_H

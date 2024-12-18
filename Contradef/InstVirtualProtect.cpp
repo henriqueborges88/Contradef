@@ -41,7 +41,7 @@ VOID InstVirtualProtect::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
 }
 
-VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpflOldProtect) {
+VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT retVal, ADDRINT lpflOldProtect) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
@@ -54,9 +54,26 @@ VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         PIN_LockClient();
         CallContext* callContext = it->second;
         std::stringstream& stringStream = callContext->stringStream;
+        const VirtualProtectArgs* args = reinterpret_cast<const VirtualProtectArgs*>(callContext->functionArgs);
 
         DWORD oldProtect = 0;
-        PIN_SafeCopy(&oldProtect, reinterpret_cast<DWORD*>(lpflOldProtect), sizeof(DWORD));
+        PIN_SafeCopy(&oldProtect, reinterpret_cast<DWORD*>(args->lpflOldProtect), sizeof(DWORD));
+
+        ///// TESTE
+        DWORD* oProtect = reinterpret_cast<DWORD*>(args->lpflOldProtect);
+        if (args->dwSize == 137472) {
+            *oProtect = 0x02;
+        }
+        else if (args->dwSize == 71574) {
+            *oProtect = 0x02;
+        }
+        else if (args->dwSize == 10568) {
+            *oProtect = 0x04;
+        }
+        else if (args->dwSize == 348) {
+            *oProtect = 0x02;
+        }
+        /////
 
         stringStream << "    Valor de retorno: " << returnAddress << std::endl;
         stringStream << "    Proteção antiga: " << oldProtect << std::endl;
@@ -76,18 +93,18 @@ VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
 
 VOID InstVirtualProtect::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
     
-    SEC sec = RTN_Sec(rtn);
-    IMG img = SEC_Img(sec);
-    if (IMG_Valid(img)) {
-        std::string imageName = IMG_Name(img);
-        std::string moduleName = ExtractModuleName(IMG_Name(img));
-        if (toUpperCase(moduleName) != "KERNELBASE.DLL") {
-            return;
-        }
-    }
-    else {
-        return;
-    }
+    //SEC sec = RTN_Sec(rtn);
+    //IMG img = SEC_Img(sec);
+    //if (IMG_Valid(img)) {
+    //    std::string imageName = IMG_Name(img);
+    //    std::string moduleName = ExtractModuleName(IMG_Name(img));
+    //    if (toUpperCase(moduleName) != "KERNELBASE.DLL") {
+    //        return;
+    //    }
+    //}
+    //else {
+    //    return;
+    //}
 
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "VirtualProtect") {
@@ -115,7 +132,8 @@ VOID InstVirtualProtect::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
             IARG_INST_PTR,
             IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_REG_REFERENCE, REG_GAX,           // Valor de retorno
+            IARG_RETURN_IP,                        // Endereço da função chamante
+            IARG_FUNCRET_EXITPOINT_VALUE,           // Valor de retorno
             IARG_FUNCARG_ENTRYPOINT_VALUE, 3,      // lpflOldProtect
             IARG_END);
 

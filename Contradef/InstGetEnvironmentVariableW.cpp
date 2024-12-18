@@ -86,7 +86,7 @@ VOID InstGetEnvironmentVariableW::CallbackAfter(THREADID tid, UINT32 callId, ADD
             stringStream << "    Falha ao obter a variável de ambiente. Código de erro: " << error << std::endl;
         }
 
-        stringStream << "  [-] Chamada GetEnvironmentVariableW concluída" << std::endl << std::endl;
+        stringStream << "  [-] Chamada GetEnvironmentVariableW concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };

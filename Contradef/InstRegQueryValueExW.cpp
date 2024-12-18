@@ -125,7 +125,6 @@ VOID InstRegQueryValueExW::InstrumentFunction(RTN rtn, Notifier& globalNotifier)
             IARG_CONTEXT,
             IARG_REG_REFERENCE, REG_GAX,
             IARG_RETURN_IP, // Endereço da fun��o chamante
-            IARG_REG_REFERENCE, REG_GAX,
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0, // hKey
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1, // lpValueName
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2, // lpReserved

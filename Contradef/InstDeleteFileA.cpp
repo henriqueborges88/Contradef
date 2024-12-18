@@ -31,11 +31,8 @@ VOID InstDeleteFileA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     stringStream << "    Parâmetros: " << std::endl;
     stringStream << "        lpFileName: " << sFileName << std::endl;
     stringStream << "    Endereço da função chamante: " << std::hex << returnAddress << std::dec << std::endl;
-    stringStream << "[*] Início da exclusão do arquivo" << std::endl << std::endl;
+    stringStream << "  [-] Início da exclusão do arquivo" << std::endl;
 
-    ExecutionInformation executionCompletedInfo = { stringStream.str() };
-    ExecutionEventData executionEvent(executionCompletedInfo);
-    globalNotifierPtr->NotifyAll(&executionEvent);
 }
 
 VOID InstDeleteFileA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT lpFileName) {
@@ -53,7 +50,8 @@ VOID InstDeleteFileA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
-        stringStream << "[*] Exclusão de arquivo concluída" << std::endl << std::endl;
+        stringStream << "  [-] Exclusão de arquivo concluída" << std::endl << std::endl;
+        stringStream << "[*] Cconcluído" << std::endl << std::endl;
 
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         ExecutionEventData executionEvent(executionCompletedInfo);

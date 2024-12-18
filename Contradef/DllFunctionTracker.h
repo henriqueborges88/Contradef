@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 // Estrutura para armazenar informações sobre a função chamada na DLL
 struct DllFunctionInfo {
@@ -38,6 +39,8 @@ public:
 
     // Imprime todas as funções chamadas
     void printAllCalls() const;
+
+    void DllFunctionTracker::saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
 
     // Verifica se uma função específica foi chamada
     bool wasFunctionCalled(const std::string& dllName, const std::string& functionName) const;

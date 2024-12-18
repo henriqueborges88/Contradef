@@ -115,6 +115,34 @@
 #include "InstNtQuerySystemInformationEx.h"
 #include "InstGetEnvironmentStringsW.h"
 #include "InstGetEnvironmentVariableW.h"
+#include "InstVirtualAlloc.h"
+#include "InstVirtualFree.h"
+#include "InstReadFile.h"
+#include "InstRtlAddFunctionTable.h"
+#include "InstGetProcAddress.h"
+#include "InstQueueUserAPC2.h"
+#include "InstSleepEx.h"
+#include "InstRtlAddVectoredExceptionHandler.h"
+#include "InstRaiseException.h"
+#include "InstRtlRemoveVectoredExceptionHandler.h"
+#include "InstGetVersionExW.h"
+#include "InstNtdllDefWindowProc_W.h"
+#include "InstCreateToolhelp32Snapshot.h"
+#include "InstGetFileSizeEx.h"
+#include "InstSetFilePointerEx.h"
+#include "InstQueryDosDeviceW.h"
+#include "InstGetSystemFirmwareTable.h"
+#include "InstBasepConstructSxsCreateProcessMessage.h"
+#include "InstGetVolumePathNameW.h"
+#include "InstDeviceIoControl.h"
+#include "InstRtlQueryPerformanceCounter.h"
+#include "InstGetCommandLineA.h"
+#include "InstGetCommandLineW.h"
+#include "InstGetComputerNameA.h"
+#include "InstLCMapStringEx.h"
+
+
+
 
 typedef void (*RTNFunction)(RTN, Notifier&);
 

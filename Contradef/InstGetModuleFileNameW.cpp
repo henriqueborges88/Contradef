@@ -5,7 +5,7 @@ UINT32 InstGetModuleFileNameW::imgCallId = 0;
 UINT32 InstGetModuleFileNameW::fcnCallId = 0;
 Notifier* InstGetModuleFileNameW::globalNotifierPtr;
 
-VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
+VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
@@ -38,7 +38,7 @@ VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
 }
 
-VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT returnAddress, CONTEXT* ctx, ADDRINT retValAddr, ADDRINT lpFilename, ADDRINT nSize) {
+VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT retVal, ADDRINT lpFilename, ADDRINT nSize) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
@@ -54,7 +54,7 @@ VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
 
         std::wstring wsFilename = ConvertAddrToWideString(lpFilename);
         stringStream << "    Caminho do Módulo Retornado: " << WStringToString(wsFilename) << std::endl;
-        stringStream << "    Número de caracteres copiados: " << retValAddr << std::endl;
+        stringStream << "    Número de caracteres copiados: " << retVal << std::endl;
         stringStream << "  [-] Operação concluída" << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
@@ -95,7 +95,6 @@ VOID InstGetModuleFileNameW::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
             IARG_RETURN_IP,                        // Endereço da função chamante
             IARG_FUNCARG_ENTRYPOINT_VALUE, 0,      // hModule
@@ -107,9 +106,9 @@ VOID InstGetModuleFileNameW::InstrumentFunction(RTN rtn, Notifier& globalNotifie
             IARG_THREAD_ID,
             IARG_UINT32, imgCallId,
             IARG_INST_PTR,
-            IARG_ADDRINT, RTN_Address(rtn),
             IARG_CONTEXT,
-            IARG_REG_REFERENCE, REG_GAX,           // Valor de retorno (número de caracteres copiados)
+            IARG_RETURN_IP,                        // Endereço da função chamante
+            IARG_FUNCRET_EXITPOINT_VALUE,           // Valor de retorno
             IARG_FUNCARG_ENTRYPOINT_VALUE, 1,      // lpFilename
             IARG_FUNCARG_ENTRYPOINT_VALUE, 2,      // nSize
             IARG_END);

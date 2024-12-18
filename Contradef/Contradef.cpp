@@ -24,9 +24,12 @@ using std::wstring;
 
 PIN_LOCK lock;
 static std::ofstream OutFile;
+static std::ofstream ExternalCallTraceOutFile;
 static std::ofstream* TraceOutFile;
 KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "contradef", "specify file name for output log ");
 KNOB<string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "y", "", "specify file name for YARA rules ");
+KNOB<BOOL> KnobAllowAttachDebugger(KNOB_MODE_WRITEONCE, "pintool", "ad", "0", "Allow attach debugger ");
+KNOB<BOOL> KnobSaveExternalCallTrace(KNOB_MODE_WRITEONCE, "pintool", "et", "1", "Save external call trace file ");
 
 InstrumentationContext context; // As estratégias já estão adicionadas no contexto
 
@@ -47,7 +50,7 @@ VOID InstrumentFunctions(IMG img, VOID* v) {
         GetSectionInfo(img, OutFile);
 
         std::string execName = IMG_Name(img);
-        std::string rules_file = KnobYaraRulesFile.Value(); //"C:\\Users\\henri\\OneDrive\\Escritorio\\Yara Teste\\contradef.yar";
+        std::string rules_file = KnobYaraRulesFile.Value();
         
         std::string yaraRulesPath = KnobYaraRulesFile.Value();
         if (!yaraRulesPath.empty())
@@ -87,8 +90,45 @@ VOID Fini(int, VOID* v)
 {
     OutFile.close();
     //TraceOutFile->close();
+
+    if (KnobSaveExternalCallTrace)
+    {
+        saveAllExternalCalls(ExternalCallTraceOutFile);
+    }
+
+    ExternalCallTraceOutFile.close();
 }
 
+// Função para aguardar no Entry Point
+VOID PauseAtEntryPoint(ADDRINT entryAddress) {
+    std::cout << "[CONTRADEF] O Contradef pausou no entry point do processo (" << std::hex << entryAddress << ")" << std::endl;
+    std::cout << "[CONTRADEF] Anexe o depurador ao processo agora." << std::endl;
+    std::cout << "[CONTRADEF] Pressione Enter para continuar a execucao..." << std::endl;
+
+    std::cin.get(); // Aguarda entrada do usuário para continuar
+}
+
+// Instrumenta o carregamento de imagens
+VOID ImageLoad(IMG img, VOID* v) {
+    if (IMG_IsMainExecutable(img)) {
+        ADDRINT entryPoint = IMG_EntryAddress(img); // IMG_Entry(img);
+        std::cout << "[CONTRADEF] Executavel principal carregado: " << IMG_Name(img) << std::endl;
+        //std::cout << "[CONTRADEF] Localizando Entry Point: " << std::hex << entryPoint << std::endl;
+
+        // Insere o callback para pausar no entry point
+        RTN entryRtn = RTN_FindByAddress(entryPoint);
+        if (RTN_Valid(entryRtn)) {
+            RTN_Open(entryRtn);
+            RTN_InsertCall(entryRtn, IPOINT_BEFORE, (AFUNPTR)PauseAtEntryPoint,
+                IARG_ADDRINT, entryPoint, // Endereço do Entry Point
+                IARG_END);
+            RTN_Close(entryRtn);
+        }
+        else {
+            std::cerr << "Falha ao localizar rotina no Entry Point." << std::endl;
+        }
+    }
+}
 
 int main(int argc, char* argv[]) {
 
@@ -97,8 +137,9 @@ int main(int argc, char* argv[]) {
     string filename;
     string pid = decstr(WindowsAPI::getpid());
     filename = KnobOutputFile.Value();
-    filename += "." + pid + ".log.cdf";
-    OutFile.open(filename.c_str(), std::ios::binary);
+
+    string logfilename = filename + "." + pid + ".log.cdf";
+    OutFile.open(logfilename.c_str(), std::ios::binary);
 
     // Recuperar o valor do caminho do arquivo YARA
     std::string yaraRulesPath = KnobYaraRulesFile.Value();
@@ -108,6 +149,12 @@ int main(int argc, char* argv[]) {
         //PIN_ToolFullPath() para obter o yara rules file do mesmo diretorio do PIN tool
         //std::cerr << "Por favor, forneça o caminho para o arquivo de regras YARA usando -y." << std::endl;
         //return 1;
+    }
+
+    if (KnobSaveExternalCallTrace)
+    {
+        string logfilename = filename + "." + pid + ".externalcalltrace.cdf";
+        ExternalCallTraceOutFile.open(logfilename.c_str(), std::ios::binary);
     }
 
     PIN_InitSymbols();
@@ -129,19 +176,20 @@ int main(int argc, char* argv[]) {
 
     IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
-    InitInstrunctionsInstrumentation();
+    InitInstrumentation();
 
     //InitTrace(TraceOutFile, pid);
 
     PIN_AddFiniFunction(Fini, 0);
 
+    if (KnobAllowAttachDebugger)
+    {
+        IMG_AddInstrumentFunction(ImageLoad, nullptr);
+    }
+    
+
+    
     PIN_StartProgram();
-
-    // string s = StringFromAddrint(address);
-    // Addrint2VoidStar
-    // AddrintFromString
-    // VoidStar2Addrint
-
 
     return 0;
 }

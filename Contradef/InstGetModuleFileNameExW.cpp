@@ -77,18 +77,18 @@ VOID InstGetModuleFileNameExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
 
 VOID InstGetModuleFileNameExW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
 
-    SEC sec = RTN_Sec(rtn);
-    IMG img = SEC_Img(sec);
-    if (IMG_Valid(img)) {
-        std::string imageName = IMG_Name(img);
-        std::string moduleName = ExtractModuleName(IMG_Name(img));
-        if (toUpperCase(moduleName) != "KERNELBASE.DLL") {
-            return;
-        }
-    }
-    else {
-        return;
-    }
+    //SEC sec = RTN_Sec(rtn);
+    //IMG img = SEC_Img(sec);
+    //if (IMG_Valid(img)) {
+    //    std::string imageName = IMG_Name(img);
+    //    std::string moduleName = ExtractModuleName(IMG_Name(img));
+    //    if (toUpperCase(moduleName) != "KERNELBASE.DLL") {
+    //        return;
+    //    }
+    //}
+    //else {
+    //    return;
+    //}
 
    std::string rtnName = RTN_Name(rtn);
     if (rtnName == "GetModuleFileNameExW") {
