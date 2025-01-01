@@ -35,7 +35,7 @@ VOID InstGetEnvironmentVariableA::CallbackBefore(THREADID tid, UINT32 callId, AD
     // Recuperar o nome da variável de ambiente
     std::string envVarName;
     if (lpName != 0) {
-        CHAR buffer[256] = { 0 };
+        CHAR buffer[4096] = { 0 };
         PIN_SafeCopy(buffer, reinterpret_cast<CHAR*>(lpName), sizeof(buffer) - 1);
         envVarName = buffer;
     }

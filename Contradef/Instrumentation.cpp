@@ -28,47 +28,49 @@ ADDRINT GetRtnAddr(ADDRINT instAddress) {
     return rtnAddress;
 }
 
-std::string getFileName(const std::string& filePath) {
-    // Encontra a última ocorrência de '\' ou '/'
-    size_t pos = filePath.find_last_of("\\/");
-
-    if (pos != std::string::npos) {
-        return filePath.substr(pos + 1);
-    }
-
-    return filePath;
-}
-
-
-
 bool IsValidWideString(const std::wstring& str) {
-    for (wchar_t ch : str) {
-        // Verifica se o caractere é alfanumérico ou pertence ao conjunto permitido
-        if (!std::iswalnum(ch) && ch != L'.' && ch != L'-' && ch != L'_' && ch != L':' && ch != L'\\' && ch != L'/') {
-            return false; // Se um caractere inválido for encontrado, retorna false
-        }
-    }
+    // Verifique primeiro o tamanho mínimo
     if (str.size() < 3) {
         return false;
     }
+
+    for (wchar_t ch : str) {
+        // Permitir apenas caracteres ASCII alfanuméricos e os permitidos extras
+        if (!((ch >= L'0' && ch <= L'9') || // Números
+            (ch >= L'A' && ch <= L'Z') || // Letras maiúsculas
+            (ch >= L'a' && ch <= L'z') || // Letras minúsculas
+            ch == L'.' || ch == L'-' || ch == L'_' ||
+            ch == L':' || ch == L'\\' || ch == L'/')) {
+            return false; // Caractere inválido encontrado
+        }
+    }
+
     return true; // Todos os caracteres são válidos
 }
 
+
 bool IsValidString(const std::string& str) {
-    for (char ch : str) {
-        // Verifica se o caractere é alfanumérico ou pertence ao conjunto permitido
-        if (!std::isalnum(ch) && ch != '.' && ch != '-' && ch != '_' && ch != ':' && ch != '\\' && ch != '/') {
-            return false; // Se um caractere inválido for encontrado, retorna false
-        }
-    }
+    // Verifique primeiro o tamanho mínimo
     if (str.size() < 3) {
         return false;
     }
+
+    for (char ch : str) {
+        // Permitir apenas caracteres ASCII alfanuméricos e os extras permitidos
+        if (!((ch >= '0' && ch <= '9') || // Números
+            (ch >= 'A' && ch <= 'Z') || // Letras maiúsculas
+            (ch >= 'a' && ch <= 'z') || // Letras minúsculas
+            ch == '.' || ch == '-' || ch == '_' ||
+            ch == ':' || ch == '\\' || ch == '/')) {
+            return false; // Caractere inválido encontrado
+        }
+    }
+
     return true; // Todos os caracteres são válidos
 }
 
 std::wstring aCopyLPCWSTR(ADDRINT addr) {
-    const size_t MAX_STRING_LENGTH = 20; // Defina o tamanho máximo da string
+    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
     wchar_t buffer[MAX_STRING_LENGTH];    // Buffer para armazenar a string copiada
     memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
 
@@ -95,7 +97,7 @@ std::wstring aCopyLPCWSTR(ADDRINT addr) {
 }
 
 std::string aCopyLPCSTR(ADDRINT addr) {
-    const size_t MAX_STRING_LENGTH = 20; // Defina o tamanho máximo da string
+    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
     char buffer[MAX_STRING_LENGTH];       // Buffer para armazenar a string copiada
     memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
 
@@ -240,8 +242,7 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr,
             if (RTN_Valid(rtnt)) {
                 retRtnName = RTN_Name(rtnt);
             }
-            std::cout << std::hex << RTN_Address(tgtRtn) << " - " << imgName << ":" << tgtRtnName << " T[" << threadid << "] - Return to: " << retRtnName << " (" << returnAddress << ")" << std::dec << std::endl;
-            PIN_UnlockClient();
+            //std::cout << std::hex << RTN_Address(tgtRtn) << " - " << imgName << ":" << tgtRtnName << " T[" << threadid << "] - Return to: " << retRtnName << " (" << returnAddress << ")" << std::dec << std::endl;
         }
     }
     PIN_UnlockClient();
@@ -404,8 +405,11 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
     else if (INS_IsDirectControlFlow(ins))
     {
         // Is this a tail call?
+        PIN_LockClient();
         RTN sourceRtn = TRACE_Rtn(trace);
         RTN destRtn = RTN_FindByAddress(INS_DirectControlFlowTargetAddress(ins));
+        PIN_UnlockClient();
+
         //std::cout << INS_Disassemble(ins) << std::endl;
 
         if (INS_IsCall(ins)         // conventional call
@@ -1146,24 +1150,191 @@ VOID SequenceMatchReadStringForCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt,
 }
 
 
+VOID SequenceMatchReadStringCmpCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter o valor completo de RSI
+    ADDRINT rsi_value = PIN_GetContextReg(ctxt, REG_RSI);
+
+    // Extrair os 16 bits menos significativos (SI)
+    UINT16 six_value = static_cast<UINT16>(rsi_value);
+
+    // Imprimir o valor do registrador SI
+    std::cout << "Valor de SI: 0x" << std::hex << six_value << std::endl;
+    std::cout << "Valor de RSI: 0x" << std::hex << rsi_value << std::endl;
+
+    //ADDRINT six_value = PIN_GetContextReg(ctxt, REG_SI);
+    //ADDRINT rbp_value = PIN_GetContextReg(ctxt, REG_RBP);
+    //ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RAX);
+
+    //for (size_t i = 0; i < 15; i++)
+    //{
+    //    ADDRINT result = rbp_value + rax_value * 2;
+
+    //    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
+    //    {
+    //        wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
+    //        std::wstring wstr(CharStr);
+    //        wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+
+    //    }
+    //    result = result + 0x1;
+    //}
+
+
+}
+
+
+
+VOID SequenceMatchReadStringCmp2Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    ADDRINT rbp_value = PIN_GetContextReg(ctxt, REG_RBP);
+    wchar_t* CharStr = reinterpret_cast<wchar_t*>(rbp_value);
+    std::wstring wstr(CharStr);
+    wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+}
+
+VOID SequenceMatchReadStringCmp3Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    ADDRINT rdi_value = PIN_GetContextReg(ctxt, REG_RCX);
+    wchar_t* CharStr = reinterpret_cast<wchar_t*>(rdi_value);
+    std::wstring wstr(CharStr);
+    wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+
+    char* CharStr2 = reinterpret_cast<char*>(rdi_value);
+    std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
+}
+
+
+// Leitura de depuradores
+VOID SequenceMatchReadStringCmp40Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    ADDRINT r_value = PIN_GetContextReg(ctxt, REG_R10) + PIN_GetContextReg(ctxt, REG_RCX) * 1 + 0x1;
+
+    for (size_t i = 0; i < 1; i++)
+    {
+        std::cout << "ADDR: " << std::hex << r_value << std::dec << std::endl;
+
+        if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(r_value))) {
+            wchar_t* CharStr = reinterpret_cast<wchar_t*>(r_value);
+            std::wstring wstr(CharStr);
+            wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+
+            char* CharStr2 = reinterpret_cast<char*>(r_value);
+            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
+            r_value = r_value + 0x1;
+        }
+
+    }
+
+
+}
+
+
+VOID SequenceMatchReadStringCmp41Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RBP) + PIN_GetContextReg(ctxt, REG_RCX) * 2 + 0x0;
+
+    for (size_t i = 0; i < 1; i++)
+    {
+        std::cout << "ADDR: " << std::hex << r_value << std::dec << " T[" << tid << "]" << std::endl;
+        std::cout << "TXT: " << r_value << std::endl;
+
+        if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(r_value))) {
+            wchar_t* CharStr = reinterpret_cast<wchar_t*>(r_value);
+            std::wstring wstr(CharStr);
+            wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+
+            char* CharStr2 = reinterpret_cast<char*>(r_value);
+            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
+            r_value = r_value + 0x1;
+        }
+       
+    }
+
+
+}
+
+
+
+VOID SequenceMatchReadStringCmp4Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    //ADDRINT rip_value = PIN_GetContextReg(ctxt, REG_RIP);
+    //PIN_LockClient();
+    //IMG tgtImg = IMG_FindByAddress(rip_value);
+    //RTN tgtRtn = RTN_FindByAddress(rip_value);
+    //string rtnN = RTN_FindNameByAddress(rip_value);
+
+    //string imgN = "";
+    //if (IMG_Valid(tgtImg)) {
+    //    imgN = IMG_Name(tgtImg);
+    //}
+    //std::cout << "=== " << IsMainExecutable(ip) << " - " << imgN << " - " << rtnN << std::endl;
+    //PIN_UnlockClient();
+
+
+
+
+    //UINT64 rbxValue = PIN_GetContextReg(ctxt, REG_RBX);
+    //UINT16 bxValue = static_cast<UINT16>(rbxValue & 0xFFFF);
+    //std::cout << "Valor de BX: 0x" << std::hex << bxValue << std::endl;
+
+    OS_PROCESS_ID pid = PIN_GetPid();
+    std::cout << "Sequencia de instrucoes identificada, endereco de instrucao " << std::hex << ip << std::dec << ", corresponde a funcao: " << GetFunctionFromAddress(ip, pid) << std::endl;
+    return;
+   
+    // ADDRINT r_value = PIN_GetContextReg(ctxt, REG_R10) + PIN_GetContextReg(ctxt, REG_RCX) * 1 + 0x1;
+    //ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RBP) + 0x158;
+    ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RCX) ;
+
+    for (size_t i = 0; i < 1; i++)
+    {
+        //std::cout << "ADDR1: " << std::hex << *(reinterpret_cast<ADDRINT*>(r_value)) << std::dec << " T[" << tid << "]" << std::endl;
+        std::cout << "ADDR: " << std::hex << r_value << std::dec << " T[" << tid << "]" << std::endl;
+
+
+        if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(r_value))) {
+            wchar_t* CharStr = reinterpret_cast<wchar_t*>(r_value);
+            std::wstring wstr(CharStr);
+            wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
+
+            char* CharStr2 = reinterpret_cast<char*>(r_value);
+            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
+            r_value = r_value + 0x1;
+        }
+
+    }
+
+
+}
+
 
 VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID* ea, UINT32 size)
 {
     ADDRINT address = reinterpret_cast<ADDRINT>(ea);
-
+    return;
 
     if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(ea)))
     {
         std::wstring wstr = aCopyLPCWSTR(address);
+        //if (wstr.find(L"Fracture") != std::wstring::npos) {
+        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
+        //    std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
+        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
+        //}
         if (IsValidWideString(wstr)) {
             std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-            wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
+            wprintf(L" ** Read WString --> %ls <-\n", wstr);
         }
         
         std::string str = aCopyLPCSTR(address);
-        if (IsValidString(str)) {
+        //if (str.find("Fracture") != std::string::npos) {
+        //    std::cout << "Str achado:  " << instAddress << std::endl;
+        //    std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
+        //    std::cout << " ** RETURN String --> " << str << std::endl;
+        //}
+         if (IsValidString(str)) {
             std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-            std::cout << " ** RETURN String --> " << str << std::endl;
+            std::cout << " ** Read String --> " << str << std::endl;
         }
                 
     }
@@ -1219,25 +1390,56 @@ VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID
 
 }
 
+VOID CaptureWriteEa(THREADID threadid, ADDRINT instAddress, VOID* addr) {
+    ADDRINT address = reinterpret_cast<ADDRINT>(addr) - 0x0;
+    return;
+
+    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
+    {
+        std::wstring wstr = aCopyLPCWSTR(address);
+        //if (true) { // (wstr.find(L"Fracture") != std::wstring::npos) {
+        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
+        //    std::cout << "Read from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
+        //}
+        if (IsValidWideString(wstr)) {
+            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << std::endl;
+            wprintf(L" ** Write WString --> %ls <-\n", wstr);
+        }
+
+        std::string str = aCopyLPCSTR(address);
+        //if (true) { //(str.find("Fracture") != std::string::npos) {
+        //    std::cout << "Str achado:  " << instAddress << std::endl;
+        //    std::cout << "Read from address: " << std::hex << address  << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+        //    std::cout << " ** RETURN String --> " << str << std::endl;
+        //}
+         if (IsValidString(str)) {
+            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+            std::cout << " ** Write String --> " << str << std::endl;
+        }
+
+    }
+}
+
 
 
 VOID aMemoryTrace(INS ins)
 {
 
-    //if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
-    //{
-    //    INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_MEMORYWRITE_EA, IARG_END);
+    if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
+    {
+        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_INST_PTR, IARG_MEMORYWRITE_EA, IARG_END);
 
-    //    if (INS_IsValidForIpointAfter(ins))
-    //    {
-    //        INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
-    //    }
-    //    if (INS_IsValidForIpointTakenBranch(ins))
-    //    {
-    //        INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
-    //            IARG_END);
-    //    }
-    //}
+       /* if (INS_IsValidForIpointAfter(ins))
+        {
+            INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
+        }
+        if (INS_IsValidForIpointTakenBranch(ins))
+        {
+            INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
+                IARG_END);
+        }*/
+    }
     string memString = INS_Disassemble(ins);
     if (INS_HasMemoryRead2(ins) && INS_IsStandardMemop(ins))
     {
@@ -1260,7 +1462,7 @@ VOID TraceFunc(TRACE trace, VOID* v)
         {
             InstrumentFuncCall(trace, ins);
 
-            //aMemoryTrace(ins);
+            aMemoryTrace(ins);
         }
     }
 }
@@ -1439,9 +1641,9 @@ int InitInstrumentation()
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 23, 23);
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 32, 32);
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 23, 23);
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 32, 32);
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
 
@@ -1568,20 +1770,98 @@ int InitInstrumentation()
 
 
 
-    ////Desconsiderar
-    //std::vector<std::vector<std::string>> sequence_read_string_fcn;
-    //sequence_read_string_fcn.push_back(CreateInstVector("xor r11d, r11d"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov r10, rdx"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov r8, rcx"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmp word ptr [rdx], r11w"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("jnz 0x7ffdf81032b3"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmp word ptr [rcx], r11w"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("jz 0x7ffdf81032f3"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov r9, rcx"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("sub r9, r10"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov rdx, r10"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmp word ptr [rdx], r11w"));
-    //seq_detector.AddInstructionSequence(sequence_read_string_fcn, SequenceMatchReadStringCallback);
+
+    std::vector<std::vector<std::string>> read_string_cmp;
+    read_string_cmp.push_back(CreateInstVector("or rax, 0xffffffffffffffff"));
+    read_string_cmp.push_back(CreateInstVector("inc rax"));
+    read_string_cmp.push_back(CreateInstVector("cmp word ptr [rbp+rax*2], si"));
+    read_string_cmp.push_back(CreateInstVector("jnz 0x7ff7e1c5bc9c"));
+    read_string_cmp.push_back(CreateInstVector("inc rax"));
+    read_string_cmp.push_back(CreateInstVector("cmp word ptr [rbp+rax*2], si"));
+    //seq_detector.AddInstructionSequence(read_string_cmp, SequenceMatchReadStringCmpCallback);
+
+
+
+    std::vector<std::vector<std::string>> read_string_cmp2;
+    read_string_cmp2.push_back(CreateInstVector("jnz 0x7ff7e1c5bc9c"));
+    read_string_cmp2.push_back(CreateInstVector("lea rbp, ptr [rbp+rax*2]"));
+    read_string_cmp2.push_back(CreateInstVector("add rbp, 0x2"));
+    read_string_cmp2.push_back(CreateInstVector("cmp word ptr [rbp], si"));
+    //seq_detector.AddInstructionSequence(read_string_cmp2, SequenceMatchReadStringCmp2Callback);
+
+
+    std::vector<std::vector<std::string>> read_string_cmp3;
+    read_string_cmp3.push_back(CreateInstVector("mov rdi, rax"));
+    read_string_cmp3.push_back(CreateInstVector("test rax, rax"));
+    read_string_cmp3.push_back(CreateInstVector("jnz 0x7ff7e1c5bd0c"));
+    read_string_cmp3.push_back(CreateInstVector("mov qword ptr [rsp+0x38], rsi"));
+    read_string_cmp3.push_back(CreateInstVector("mov r9d, ebp"));
+    read_string_cmp3.push_back(CreateInstVector("mov qword ptr [rsp+0x30], rsi"));
+    read_string_cmp3.push_back(CreateInstVector("mov r8, rbx"));
+    read_string_cmp3.push_back(CreateInstVector("mov dword ptr [rsp+0x28], r14d"));
+    read_string_cmp3.push_back(CreateInstVector("xor edx, edx"));
+    read_string_cmp3.push_back(CreateInstVector("xor ecx, ecx"));
+    read_string_cmp3.push_back(CreateInstVector("mov qword ptr [rsp+0x20], rdi"));
+    //seq_detector.AddInstructionSequence(read_string_cmp3, SequenceMatchReadStringCmp3Callback);
+
+    // Verificar Com R12 e R13 
+    //std::vector<std::vector<std::string>> read_string_cmp4;
+    //read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x20"));
+    //read_string_cmp4.push_back(CreateInstVector("mov r15d, ecx"));
+    //read_string_cmp4.push_back(CreateInstVector("lea r14, ptr [rip-0x14c32]"));
+    //read_string_cmp4.push_back(CreateInstVector("or rdi, 0xffffffffffffffff"));
+    //read_string_cmp4.push_back(CreateInstVector("mov r12, r9"));
+    //read_string_cmp4.push_back(CreateInstVector("mov rbp, r8"));
+    //read_string_cmp4.push_back(CreateInstVector("mov r13, rdx"));
+    //read_string_cmp4.push_back(CreateInstVector("mov r10, qword ptr [r14+r15*8+0x372c0]"));
+    //seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmp4Callback);
+
+
+
+    // IMPORTANTE - Contem o nome de alguns depuradores
+    std::vector<std::vector<std::string>> read_string_cmp40;
+    read_string_cmp40.push_back(CreateInstVector("jmp 0x7ff625001cd1"));
+    read_string_cmp40.push_back(CreateInstVector("jmp 0x7ff625001cd6"));
+    read_string_cmp40.push_back(CreateInstVector("mov al, byte ptr [r10+rcx*1+0x1]"));
+    read_string_cmp40.push_back(CreateInstVector("jmp 0x7ff625001cde"));
+    //seq_detector.AddInstructionSequence(read_string_cmp40, SequenceMatchReadStringCmp40Callback);
+
+
+    // IMPORTANTE - Contem os valores a serem comparados com os nomes de alguns depuradores
+    std::vector<std::vector<std::string>> read_string_cmp41;
+    read_string_cmp41.push_back(CreateInstVector("mov al, byte ptr [r10+rcx*1+0x1]"));
+    read_string_cmp41.push_back(CreateInstVector("jmp 0x7ff625001cde"));
+    read_string_cmp41.push_back(CreateInstVector("test al, al"));
+    read_string_cmp41.push_back(CreateInstVector("jno 0x7ff625001ce4"));
+    read_string_cmp41.push_back(CreateInstVector("jz 0x7ff625001d46"));
+    read_string_cmp41.push_back(CreateInstVector("jmp 0x7ff625001ced"));
+    read_string_cmp41.push_back(CreateInstVector("cmp ax, word ptr [rbp+rcx*2]"));
+    //seq_detector.AddInstructionSequence(read_string_cmp41, SequenceMatchReadStringCmp41Callback);
+
+
+    std::vector<std::vector<std::string>> read_string_cmp4;
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rsi], 0x56"));
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbp], 0x43"));
+    //read_string_cmp4.push_back(CreateInstVector("cmp qword ptr [rdx-0x10], 0x48")); pesquisar mais
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdx], 0x6c")); pesquisar mais
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rsi], 0x6c")); pesquisar mais
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdx], 0x32")); pesquisar mais
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbx], 0x23")); pesquisar mais
+    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdi], 0x22")); // procura aspas
+
+    read_string_cmp4.push_back(CreateInstVector("push rbx"));
+    read_string_cmp4.push_back(CreateInstVector("push rsi"));
+    read_string_cmp4.push_back(CreateInstVector("push r12"));
+    read_string_cmp4.push_back(CreateInstVector("push r13"));
+    read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x58"));
+    read_string_cmp4.push_back(CreateInstVector("mov ebx, dword ptr [rsp+0xa0]"));
+    read_string_cmp4.push_back(CreateInstVector("lea rax, ptr [rsp+0x30]"));
+    read_string_cmp4.push_back(CreateInstVector("mov r8d, dword ptr [rsp+0xa8]"));
+    read_string_cmp4.push_back(CreateInstVector("mov rsi, r9"));
+    read_string_cmp4.push_back(CreateInstVector("mov r9d, dword ptr [rsp+0xb0]"));
+    read_string_cmp4.push_back(CreateInstVector("mov r13d, 0x1"));
+    read_string_cmp4.push_back(CreateInstVector("mov qword ptr [rsp+0x28], rax"));
+    seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmp4Callback);
 
     seq_detector.Initialize();
 

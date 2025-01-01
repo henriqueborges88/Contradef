@@ -456,6 +456,18 @@
     <ClCompile Include="InstLCMapStringEx.cpp">
       <Filter>Arquivos de Origem\Strategies</Filter>
     </ClCompile>
+    <ClCompile Include="InstWriteFile.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstCompareStringEx.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="DllFunctionMapper.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClCompile>
+    <ClCompile Include="DllFunctionMapper.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InstrumentationStrategy.h">
@@ -903,6 +915,12 @@
       <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
     <ClInclude Include="InstLCMapStringEx.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstWriteFile.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstCompareStringEx.h">
       <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
   </ItemGroup>

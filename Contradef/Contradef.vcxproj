@@ -181,6 +181,8 @@
   <ItemGroup>
     <ClCompile Include="CallStackManager.cpp" />
     <ClCompile Include="Contradef.cpp" />
+    <ClCompile Include="DllFunctionMapper.cpp" />
+    <ClCompile Include="DllFunctionMapper.h" />
     <ClCompile Include="DllFunctionTracker.cpp" />
     <ClCompile Include="InstBasepConstructSxsCreateProcessMessage.cpp" />
     <ClCompile Include="InstBaseRegEnumKey.cpp" />
@@ -188,6 +190,7 @@
     <ClCompile Include="InstBlockInput.cpp" />
     <ClCompile Include="InstCheckRemoteDebuggerPresent.cpp" />
     <ClCompile Include="InstCoCreateInstance.cpp" />
+    <ClCompile Include="InstCompareStringEx.cpp" />
     <ClCompile Include="InstCreateEventW.cpp" />
     <ClCompile Include="InstCreateFileW.cpp" />
     <ClCompile Include="InstCreateProcess.cpp" />
@@ -318,6 +321,7 @@
     <ClCompile Include="InstWmi.cpp" />
     <ClCompile Include="InstWmiEx.cpp" />
     <ClCompile Include="InstWriteConsoleW.cpp" />
+    <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
     <ClCompile Include="Params.cpp" />
     <ClCompile Include="PinDebugTrace.cpp" />
@@ -336,6 +340,7 @@
     <ClInclude Include="InstBlockInput.h" />
     <ClInclude Include="InstCheckRemoteDebuggerPresent.h" />
     <ClInclude Include="InstCoCreateInstance.h" />
+    <ClInclude Include="InstCompareStringEx.h" />
     <ClInclude Include="InstCreateEventW.h" />
     <ClInclude Include="InstCreateFileW.h" />
     <ClInclude Include="InstCreateProcess.h" />
@@ -464,6 +469,7 @@
     <ClInclude Include="InstWmi.h" />
     <ClInclude Include="InstWmiEx.h" />
     <ClInclude Include="InstWriteConsoleW.h" />
+    <ClInclude Include="InstWriteFile.h" />
     <ClInclude Include="ModulesDetection.h" />
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />

@@ -7,26 +7,23 @@
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <deque>
-#include <queue>
 #include "utils.h"
 #include "CallContext.h"
 #include "Notifier.h"
 #include "Observer.h"
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
-#include "RegistryKeys.h"
-#include "RegistryErrors.h"
 
-struct InstRegEnumKeyExWArgs {
-    ADDRINT hKey;
-    ADDRINT dwIndex;
-    ADDRINT lpName;
-    ADDRINT lpcName;
-    ADDRINT lpReserved;
-    ADDRINT lpClass;
-    ADDRINT lpcClass;
-    ADDRINT lpftLastWriteTime;
+// Estrutura para armazenar os argumentos da função RegEnumKeyExW
+struct RegEnumKeyExWArgs {
+    ADDRINT hKey;               // HKEY
+    ADDRINT dwIndex;            // DWORD
+    ADDRINT lpName;             // LPWSTR
+    ADDRINT lpcchName;          // LPDWORD
+    ADDRINT lpReserved;         // LPDWORD (deve ser NULL)
+    ADDRINT lpClass;            // LPWSTR
+    ADDRINT lpcchClass;         // LPDWORD
+    ADDRINT lpftLastWriteTime;  // PFILETIME
 };
 
 class InstRegEnumKeyExW : public InstrumentationStrategy {
@@ -40,9 +37,13 @@ private:
     static UINT32 imgCallId;
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
-    static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpReserved, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT* retValAddr, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpReserved, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime);
+
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
+        ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcchName, ADDRINT lpReserved,
+        ADDRINT lpClass, ADDRINT lpcchClass, ADDRINT lpftLastWriteTime);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
+        ADDRINT retValAddr, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcchName,
+        ADDRINT lpReserved, ADDRINT lpClass, ADDRINT lpcchClass, ADDRINT lpftLastWriteTime);
 };
 
 #endif // INST_REG_ENUM_KEY_EX_W_H

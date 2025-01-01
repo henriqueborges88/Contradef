@@ -290,3 +290,14 @@ DWORD GetProcessIdByName(std::string processName) {
     CloseHandle(hSnapshot);
     return processId;
 }
+
+std::string getFileName(const std::string& filePath) {
+    // Encontra a última ocorrência de '\' ou '/'
+    size_t pos = filePath.find_last_of("\\/");
+
+    if (pos != std::string::npos) {
+        return filePath.substr(pos + 1);
+    }
+
+    return filePath;
+}

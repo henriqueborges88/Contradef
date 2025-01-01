@@ -15,7 +15,7 @@ KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread",
 KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
 KNOB< BOOL > KnobFullImgName(KNOB_MODE_WRITEONCE, "pintool", "full_img_name", "0", "Include full image name");
-KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "0", "Include line number information");
+KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "1", "Include line number information");
 KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
 KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
@@ -409,7 +409,7 @@ VOID CallTrace(TRACE trace, INS ins)
     if (INS_IsCall(ins) && !INS_IsDirectControlFlow(ins))
     {
         // Indirect call
-        string s = "Call " + FormatAddress(INS_Address(ins), TRACE_Rtn(trace));
+        string s = "Call " + FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
         s += " -> ";
 
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitIndirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s),
@@ -417,9 +417,11 @@ VOID CallTrace(TRACE trace, INS ins)
     }
     else if (INS_IsDirectControlFlow(ins))
     {
+        PIN_LockClient();
         // Is this a tail call?
         RTN sourceRtn = TRACE_Rtn(trace);
         RTN destRtn = RTN_FindByAddress(INS_DirectControlFlowTargetAddress(ins));
+        PIN_UnlockClient();
 
         if (INS_IsCall(ins)         // conventional call
             || sourceRtn != destRtn // tail call
@@ -445,12 +447,14 @@ VOID CallTrace(TRACE trace, INS ins)
 
             //s += INS_Mnemonic(ins) + " ";
 
-            s += FormatAddress(INS_Address(ins), TRACE_Rtn(trace));
+            s += FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
             s += " -> ";
 
             ADDRINT target = INS_DirectControlFlowTargetAddress(ins);
 
+            PIN_LockClient();
             s += FormatAddress(target, RTN_FindByAddress(target));
+            PIN_UnlockClient();
 
             INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitDirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s), IARG_BOOL,
                 tailcall, IARG_FUNCARG_CALLSITE_VALUE, 0, IARG_FUNCARG_CALLSITE_VALUE, 1, IARG_FUNCARG_CALLSITE_VALUE, 2, IARG_FUNCARG_CALLSITE_VALUE, 3, IARG_FUNCARG_CALLSITE_VALUE, 4, IARG_FUNCARG_CALLSITE_VALUE, 5, IARG_FUNCARG_CALLSITE_VALUE, 6, IARG_END);
@@ -479,7 +483,7 @@ VOID InstructionTrace(TRACE trace, INS ins)
 
     // Format the string at instrumentation time
     string traceString = "";
-    string astring = FormatAddress(INS_Address(ins), TRACE_Rtn(trace));
+    string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
     for (INT32 length = astring.length(); length < 30; length++)
     {
         traceString += " ";

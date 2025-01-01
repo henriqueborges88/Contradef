@@ -56,7 +56,7 @@ VOID InstNtQuerySystemInformation::CallbackAfter(THREADID tid, UINT32 callId, AD
         stringStream << "    Id de chamada: " << fcnCallId << std::endl;
         stringStream << "    Endereço da rotina: " << std::hex << callContext->rtnAddress << std::dec << std::endl;
         stringStream << "    Parâmetros: " << std::endl;
-        stringStream << "        SystemInformationClass: " << args->SystemInformationClass << std::endl;
+        stringStream << "        SystemInformationClass: " << args->SystemInformationClass << std::endl; // -> SystemKernelDebuggerInformation do SYSTEM_INFORMATION_CLASS em NtStructures
         stringStream << "        SystemInformation: " << args->SystemInformation << std::endl;
         stringStream << "        SystemInformationLength: " << args->SystemInformationLength << std::endl;
         stringStream << "        ReturnLength: " << args->ReturnLength << std::endl;

@@ -16,6 +16,7 @@
 #include "InstructionSequenceDetector.h"
 #include "CallStackManager.h"
 #include "DllFunctionTracker.h"
+#include "DllFunctionMapper.h"
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h
 

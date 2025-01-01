@@ -25,6 +25,7 @@ VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     // Registrando os parâmetros de GetModuleFileNameW e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
+   
     stringStream << std::endl << "[+] GetModuleFileNameW..." << std::endl;
     stringStream << "    Thread: " << tid << std::endl;
     stringStream << "    Id de chamada: " << fcnCallId << std::endl;

@@ -7,9 +7,8 @@ Notifier* InstGetProcAddress::globalNotifierPtr;
 
 VOID InstGetProcAddress::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
     ADDRINT hModule, ADDRINT lpProcName) {
-
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
-        return;
+        //return;
     }
 
     GetProcAddressArgs args;
@@ -49,7 +48,7 @@ VOID InstGetProcAddress::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
     ADDRINT retValAddr, ADDRINT hModule, ADDRINT lpProcName) {
 
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
-        return;
+        //return;
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;

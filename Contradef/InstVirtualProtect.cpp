@@ -60,19 +60,19 @@ VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
         PIN_SafeCopy(&oldProtect, reinterpret_cast<DWORD*>(args->lpflOldProtect), sizeof(DWORD));
 
         ///// TESTE
-        DWORD* oProtect = reinterpret_cast<DWORD*>(args->lpflOldProtect);
-        if (args->dwSize == 137472) {
-            *oProtect = 0x02;
-        }
-        else if (args->dwSize == 71574) {
-            *oProtect = 0x02;
-        }
-        else if (args->dwSize == 10568) {
-            *oProtect = 0x04;
-        }
-        else if (args->dwSize == 348) {
-            *oProtect = 0x02;
-        }
+        //DWORD* oProtect = reinterpret_cast<DWORD*>(args->lpflOldProtect);
+        //if (args->dwSize == 137472) {
+        //    *oProtect = 0x02;
+        //}
+        //else if (args->dwSize == 71574) {
+        //    *oProtect = 0x02;
+        //}
+        //else if (args->dwSize == 10568) {
+        //    *oProtect = 0x04;
+        //}
+        //else if (args->dwSize == 348) {
+        //    *oProtect = 0x02;
+        //}
         /////
 
         stringStream << "    Valor de retorno: " << returnAddress << std::endl;

@@ -39,4 +39,5 @@ std::string ConvertWStringToUTF8(const std::wstring& wstr);
 std::string WideStringToStringFromPointer(ADDRINT addr);
 void GetParentProcessName();
 DWORD GetProcessIdByName(std::string processName);
+std::string getFileName(const std::string& filePath);
 #endif // UTILS_H

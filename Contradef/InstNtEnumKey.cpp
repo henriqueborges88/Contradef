@@ -7,7 +7,6 @@ Notifier* InstNtEnumKey::globalNotifierPtr;
 
 
 VOID InstNtEnumKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hKey, ADDRINT dwIndex, ADDRINT lpName, ADDRINT lpcName, ADDRINT lpClass, ADDRINT lpcClass, ADDRINT lpftLastWriteTime) {
-    std::cout << "EnumKey Invocado" << std::endl;
     if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
         return;
     }

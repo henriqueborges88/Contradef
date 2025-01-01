@@ -115,6 +115,7 @@ VOID ImageLoad(IMG img, VOID* v) {
         std::cout << "[CONTRADEF] Executavel principal carregado: " << IMG_Name(img) << std::endl;
         //std::cout << "[CONTRADEF] Localizando Entry Point: " << std::hex << entryPoint << std::endl;
 
+        PIN_LockClient();
         // Insere o callback para pausar no entry point
         RTN entryRtn = RTN_FindByAddress(entryPoint);
         if (RTN_Valid(entryRtn)) {
@@ -127,6 +128,8 @@ VOID ImageLoad(IMG img, VOID* v) {
         else {
             std::cerr << "Falha ao localizar rotina no Entry Point." << std::endl;
         }
+        PIN_UnlockClient();
+
     }
 }
 

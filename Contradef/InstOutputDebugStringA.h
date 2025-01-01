@@ -7,8 +7,6 @@
 #include <fstream>
 #include <sstream>
 #include <map>
-#include <deque>
-#include <queue>
 #include "utils.h"
 #include "CallContext.h"
 #include "Notifier.h"
@@ -16,8 +14,9 @@
 #include "Instrumentation.h"
 #include "InstrumentationStrategy.h"
 
-struct InstOutputDebugStringAArgs {
-    ADDRINT lpOutputString;
+// A função OutputDebugStringA possui apenas um argumento: LPCSTR lpOutputString
+struct OutputDebugStringAArgs {
+    ADDRINT lpOutputString; // LPCSTR
 };
 
 class InstOutputDebugStringA : public InstrumentationStrategy {
@@ -31,11 +30,9 @@ private:
     static UINT32 imgCallId;
     static UINT32 fcnCallId;
     static Notifier* globalNotifierPtr;
-    static VOID CheckPrintConditions(CallContext* callContext);
-    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
-        ADDRINT lpOutputString);
-    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
-        ADDRINT lpOutputString);
+
+    static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpOutputString);
+    static VOID CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpOutputString);
 };
 
 #endif // INST_OUTPUT_DEBUG_STRING_A_H

@@ -140,6 +140,8 @@
 #include "InstGetCommandLineW.h"
 #include "InstGetComputerNameA.h"
 #include "InstLCMapStringEx.h"
+#include "InstWriteFile.h"
+#include "InstCompareStringEx.h"
 
 
 

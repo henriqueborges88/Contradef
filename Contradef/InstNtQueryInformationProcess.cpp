@@ -302,6 +302,7 @@ VOID InstNtQueryInformationProcess::ReadMemoryValue(THREADID tid, CallContext* c
             std::string moduleName = ExtractModuleName(IMG_Name(img));
             if (toUpperCase(moduleName) == "NTDLL.DLL") {
                 // Se a leitura ocorre em ntdll.dll desconsidera. Alguns protetores podem carregar fun��es em modulos diferentes ao principal, se for o caso, desativar o return
+                PIN_UnlockClient();
                 return;
             }
         }
