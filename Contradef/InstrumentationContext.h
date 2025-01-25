@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "InstrumentationStrategy.h"
+#include "Instrumentation.h"
 #include <map>
 #include <string>
 #include <functional>

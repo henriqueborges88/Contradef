@@ -120,13 +120,389 @@ VOID AddXMMEmit(INS ins, IPOINT point, REG xmm_dst) {
     INS_InsertCall(ins, point, AFUNPTR(EmitXMM), IARG_THREAD_ID, IARG_UINT32, xmm_dst - REG_XMM0, IARG_REG_CONST_REFERENCE, xmm_dst, IARG_END);
 }
 
+////
+bool IsPointer(ADDRINT value) {
+    // Verifica se o valor é um ponteiro acessível
+    return PIN_CheckReadAccess(reinterpret_cast<void*>(value));
+}
+
+
+std::string GetNumericValue(ADDRINT ea, UINT32 size) {
+    if (size == 0) {
+        return "0"; // Retorna "0" para tamanho inválido
+    }
+
+    std::stringstream ss;
+
+    switch (size) {
+    case 1:
+    {
+        UINT8 value = static_cast<UINT8>(ea);
+        ss << std::dec << static_cast<unsigned int>(value);
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 value = static_cast<UINT16>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 value = static_cast<UINT32>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 value = static_cast<UINT64>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    default:
+        // Trata outros casos como um ponteiro de 64 bits
+        ss << std::dec << static_cast<UINT64>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+std::string GetNumericHexValue(ADDRINT ea, UINT32 size) {
+    if (size == 0) {
+        return "0"; // Retorna "0" para tamanho inválido
+    }
+
+    std::stringstream ss;
+    ss << "0x"; // Prefixo hexadecimal para maior clareza
+
+    switch (size) {
+    case 1:
+    {
+        UINT8 value = static_cast<UINT8>(ea);
+        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(value);
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 value = static_cast<UINT16>(ea);
+        ss << std::setfill('0') << std::setw(4) << std::hex << value;
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 value = static_cast<UINT32>(ea);
+        ss << std::setfill('0') << std::setw(8) << std::hex << value;
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 value = static_cast<UINT64>(ea);
+        ss << std::setfill('0') << std::setw(16) << std::hex << value;
+    }
+    break;
+
+    default:
+        // Trata outros casos como um ponteiro de 64 bits
+        ss << std::hex << static_cast<UINT64>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+std::string GetNumericValueFromRef(VOID* ea, UINT32 size) {
+    if (!IsPointer(reinterpret_cast<ADDRINT>(ea))) {
+        return ""; // Retorna um valor padrão se o ponteiro for inválido
+    }
+
+    std::stringstream ss;
+    ss << "0x"; // Prefixo hexadecimal para maior clareza
+
+    switch (size) {
+    case 0:
+        return ""; // Tamanho inválido
+        break;
+
+    case 1:
+    {
+        UINT8 x;
+        PIN_SafeCopy(&x, static_cast<UINT8*>(ea), 1);
+        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(x) << " (" << std::dec << static_cast<unsigned int>(x) << ")"; // Converte UINT8 para string
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 x;
+        PIN_SafeCopy(&x, static_cast<UINT16*>(ea), 2);
+        ss << std::setfill('0') << std::setw(4) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT16 para string
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 x;
+        PIN_SafeCopy(&x, static_cast<UINT32*>(ea), 4);
+        ss << std::setfill('0') << std::setw(8) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT32 para string
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 x;
+        PIN_SafeCopy(&x, static_cast<UINT64*>(ea), 8);
+        ss << std::setfill('0') << std::setw(16) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT64 para string
+    }
+    break;
+
+    default:
+        // Converte o ponteiro em string hexadecimal
+        ss << "0x" << std::hex << reinterpret_cast<uintptr_t>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+bool IsStringPointer(UINT64 addr) {
+    if (!IsPointer(addr)) {
+        return false; // Ponteiro inválido
+    }
+
+    char* str = reinterpret_cast<char*>(addr);
+    for (int i = 0; i < 256; ++i) { // Limite para evitar leitura fora do contexto
+        if (!PIN_CheckReadAccess(&str[i])) {
+            return false; // Parte da string não é acessível
+        }
+        if (str[i] == '\0') {
+            return true; // Encontrou o final da string
+        }
+        if (str[i] < 0x20 || str[i] > 0x7E) {
+            return false; // Não é um caractere imprimível
+        }
+    }
+    return false; // Não encontrou um final de string válido
+}
+
+
+std::string GetStringValueFromRegister(UINT64 value, UINT32 size) {
+    std::ostringstream result;
+
+    // Caso de um único caractere (1 byte)
+    if (size == 1) {
+        char c = static_cast<char>(value & 0xFF); // Apenas o byte menos significativo
+        if (c >= 0x20 && c <= 0x7E) { // Verifica se é imprimível
+            result << "'" << c << "'";
+        }
+        else {
+            result << "";
+        }
+        return result.str();
+    }
+
+    // Caso de sequência de caracteres (até 8 bytes)
+    const char* str = reinterpret_cast<const char*>(&value);
+    bool isString = true;
+    for (UINT32 i = 0; i < size && i < 8; ++i) { // Limite do registrador é 8 bytes
+        if (str[i] == '\0') { // Terminação de string
+            break;
+        }
+        if (str[i] < 0x20 || str[i] > 0x7E) { // Não imprimível
+            isString = false;
+            break;
+        }
+    }
+
+    if (isString) {
+        result << "\"" << std::string(str, size).c_str() << "\""; // Converte para string
+    }
+    else {
+        result << "";
+    }
+
+    return result.str();
+}
+
+void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::string* reg1str, INT32 reg1ismem, UINT32 reg1size, VOID* reg1val, std::string* reg2str, INT32 reg2ismem, UINT32 reg2size, VOID* reg2val, std::string* reg3str, UINT64 reg3val) {
+    if (!Emit(threadid)) return;
+
+    std::string valnum1 = "";
+    std::stringstream val1;
+    if (reg1ismem) {
+        val1 << GetNumericHexValue((UINT64)reg1val, 8);
+
+        if (IsStringPointer((ADDRINT)reg1val)) {
+            valnum1 = GetNumericValueFromRef(reg1val, reg1size) + " | \"" + std::string(reinterpret_cast<const char*>(reg1val)) + "\"";
+        }
+        else {
+            std::stringstream ss;
+            //UINT64 x;
+            //PIN_SafeCopy(&x, static_cast<UINT64*>(reg1val), 8);
+            //ss << x; // Converte UINT64 para string
+            //valaddr1 = " (" + ss.str() + ")";
+            valnum1 = GetNumericValueFromRef(reg1val, reg1size);
+        }
+    }
+    else {
+        val1 << GetNumericHexValue((UINT64)reg1val, reg1size);
+        std::string reg1str = GetStringValueFromRegister((UINT64)reg1val, reg1size);
+        if (!reg1str.empty()) {
+            val1 << " (" << reg1str << ")";
+        }
+        valnum1 = GetNumericValue((UINT64)reg1val, reg1size);
+    }
+
+    std::string valnum2 = "";
+    std::stringstream val2;
+    if (reg2ismem) {
+        val2 << std::hex << GetNumericHexValue((UINT64)reg2val, 8);
+
+        if (IsStringPointer((ADDRINT)reg2val)) {
+            valnum2 = GetNumericValueFromRef(reg2val, reg2size) + " | \"" + std::string(reinterpret_cast<const char*>(reg2val)) + "\"";
+        }
+        else {
+            valnum2 = GetNumericValueFromRef(reg2val, reg2size);
+        }
+    }
+    else {
+        val2 << GetNumericHexValue((UINT64)reg2val, reg2size);
+        std::string reg2str = GetStringValueFromRegister((UINT64)reg2val, reg2size);
+        if (!reg2str.empty()) {
+            val2 << " (" << reg2str << ")";
+        }
+        valnum2 = GetNumericValue((UINT64)reg2val, reg2size);
+    }
+
+    out << *str << " | [T" << std::dec << threadid << std::hex << "] "
+        << *reg1str << " [" << val1.str() << "] = " << valnum1 << ", "
+        << *reg2str << " [" << val2.str() << "] = " << valnum2 << ", "
+        << *reg3str << " = " << reg3val << std::endl;
+
+    Flush();
+}
+
+VOID AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
+    // Instrumenta a instrução CMP
+    if (INS_OperandIsReg(ins, 0) && INS_OperandIsReg(ins, 1)) {
+        // CMP com dois registradores
+        REG reg1 = INS_OperandReg(ins, 0);
+        REG reg2 = INS_OperandReg(ins, 1);
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitCmpValues,
+            IARG_ADDRINT, INS_Address(ins),
+            IARG_THREAD_ID, 
+            IARG_PTR, new std::string(traceString),
+            IARG_PTR, new std::string(REG_StringShort(reg1)),
+            IARG_BOOL, false,
+            IARG_ADDRINT, REG_Size(reg1),
+            IARG_REG_VALUE, reg1,
+            IARG_PTR, new std::string(REG_StringShort(reg2)),
+            IARG_BOOL, false,
+            IARG_ADDRINT, REG_Size(reg2),
+            IARG_REG_VALUE, reg2,
+            IARG_PTR, new std::string(REG_StringShort(reg3val)),
+            IARG_REG_VALUE, reg3val,
+            IARG_END);
+    }
+    else if (INS_OperandIsReg(ins, 0) && INS_OperandIsMemory(ins, 1)) {
+        // CMP entre registrador e memória
+        REG reg1 = INS_OperandReg(ins, 0);
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitCmpValues,
+            IARG_ADDRINT, INS_Address(ins),
+            IARG_THREAD_ID,
+            IARG_PTR, new std::string(traceString),
+            IARG_PTR, new std::string(REG_StringShort(reg1)),
+            IARG_BOOL, false,
+            IARG_ADDRINT, REG_Size(reg1),
+            IARG_REG_VALUE, reg1,
+            IARG_PTR, new std::string("memval"),
+            IARG_BOOL, true,
+            IARG_MEMORYREAD_SIZE,
+            IARG_MEMORYREAD_EA,
+            IARG_PTR, new std::string(REG_StringShort(reg3val)),
+            IARG_REG_VALUE, reg3val,
+            IARG_END);
+    }
+    else if (INS_OperandIsMemory(ins, 0) && INS_OperandIsReg(ins, 1)) {
+        // CMP entre memória e registrador
+        REG reg2 = INS_OperandReg(ins, 1);
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitCmpValues,
+            IARG_ADDRINT, INS_Address(ins),
+            IARG_THREAD_ID,
+            IARG_PTR, new std::string(traceString),
+            IARG_PTR, new std::string("memval"),
+            IARG_BOOL, true,
+            IARG_MEMORYREAD_SIZE,
+            IARG_MEMORYREAD_EA,
+            IARG_PTR, new std::string(REG_StringShort(reg2)),
+            IARG_BOOL, false,
+            IARG_ADDRINT, REG_Size(reg2),
+            IARG_REG_VALUE, reg2,
+            IARG_PTR, new std::string(REG_StringShort(reg3val)),
+            IARG_REG_VALUE, reg3val,
+            IARG_END);
+    }
+    else if (INS_OperandIsImmediate(ins, 1)) {
+        // CMP entre registrador/memória e imediato
+        if (INS_OperandIsReg(ins, 0)) {
+            REG reg1 = INS_OperandReg(ins, 0);
+            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitCmpValues,
+                IARG_ADDRINT, INS_Address(ins),
+                IARG_THREAD_ID,
+                IARG_PTR, new std::string(traceString),
+                IARG_PTR, new std::string(REG_StringShort(reg1)),
+                IARG_BOOL, false,
+                IARG_ADDRINT, REG_Size(reg1),
+                IARG_REG_VALUE, reg1,
+                IARG_PTR, new std::string("immval"),
+                IARG_BOOL, false,
+                IARG_ADDRINT, (INS_OperandWidth(ins, 1) / 8),
+                IARG_ADDRINT, INS_OperandImmediate(ins, 1),
+                IARG_PTR, new std::string(REG_StringShort(reg3val)),
+                IARG_REG_VALUE, reg3val,
+                IARG_END);
+        }
+        else if (INS_OperandIsMemory(ins, 0)) {
+            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitCmpValues,
+                IARG_ADDRINT, INS_Address(ins),
+                IARG_THREAD_ID,
+                IARG_PTR, new std::string(traceString),
+                IARG_PTR, new std::string("memval"),
+                IARG_BOOL, true,
+                IARG_MEMORYREAD_SIZE,
+                IARG_MEMORYREAD_EA,
+                IARG_PTR, new std::string("immval"),
+                IARG_BOOL, false,
+                IARG_ADDRINT, (INS_OperandWidth(ins, 1) / 8),
+                IARG_ADDRINT, INS_OperandImmediate(ins, 1),
+                IARG_PTR, new std::string(REG_StringShort(reg3val)),
+                IARG_REG_VALUE, reg3val,
+                IARG_END);
+        }
+    }
+}
+////
+
 VOID AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, REG regs[]) {
     if (regCount > MaxEmitArgs) regCount = MaxEmitArgs;
     IARGLIST args = IARGLIST_Alloc();
     for (UINT32 i = 0; i < regCount; i++) {
         IARGLIST_AddArguments(args, IARG_PTR, new std::string(REG_StringShort(regs[i])), IARG_REG_VALUE, regs[i], IARG_END);
     }
-    INS_InsertCall(ins, point, emitFuns[regCount], IARG_THREAD_ID, IARG_PTR, new std::string(traceString), IARG_IARGLIST, args, IARG_END);
+    
+    std::string mnemonic = INS_Mnemonic(ins);
+    if (INS_Opcode(ins) == XED_ICLASS_CMP || mnemonic.rfind("CMOV", 0) == 0) {
+        AddEmitCmp(ins, point, traceString, regs[0]);
+    } else {
+        INS_InsertCall(ins, point, emitFuns[regCount], IARG_THREAD_ID, IARG_PTR, new std::string(traceString), IARG_IARGLIST, args, IARG_END);
+    }
     IARGLIST_Free(args);
 }
 

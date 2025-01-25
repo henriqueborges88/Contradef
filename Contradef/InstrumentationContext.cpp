@@ -319,6 +319,12 @@ bool InstrumentationContext::HasStrategy(const std::string& name) const {
 }
 
 void InstrumentationContext::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
+    ModuleRange range;
+    range.start = IMG_LowAddress(img);
+    range.end = IMG_HighAddress(img);
+    range.name = IMG_Name(img);
+
+    moduleRanges.push_back(range);
 
     std::string moduleName = IMG_Name(img);
     for (SYM sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {

@@ -12,6 +12,7 @@
 #include "YaraContradef.h"
 #include "NtStructures.h"
 #include "PinDebugTrace.h"
+#include "Instrumentation.h"
 
 using std::string;
 using std::cerr;
@@ -99,15 +100,6 @@ VOID Fini(int, VOID* v)
     ExternalCallTraceOutFile.close();
 }
 
-// Função para aguardar no Entry Point
-VOID PauseAtEntryPoint(ADDRINT entryAddress) {
-    std::cout << "[CONTRADEF] O Contradef pausou no entry point do processo (" << std::hex << entryAddress << ")" << std::endl;
-    std::cout << "[CONTRADEF] Anexe o depurador ao processo agora." << std::endl;
-    std::cout << "[CONTRADEF] Pressione Enter para continuar a execucao..." << std::endl;
-
-    std::cin.get(); // Aguarda entrada do usuário para continuar
-}
-
 // Instrumenta o carregamento de imagens
 VOID ImageLoad(IMG img, VOID* v) {
     if (IMG_IsMainExecutable(img)) {
@@ -181,7 +173,7 @@ int main(int argc, char* argv[]) {
 
     InitInstrumentation();
 
-    //InitTrace(TraceOutFile, pid);
+    InitTrace(TraceOutFile, pid);
 
     PIN_AddFiniFunction(Fini, 0);
 

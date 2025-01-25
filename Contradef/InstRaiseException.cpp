@@ -44,6 +44,12 @@ VOID InstRaiseException::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
         for (size_t i = 0; i < count; i++) {
             stringStream << "        Argumento[" << i << "]: 0x" << std::hex << argsArray[i] << std::dec << std::endl;
+            if (argsArray[i] != 0) {
+                if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(argsArray[i])))
+                {
+                    //wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(argsArray[i]));
+                }
+            }
         }
     }
 

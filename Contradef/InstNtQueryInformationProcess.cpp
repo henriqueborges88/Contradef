@@ -94,6 +94,19 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, 
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
 
+    std::stringstream& stringStream = callContext->stringStream;
+    stringStream << std::endl << "[+] NtQueryInformationProcess..." << std::endl;
+    stringStream << "    Thread: " << tid << std::endl;
+    stringStream << "    Id de chamada: " << fcnCallId << std::endl;
+    stringStream << "    Endereço da rotina: 0x" << std::hex << callContext->rtnAddress << std::dec << std::endl;
+    stringStream << "    Parâmetros: " << std::endl;
+    stringStream << "        ProcessHandle: 0x" << std::hex << ProcessHandle << std::dec << std::endl;
+    stringStream << "        ProcessInformationClass: " << ProcessInformationClass << std::endl;
+    stringStream << "        ProcessInformation: 0x" << std::hex << ProcessInformation << std::dec << std::endl;
+    stringStream << "        ProcessInformationLength: " << ProcessInformationLength << std::endl;
+    stringStream << "        ReturnLength: 0x" << std::hex << ReturnLength << std::dec << std::endl;
+    stringStream << "    Endereço da função chamante: 0x" << std::hex << returnAddress << std::dec << std::endl;
+    stringStream << "  [-] Início da chamada NtQueryInformationProcess" << std::endl;
     
 }
 
@@ -111,6 +124,54 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         PIN_LockClient();
 
         CallContext* callContext = it->second;
+        
+        std::stringstream& stringStream = callContext->stringStream;
+
+        // O retorno é NTSTATUS (LONG)
+        LONG status = *retValAddr;
+        stringStream << "    Retorno NtQueryInformationProcess (NTSTATUS): 0x"
+            << std::hex << status << std::dec << std::endl;
+
+        if (status == 0) { // STATUS_SUCCESS (0)
+            stringStream << "    Operação bem-sucedida (STATUS_SUCCESS)." << std::endl;
+
+            // Se fizer sentido, podemos tentar ler parte do 'ProcessInformation'
+            // dependendo do 'ProcessInformationClass' e do tamanho do buffer,
+            // mas este exemplo apenas ilustra a leitura:
+            if (ProcessInformation != 0 && ProcessInformationLength > 0) {
+                ULONG bytesToRead = (ProcessInformationLength < 256) ? ProcessInformationLength : 256;
+                std::vector<BYTE> infoData(bytesToRead);
+                SIZE_T bytesCopied = PIN_SafeCopy(infoData.begin(), reinterpret_cast<BYTE*>(ProcessInformation), bytesToRead);
+                stringStream << "    (Leu " << bytesCopied << " bytes de ProcessInformation, exibindo em hexa): ";
+                for (SIZE_T i = 0; i < bytesCopied; i++) {
+                    stringStream << std::hex << (int)infoData[i] << " ";
+                }
+                stringStream << std::dec << std::endl;
+            }
+        }
+        else {
+            // Em caso de falha, podemos exibir mais detalhes, se necessários.
+            stringStream << "    Falha na operação (NTSTATUS != 0). Código: 0x"
+                << std::hex << status << std::dec << std::endl;
+        }
+
+        stringStream << "  [-] Chamada NtQueryInformationProcess concluída" << std::endl;
+        stringStream << "[*] Concluído" << std::endl << std::endl;
+
+        ExecutionInformation executionCompletedInfo = { stringStream.str() };
+        ExecutionEventData executionEvent(executionCompletedInfo);
+        globalNotifierPtr->NotifyAll(&executionEvent);
+
+        delete callContext;
+        callContextMap.erase(it);
+
+
+
+        
+        
+        
+
+        // Outro Processamento
         const NtQueryInformationProcessArgs* args = reinterpret_cast<NtQueryInformationProcessArgs*>(callContext->functionArgs);
 
         //CONTRAMEDIDAS
@@ -118,7 +179,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
             DWORD* debugPort = reinterpret_cast<DWORD*>(args->ProcessInformation);
             if (*debugPort != 0) {
                 //std::cout << "debugPort\n";
-                *debugPort = 0;
+                //*debugPort = 0;
             }
         }
 
@@ -126,8 +187,8 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
             HANDLE* debugHandle = reinterpret_cast<HANDLE*>(args->ProcessInformation);
 
             if (*debugHandle != 0) {
-                //std::cout << "debugHandle\n";
-                *debugHandle = 0;
+                //std::cout << "debugHandle "<< *debugHandle;
+                //*debugHandle = 0;
             }
         }
 
@@ -135,7 +196,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
             DWORD* debugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
             if (*debugFlags == 0) {
                 //std::cout << "debugFlags\n";
-                *debugFlags = -1;
+                //*debugFlags = -1;
             }
         }
 

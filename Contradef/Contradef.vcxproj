@@ -132,7 +132,7 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pin\intel64\lib;..\pin\intel64\lib-ext;..\pin\extras\xed-intel64\lib;..\pin\extras\components\lib\intel64;..\pin\source\tools\InstLib\obj-intel64;..\pin\intel64\runtime\pincrt;..\yaracontradef\yaraCdef;$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\pin\intel64\lib;..\pin\intel64\lib-ext;..\pin\extras\xed-intel64\lib;..\pin\extras\components\lib\intel64;..\pin\source\tools\InstLib\obj-intel64;..\pin\intel64\runtime\pincrt;..\yaracontradef\yaraCdef;$(SolutionDir)$(Platform)\$(Configuration)\;Dbghelp.lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>pin.lib;pinipc.lib;xed.lib;atomic.lib;debugger-protocol.lib;pincrt.lib;controller.lib;kernel32.lib;crtbeginS.obj;yaraCdef64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
@@ -169,7 +169,7 @@
       </EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\pin\intel64\lib;..\pin\intel64\lib-ext;..\pin\extras\xed-intel64\lib;..\pin\extras\components\lib\intel64;..\pin\source\tools\InstLib\obj-intel64;..\pin\intel64\runtime\pincrt;..\yaracontradef\yaraCdef;$(SolutionDir)$(Platform)\$(Configuration)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\pin\intel64\lib;..\pin\intel64\lib-ext;..\pin\extras\xed-intel64\lib;..\pin\extras\components\lib\intel64;..\pin\source\tools\InstLib\obj-intel64;..\pin\intel64\runtime\pincrt;..\yaracontradef\yaraCdef;$(SolutionDir)$(Platform)\$(Configuration)\;Dbghelp.lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>pin.lib;pinipc.lib;xed.lib;atomic.lib;debugger-protocol.lib;pincrt.lib;controller.lib;kernel32.lib;crtbeginS.obj;yaraCdef64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>

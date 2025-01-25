@@ -124,6 +124,27 @@ std::string aCopyLPCSTR(ADDRINT addr) {
 }
 
 
+// Função para aguardar no Entry Point
+VOID PauseAtEntryPoint(ADDRINT entryAddress) {
+    std::cout << "[CONTRADEF] O Contradef pausou no entry point do processo (" << std::hex << entryAddress << ")" << std::endl;
+    std::cout << "[CONTRADEF] Anexe o depurador ao processo agora." << std::endl;
+    std::cout << "[CONTRADEF] Pressione Enter para continuar a execucao..." << std::endl;
+
+    std::cin.get(); // Aguarda entrada do usuário para continuar
+}
+
+VOID PauseAtAddress(ADDRINT address) {
+    PIN_LockClient();
+    std::cout << "[CONTRADEF] O Contradef pausou no endereço " << std::hex << address << std::endl;
+    std::cout << "[CONTRADEF] Anexe o depurador ao processo agora." << std::endl;
+    std::cout << "[CONTRADEF] Pressione Enter para continuar a execucao..." << std::endl;
+
+    std::cin.get(); // Aguarda entrada do usuário para continuar
+    PIN_UnlockClient();
+    PIN_Detach();
+}
+
+
 VOID GetSectionInfo(IMG img, std::ofstream& OutFile)
 {
     OutFile << std::endl << "[+] Informação de seções..." << std::endl;
@@ -208,6 +229,7 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr,
         }
         else {
             print = false;
+
         }
 
         UINT64 stackValue = *reinterpret_cast<UINT64*>(rspValue);
@@ -225,25 +247,33 @@ VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr,
     if (IsMainExecutable(instAddress) && !IsMainExecutable(targetRtnAddr)) {
         string tgtRtnName = "";
         string imgName = "";
+        ADDRINT tgtRtnAddr = 0;
         RTN tgtRtn = RTN_FindByAddress(targetRtnAddr);
         if (RTN_Valid(tgtRtn))
         {
             tgtRtnName = RTN_Name(tgtRtn);
+            tgtRtnAddr = RTN_Address(tgtRtn);
             IMG tgtImg = SEC_Img(RTN_Sec(tgtRtn));
             if (IMG_Valid(tgtImg))
             {
                 imgName = IMG_Name(tgtImg);
             }
         }
-        if (!tgtRtnName.empty()) {
-            callTracker.addFunctionCall(threadid, imgName, tgtRtnName, RTN_Address(tgtRtn));
-            string retRtnName = "INVALID_RTN";
-            RTN rtnt = RTN_FindByAddress(returnAddress);
-            if (RTN_Valid(rtnt)) {
-                retRtnName = RTN_Name(rtnt);
-            }
-            //std::cout << std::hex << RTN_Address(tgtRtn) << " - " << imgName << ":" << tgtRtnName << " T[" << threadid << "] - Return to: " << retRtnName << " (" << returnAddress << ")" << std::dec << std::endl;
+        if (tgtRtnName.empty()) {
+            OS_PROCESS_ID pid = PIN_GetPid();
+            FunctionData fcnData = GetFunctionFromAddress(targetRtnAddr, pid);
+            tgtRtnName = fcnData.functionName;
+            tgtRtnAddr = targetRtnAddr;
+            imgName = "[forced] " + fcnData.fullModuleName;
         }
+        callTracker.addFunctionCall(threadid, imgName, tgtRtnName, tgtRtnAddr);
+        string retRtnName = "INVALID_RTN";
+        RTN rtnt = RTN_FindByAddress(returnAddress);
+        if (RTN_Valid(rtnt)) {
+            retRtnName = RTN_Name(rtnt);
+        }
+        //std::cout << std::hex << RTN_Address(tgtRtn) << " - " << imgName << ":" << tgtRtnName << " T[" << threadid << "] - Return to: " << retRtnName << " (" << returnAddress << ")" << std::dec << std::endl;
+
     }
     PIN_UnlockClient();
 
@@ -888,11 +918,14 @@ VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, Seque
 
 VOID SequenceMatchReadStringFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    ADDRINT regRcx = PIN_GetContextReg(ctxt, REG_RCX);
+    std::cout << "xxxxx: " << ip << std::endl;
+    //return;
+    ADDRINT regRcx = PIN_GetContextReg(ctxt, REG_RAX);
 
     if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(regRcx)))
     {
-        std::cout << "R9 = 0x" << std::hex << regRcx << std::endl;
+        wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(regRcx));
+
         char* CharStr = reinterpret_cast<char*>(regRcx);
         std::cout << "Nome da função --> " << CharStr << std::endl;
     }
@@ -1184,6 +1217,23 @@ VOID SequenceMatchReadStringCmpCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt,
 }
 
 
+VOID SequenceMatchReadStringCmpCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter o valor completo de RSI
+    ADDRINT rsi_value = PIN_GetContextReg(ctxt, REG_RBP);
+    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R8);
+
+    // Extrair os 16 bits menos significativos (SI)
+    LONG* six_value = reinterpret_cast<LONG*>(rsi_value);
+
+    // Imprimir o valor do registrador SI
+    std::cout << "Valor de RBP: 0x" << std::hex << rsi_value << std::endl;
+
+    std::cout << "Valor de PTR: 0x" << std::hex << *six_value << std::endl;
+
+    std::cout << "Valor de R8: 0x" << std::hex << r8_value << std::endl;
+
+}
 
 VOID SequenceMatchReadStringCmp2Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
@@ -1279,7 +1329,8 @@ VOID SequenceMatchReadStringCmp4Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt
     //std::cout << "Valor de BX: 0x" << std::hex << bxValue << std::endl;
 
     OS_PROCESS_ID pid = PIN_GetPid();
-    std::cout << "Sequencia de instrucoes identificada, endereco de instrucao " << std::hex << ip << std::dec << ", corresponde a funcao: " << GetFunctionFromAddress(ip, pid) << std::endl;
+    std::cout << "Sequencia de instrucoes identificada, endereco de instrucao " << std::hex << ip << std::dec << ", corresponde a funcao: " << GetFunctionFromAddress(ip, pid).functionName << std::endl;
+    PauseAtAddress(ip);
     return;
    
     // ADDRINT r_value = PIN_GetContextReg(ctxt, REG_R10) + PIN_GetContextReg(ctxt, REG_RCX) * 1 + 0x1;
@@ -1307,6 +1358,70 @@ VOID SequenceMatchReadStringCmp4Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt
 
 }
 
+// From regval.cpp
+static void PrintRegisters(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    static const UINT stRegSize = REG_Size(REG_ST_BASE);
+    for (int reg = (int)REG_GR_BASE; reg <= (int)REG_GR_LAST; ++reg)
+    {
+        // For the integer registers, it is safe to use ADDRINT. But make sure to pass a pointer to it.
+        ADDRINT val;
+        PIN_GetContextRegval(ctxt, (REG)reg, reinterpret_cast<UINT8*>(&val));
+        std::cout << REG_StringShort((REG)reg) << ": 0x" << std::hex << val << std::endl;
+    }
+    for (int reg = (int)REG_ST_BASE; reg <= (int)REG_ST_LAST; ++reg)
+    {
+        // For the x87 FPU stack registers, using PINTOOL_REGISTER ensures a large enough buffer.
+        PINTOOL_REGISTER val;
+        PIN_GetContextRegval(ctxt, (REG)reg, reinterpret_cast<UINT8*>(&val));
+        std::cout << REG_StringShort((REG)reg) << ": " << Val2Str(&val, stRegSize) << std::endl;
+    }
+}
+
+
+VOID SetZfToOne(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+
+    if (zf_before == 0) {
+
+        // Para setar o ZF para 1:
+        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
+        std::cout << "APLICANDO Patch NO INDICE -> " << sequence.matchCount << std::endl;
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        PIN_ExecuteAt(ctxt);
+    }
+
+}
+
+VOID SetZfToZero(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    // Obter os flags atuais
+    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
+
+    // Verificar o valor atual do ZF
+    BOOL zf_before = (flags & (1 << 6)) != 0;
+
+    if (zf_before == 1) {
+
+        // Para setar o ZF para 0:
+        flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
+        std::cout << "APLICANDO Patch NO INDICE -> " << sequence.matchCount << std::endl;
+
+        // Atualizar os flags
+        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
+
+        PIN_ExecuteAt(ctxt);
+    }
+
+}
 
 VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID* ea, UINT32 size)
 {
@@ -1639,11 +1754,11 @@ int InitInstrumentation()
     std::vector<std::vector<std::string>> sequence;
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
+    sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb", "jb 0x7ff7bf17d3eb", "jo 0x7ff6cafbeb87"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 23, 23);
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 32, 32);
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
+
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 34, 34);
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
 
@@ -1849,19 +1964,30 @@ int InitInstrumentation()
     //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbx], 0x23")); pesquisar mais
     //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdi], 0x22")); // procura aspas
 
-    read_string_cmp4.push_back(CreateInstVector("push rbx"));
-    read_string_cmp4.push_back(CreateInstVector("push rsi"));
-    read_string_cmp4.push_back(CreateInstVector("push r12"));
-    read_string_cmp4.push_back(CreateInstVector("push r13"));
-    read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x58"));
-    read_string_cmp4.push_back(CreateInstVector("mov ebx, dword ptr [rsp+0xa0]"));
-    read_string_cmp4.push_back(CreateInstVector("lea rax, ptr [rsp+0x30]"));
-    read_string_cmp4.push_back(CreateInstVector("mov r8d, dword ptr [rsp+0xa8]"));
-    read_string_cmp4.push_back(CreateInstVector("mov rsi, r9"));
-    read_string_cmp4.push_back(CreateInstVector("mov r9d, dword ptr [rsp+0xb0]"));
-    read_string_cmp4.push_back(CreateInstVector("mov r13d, 0x1"));
-    read_string_cmp4.push_back(CreateInstVector("mov qword ptr [rsp+0x28], rax"));
-    seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmp4Callback);
+
+    /*read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x58"));
+    read_string_cmp4.push_back(CreateInstVector("mov rdx, qword ptr [rcx]"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe09"));
+    read_string_cmp4.push_back(CreateInstVector("mov eax, dword ptr [rdx]"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe0e"));
+    read_string_cmp4.push_back(CreateInstVector("cmp eax, 0x4001000a"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe19"));
+    read_string_cmp4.push_back(CreateInstVector("jz 0x7ff62f10fe35"));*/
+
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110eb8"));
+    read_string_cmp4.push_back(CreateInstVector("test eax, eax"));
+    read_string_cmp4.push_back(CreateInstVector("jnb 0x7ff62f110ebf"));
+    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f110eea"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ec5"));
+    read_string_cmp4.push_back(CreateInstVector("cmp dword ptr [rbp+0x18], 0x8"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ecd"));
+    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f110eea"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ed6"));
+    read_string_cmp4.push_back(CreateInstVector("cmp qword ptr [rbp], 0x0"));
+    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ee1"));
+    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f11125f"));
+    seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmpCallback2);
+    //seq_detector.AddInstructionSequence(read_string_cmp4, SetZfToZero);
 
     seq_detector.Initialize();
 
