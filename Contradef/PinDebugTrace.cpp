@@ -11,7 +11,8 @@
 #include "PinDebugTrace.h"
 
 KNOB< std::string > KnobTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "to", "contradef", "trace file");
-KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "thread to watch, -1 for all");
+KNOB< std::string > KnobMemTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "mto", "contradef", "Memory trace file");
+KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "Thread to watch, -1 for all");
 KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
 KNOB< BOOL > KnobFullImgName(KNOB_MODE_WRITEONCE, "pintool", "full_img_name", "0", "Include full image name");
@@ -19,7 +20,8 @@ KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "1", "Include li
 KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
 KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
-KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "0", "Trace memory");
+KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "1", "Trace memory");
+KNOB< BOOL > KnobTraceMemoryInstructions(KNOB_MODE_WRITEONCE, "pintool", "atmemory", "0", "Attach trace memory to trace instrucions");
 KNOB< BOOL > KnobSilent(KNOB_MODE_WRITEONCE, "pintool", "silent", "0", "Do everything but write file (for debugging).");
 KNOB< BOOL > KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exit after tracing the first region.");
 
@@ -27,7 +29,10 @@ KNOB< BOOL > KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exi
 /* Global Variables */
 /* ===================================================================== */
 
+PIN_MUTEX fileOutMutex;
+PIN_MUTEX fileMemTraceOutMutex;
 std::ofstream out;
+std::ofstream memTraceOut;
 INT32 enabled = 0;
 FILTER filter;
 ICOUNT icount;
@@ -75,36 +80,47 @@ VOID Handler(EVENT_TYPE ev, VOID*, CONTEXT* ctxt, VOID*, THREADID, bool bcast) {
 
 VOID EmitNoValues(THREADID threadid, std::string* str) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "]" << std::endl;
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID Emit1Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << std::endl;
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID Emit2Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << std::endl;
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID Emit3Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << std::endl;
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID Emit4Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val, std::string* reg4str, ADDRINT reg4val) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << ", " << *reg4str << " = " << reg4val << std::endl;
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID EmitXMM(THREADID threadid, UINT32 regno, PINTOOL_REGISTER* xmm) {
     if (!Emit(threadid)) return;
+    PIN_MutexLock(&fileOutMutex);
     out << "\t\t\tXMM" << std::dec << regno << " := " << std::setfill('0') << std::hex;
     out.unsetf(std::ios::showbase);
     for (int i = 0; i < 16; i++) {
@@ -114,221 +130,11 @@ VOID EmitXMM(THREADID threadid, UINT32 regno, PINTOOL_REGISTER* xmm) {
     out << std::setfill(' ') << std::endl;
     out.setf(std::ios::showbase);
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID AddXMMEmit(INS ins, IPOINT point, REG xmm_dst) {
     INS_InsertCall(ins, point, AFUNPTR(EmitXMM), IARG_THREAD_ID, IARG_UINT32, xmm_dst - REG_XMM0, IARG_REG_CONST_REFERENCE, xmm_dst, IARG_END);
-}
-
-////
-bool IsPointer(ADDRINT value) {
-    // Verifica se o valor é um ponteiro acessível
-    return PIN_CheckReadAccess(reinterpret_cast<void*>(value));
-}
-
-
-std::string GetNumericValue(ADDRINT ea, UINT32 size) {
-    if (size == 0) {
-        return "0"; // Retorna "0" para tamanho inválido
-    }
-
-    std::stringstream ss;
-
-    switch (size) {
-    case 1:
-    {
-        UINT8 value = static_cast<UINT8>(ea);
-        ss << std::dec << static_cast<unsigned int>(value);
-    }
-    break;
-
-    case 2:
-    {
-        UINT16 value = static_cast<UINT16>(ea);
-        ss << std::dec << value;
-    }
-    break;
-
-    case 4:
-    {
-        UINT32 value = static_cast<UINT32>(ea);
-        ss << std::dec << value;
-    }
-    break;
-
-    case 8:
-    {
-        UINT64 value = static_cast<UINT64>(ea);
-        ss << std::dec << value;
-    }
-    break;
-
-    default:
-        // Trata outros casos como um ponteiro de 64 bits
-        ss << std::dec << static_cast<UINT64>(ea);
-        break;
-    }
-
-    return ss.str();
-}
-
-std::string GetNumericHexValue(ADDRINT ea, UINT32 size) {
-    if (size == 0) {
-        return "0"; // Retorna "0" para tamanho inválido
-    }
-
-    std::stringstream ss;
-    ss << "0x"; // Prefixo hexadecimal para maior clareza
-
-    switch (size) {
-    case 1:
-    {
-        UINT8 value = static_cast<UINT8>(ea);
-        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(value);
-    }
-    break;
-
-    case 2:
-    {
-        UINT16 value = static_cast<UINT16>(ea);
-        ss << std::setfill('0') << std::setw(4) << std::hex << value;
-    }
-    break;
-
-    case 4:
-    {
-        UINT32 value = static_cast<UINT32>(ea);
-        ss << std::setfill('0') << std::setw(8) << std::hex << value;
-    }
-    break;
-
-    case 8:
-    {
-        UINT64 value = static_cast<UINT64>(ea);
-        ss << std::setfill('0') << std::setw(16) << std::hex << value;
-    }
-    break;
-
-    default:
-        // Trata outros casos como um ponteiro de 64 bits
-        ss << std::hex << static_cast<UINT64>(ea);
-        break;
-    }
-
-    return ss.str();
-}
-
-std::string GetNumericValueFromRef(VOID* ea, UINT32 size) {
-    if (!IsPointer(reinterpret_cast<ADDRINT>(ea))) {
-        return ""; // Retorna um valor padrão se o ponteiro for inválido
-    }
-
-    std::stringstream ss;
-    ss << "0x"; // Prefixo hexadecimal para maior clareza
-
-    switch (size) {
-    case 0:
-        return ""; // Tamanho inválido
-        break;
-
-    case 1:
-    {
-        UINT8 x;
-        PIN_SafeCopy(&x, static_cast<UINT8*>(ea), 1);
-        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(x) << " (" << std::dec << static_cast<unsigned int>(x) << ")"; // Converte UINT8 para string
-    }
-    break;
-
-    case 2:
-    {
-        UINT16 x;
-        PIN_SafeCopy(&x, static_cast<UINT16*>(ea), 2);
-        ss << std::setfill('0') << std::setw(4) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT16 para string
-    }
-    break;
-
-    case 4:
-    {
-        UINT32 x;
-        PIN_SafeCopy(&x, static_cast<UINT32*>(ea), 4);
-        ss << std::setfill('0') << std::setw(8) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT32 para string
-    }
-    break;
-
-    case 8:
-    {
-        UINT64 x;
-        PIN_SafeCopy(&x, static_cast<UINT64*>(ea), 8);
-        ss << std::setfill('0') << std::setw(16) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT64 para string
-    }
-    break;
-
-    default:
-        // Converte o ponteiro em string hexadecimal
-        ss << "0x" << std::hex << reinterpret_cast<uintptr_t>(ea);
-        break;
-    }
-
-    return ss.str();
-}
-
-bool IsStringPointer(UINT64 addr) {
-    if (!IsPointer(addr)) {
-        return false; // Ponteiro inválido
-    }
-
-    char* str = reinterpret_cast<char*>(addr);
-    for (int i = 0; i < 256; ++i) { // Limite para evitar leitura fora do contexto
-        if (!PIN_CheckReadAccess(&str[i])) {
-            return false; // Parte da string não é acessível
-        }
-        if (str[i] == '\0') {
-            return true; // Encontrou o final da string
-        }
-        if (str[i] < 0x20 || str[i] > 0x7E) {
-            return false; // Não é um caractere imprimível
-        }
-    }
-    return false; // Não encontrou um final de string válido
-}
-
-
-std::string GetStringValueFromRegister(UINT64 value, UINT32 size) {
-    std::ostringstream result;
-
-    // Caso de um único caractere (1 byte)
-    if (size == 1) {
-        char c = static_cast<char>(value & 0xFF); // Apenas o byte menos significativo
-        if (c >= 0x20 && c <= 0x7E) { // Verifica se é imprimível
-            result << "'" << c << "'";
-        }
-        else {
-            result << "";
-        }
-        return result.str();
-    }
-
-    // Caso de sequência de caracteres (até 8 bytes)
-    const char* str = reinterpret_cast<const char*>(&value);
-    bool isString = true;
-    for (UINT32 i = 0; i < size && i < 8; ++i) { // Limite do registrador é 8 bytes
-        if (str[i] == '\0') { // Terminação de string
-            break;
-        }
-        if (str[i] < 0x20 || str[i] > 0x7E) { // Não imprimível
-            isString = false;
-            break;
-        }
-    }
-
-    if (isString) {
-        result << "\"" << std::string(str, size).c_str() << "\""; // Converte para string
-    }
-    else {
-        result << "";
-    }
-
-    return result.str();
 }
 
 void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::string* reg1str, INT32 reg1ismem, UINT32 reg1size, VOID* reg1val, std::string* reg2str, INT32 reg2ismem, UINT32 reg2size, VOID* reg2val, std::string* reg3str, UINT64 reg3val) {
@@ -344,10 +150,6 @@ void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::strin
         }
         else {
             std::stringstream ss;
-            //UINT64 x;
-            //PIN_SafeCopy(&x, static_cast<UINT64*>(reg1val), 8);
-            //ss << x; // Converte UINT64 para string
-            //valaddr1 = " (" + ss.str() + ")";
             valnum1 = GetNumericValueFromRef(reg1val, reg1size);
         }
     }
@@ -381,12 +183,14 @@ void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::strin
         valnum2 = GetNumericValue((UINT64)reg2val, reg2size);
     }
 
+    PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] "
         << *reg1str << " [" << val1.str() << "] = " << valnum1 << ", "
         << *reg2str << " [" << val2.str() << "] = " << valnum2 << ", "
         << *reg3str << " = " << reg3val << std::endl;
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
@@ -488,7 +292,7 @@ VOID AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
         }
     }
 }
-////
+
 
 VOID AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, REG regs[]) {
     if (regCount > MaxEmitArgs) regCount = MaxEmitArgs;
@@ -536,13 +340,41 @@ VOID ShowN(UINT32 n, VOID* ea)
     if (n > 512) delete[] x;
 }
 
-VOID EmitWrite(THREADID threadid, UINT32 size)
+VOID writeMemTraceOut(THREADID threadid, std::string* str, VOID* ea, UINT32 size)
+{
+    std::string opval = "";
+    std::stringstream hexval;
+    hexval << GetNumericHexValue((UINT64)ea, 8);
+
+    if (IsStringPointer((ADDRINT)ea)) {
+        opval = GetNumericValueFromRef(ea, size) + " | \"" + std::string(reinterpret_cast<const char*>(ea)) + "\"";
+    }
+    else {
+        std::stringstream ss;
+        opval = GetNumericValueFromRef(ea, size);
+    }
+
+    PIN_MutexLock(&fileMemTraceOutMutex);
+    memTraceOut << "[T" << std::dec << threadid << std::hex << "] " << *str << "        [" << hexval.str() << "] = " << opval << "\n" << std::string(133, '-') << "\n";
+    PIN_MutexUnlock(&fileMemTraceOutMutex);
+
+}
+
+VOID EmitWrite(ADDRINT addr, THREADID threadid, std::string * str, UINT32 size)
 {
     if (!Emit(threadid)) return;
 
-    out << "                                 Write ";
 
     VOID* ea = WriteEa[threadid];
+
+    // Memory trace
+    writeMemTraceOut(threadid, str, ea, size);
+
+    if (!KnobTraceMemoryInstructions) return;
+
+    PIN_MutexLock(&fileOutMutex);
+
+    out << "                                 Write ";
 
     switch (size)
     {
@@ -590,11 +422,19 @@ VOID EmitWrite(THREADID threadid, UINT32 size)
     }
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID EmitRead(THREADID threadid, VOID* ea, UINT32 size)
+VOID EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size)
 {
     if (!Emit(threadid)) return;
+
+    // Memory trace
+    writeMemTraceOut(threadid, str, ea, size);
+
+    if (!KnobTraceMemoryInstructions) return;
+
+    PIN_MutexLock(&fileOutMutex);
 
     out << "                                 Read ";
 
@@ -643,6 +483,8 @@ VOID EmitRead(THREADID threadid, VOID* ea, UINT32 size)
     }
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
+
 }
 
 static INT32 indent = 0;
@@ -655,7 +497,10 @@ VOID Indent()
     }
 }
 
-VOID EmitICount() { out << setw(10) << dec << icount.Count() << hex << " "; }
+VOID EmitICount() 
+{ 
+    out << setw(10) << dec << icount.Count() << hex << " "; 
+}
 
 VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
@@ -673,12 +518,16 @@ VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 t
         callStack.push(instAddress);
     }
 
+    PIN_MutexLock(&fileOutMutex);
     Indent();
+
     out << *str << " [T" << threadid << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", " << arg5 << ", " << arg6 << ", ...)" << endl;
 
     indent++;
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
+
 }
 
 string FormatAddress(ADDRINT address, RTN rtn)
@@ -735,6 +584,7 @@ VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRI
 
     callStack.push(instAddress);
 
+    PIN_MutexLock(&fileOutMutex);
     EmitICount();
     Indent();
     out << *str;
@@ -749,11 +599,14 @@ VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRI
     indent++;
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
 }
 
 VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0)
 {
     if (!Emit(threadid)) return;
+
+    PIN_MutexLock(&fileOutMutex);
 
     EmitICount();
     indent--;
@@ -774,6 +627,8 @@ VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT ret
     out << *str << " [T" << threadid << "] returns: " << ret0 << ", ret addr: " << retAddr << ", call addr: " << callAddr << endl;
 
     Flush();
+    PIN_MutexUnlock(&fileOutMutex);
+
 }
 
 VOID CallTrace(TRACE trace, INS ins)
@@ -860,7 +715,7 @@ VOID InstructionTrace(TRACE trace, INS ins)
     // Format the string at instrumentation time
     string traceString = "";
     string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
-    for (INT32 length = astring.length(); length < 30; length++)
+    for (INT32 length = astring.length(); length < 95; length++)
     {
         traceString += " ";
     }
@@ -868,7 +723,7 @@ VOID InstructionTrace(TRACE trace, INS ins)
 
     traceString += " " + INS_Disassemble(ins);
 
-    for (INT32 length = traceString.length(); length < 80; length++)
+    for (INT32 length = traceString.length(); length < 140; length++)
     {
         traceString += " ";
     }
@@ -916,32 +771,77 @@ VOID MemoryTrace(INS ins)
 {
     if (!KnobTraceMemory) return;
 
-    if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
+    ADDRINT addr = INS_Address(ins);
+    ASSERTX(addr);
+
+    // Format the string at instrumentation time
+    string traceString = "";
+    string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
+    for (INT32 length = astring.length(); length < 30; length++)
     {
+        traceString += " ";
+    }
+    traceString = astring + traceString;
+
+    traceString += " | " + INS_Disassemble(ins);
+
+    if (INS_IsMemoryWrite(ins)) // && INS_IsStandardMemop(ins)
+    {
+        traceString += " | [Write]: \n";
+
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_MEMORYWRITE_EA, IARG_END);
 
+        LEVEL_VM::IPOINT ipoint = LEVEL_VM::IPOINT::IPOINT_INVALID;
         if (INS_IsValidForIpointAfter(ins))
         {
-            INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
+            ipoint = IPOINT_AFTER;
+            //INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
         }
         if (INS_IsValidForIpointTakenBranch(ins))
         {
-            INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
+            ipoint = IPOINT_TAKEN_BRANCH;
+            //INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
+        }
+
+        if (ipoint != LEVEL_VM::IPOINT::IPOINT_INVALID) {
+            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitWrite,
+                IARG_ADDRINT, INS_Address(ins),
+                IARG_THREAD_ID,
+                IARG_PTR, new std::string(traceString),
+                IARG_MEMORYWRITE_SIZE,
                 IARG_END);
         }
     }
 
-    if (INS_HasMemoryRead2(ins) && INS_IsStandardMemop(ins))
+    if (INS_HasMemoryRead2(ins)) // && INS_IsStandardMemop(ins)
     {
-        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE,
+        //INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE, IARG_END);
+        traceString += " | [Read 2Op]: \n";
+
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitRead,
+            IARG_ADDRINT, INS_Address(ins),
+            IARG_THREAD_ID,
+            IARG_PTR, new std::string(traceString),
+            IARG_MEMORYREAD2_EA,
+            IARG_MEMORYREAD_SIZE,
             IARG_END);
     }
 
-    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins) && INS_IsStandardMemop(ins))
+    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins)) // && INS_IsStandardMemop(ins)
     {
-        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE,
+        //INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE, IARG_END);
+        traceString += " | [Read 1Op]: \n";
+
+        REG reg2 = INS_OperandReg(ins, 1);
+        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitRead,
+            IARG_ADDRINT, INS_Address(ins),
+            IARG_THREAD_ID,
+            IARG_PTR, new std::string(traceString),
+            IARG_MEMORYREAD_EA,
+            IARG_MEMORYREAD_SIZE,
             IARG_END);
     }
+
 }
 
 /* ===================================================================== */
@@ -968,9 +868,10 @@ VOID Trace(TRACE trace, VOID* v)
 
 /* ===================================================================== */
 
-static void OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig,
-    VOID* v)
+static void OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig, VOID* v)
 {
+    PIN_MutexLock(&fileOutMutex);
+
     if (ctxtFrom != 0)
     {
         ADDRINT address = PIN_GetContextReg(ctxtFrom, REG_INST_PTR);
@@ -1005,24 +906,30 @@ static void OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONT
         break;
     }
     out << std::endl;
+    PIN_MutexUnlock(&fileOutMutex);
+
 }
 
 /* ===================================================================== */
 static CONTROL_MANAGER control;
 static SKIPPER skipper;
 
-int InitTrace(std::ofstream* TraceOutFile, string pid)
+int InitTrace(string pid)
 {
 
     string filename = KnobTraceOutputFile.Value();
-
     filename += "." + pid + ".trace.cdf";
-
-    // Do this before we activate controllers
     out.open(filename.c_str());
     out << hex << right;
     out.setf(ios::showbase);
-    TraceOutFile = &out;
+
+
+    string memTraceFilename = KnobMemTraceOutputFile.Value();
+    memTraceFilename += "." + pid + ".memtrace.cdf";
+    memTraceOut.open(memTraceFilename.c_str());
+    memTraceOut << hex << right;
+    memTraceOut.setf(ios::showbase);
+    
 
     control.RegisterHandler(Handler, 0, FALSE);
     control.Activate();

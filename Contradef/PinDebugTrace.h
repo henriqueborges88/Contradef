@@ -72,8 +72,8 @@ VOID AddXMMEmit(INS ins, IPOINT point, REG xmm_dst);
 VOID AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, REG regs[]);
 VOID CaptureWriteEa(THREADID threadid, VOID* addr);
 VOID ShowN(UINT32 n, VOID* ea);
-VOID EmitWrite(THREADID threadid, UINT32 size);
-VOID EmitRead(THREADID threadid, VOID* ea, UINT32 size);
+VOID EmitWrite(ADDRINT addr, THREADID threadid, std::string* str, UINT32 size);
+VOID EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size);
 VOID Indent();
 VOID EmitICount();
 VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, std::string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
@@ -85,6 +85,6 @@ VOID InstructionTrace(TRACE trace, INS ins);
 VOID MemoryTrace(INS ins);
 VOID Trace(TRACE trace, VOID* v);
 VOID OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig, VOID* v);
-int InitTrace(std::ofstream* TraceOutFile, std::string pid);
+int InitTrace(std::string pid);
 
 #endif // DEBUGGING_TRACER_H

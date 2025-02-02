@@ -23,6 +23,12 @@ namespace WindowsAPI
 #include <deque>
 #include "NtStructures.h"
 
+bool IsPointer(ADDRINT value);
+std::string GetNumericValue(ADDRINT ea, UINT32 size);
+std::string GetNumericHexValue(ADDRINT ea, UINT32 size);
+std::string GetNumericValueFromRef(VOID* ea, UINT32 size);
+bool IsStringPointer(UINT64 addr);
+std::string GetStringValueFromRegister(UINT64 value, UINT32 size);
 std::wstring ConvertAddrToWideString(ADDRINT addr);
 std::string ConvertAddrToAnsiString(ADDRINT addr);
 std::string ConvertWideStringToString(const std::wstring& wstr);

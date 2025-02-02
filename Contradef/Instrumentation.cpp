@@ -28,6 +28,7 @@ ADDRINT GetRtnAddr(ADDRINT instAddress) {
     return rtnAddress;
 }
 
+
 bool IsValidWideString(const std::wstring& str) {
     // Verifique primeiro o tamanho mínimo
     if (str.size() < 3) {
@@ -1217,24 +1218,6 @@ VOID SequenceMatchReadStringCmpCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt,
 }
 
 
-VOID SequenceMatchReadStringCmpCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    // Obter o valor completo de RSI
-    ADDRINT rsi_value = PIN_GetContextReg(ctxt, REG_RBP);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R8);
-
-    // Extrair os 16 bits menos significativos (SI)
-    LONG* six_value = reinterpret_cast<LONG*>(rsi_value);
-
-    // Imprimir o valor do registrador SI
-    std::cout << "Valor de RBP: 0x" << std::hex << rsi_value << std::endl;
-
-    std::cout << "Valor de PTR: 0x" << std::hex << *six_value << std::endl;
-
-    std::cout << "Valor de R8: 0x" << std::hex << r8_value << std::endl;
-
-}
-
 VOID SequenceMatchReadStringCmp2Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
     ADDRINT rbp_value = PIN_GetContextReg(ctxt, REG_RBP);
@@ -1505,69 +1488,71 @@ VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID
 
 }
 
-VOID CaptureWriteEa(THREADID threadid, ADDRINT instAddress, VOID* addr) {
-    ADDRINT address = reinterpret_cast<ADDRINT>(addr) - 0x0;
-    return;
 
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
-    {
-        std::wstring wstr = aCopyLPCWSTR(address);
-        //if (true) { // (wstr.find(L"Fracture") != std::wstring::npos) {
-        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
-        //    std::cout << "Read from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
-        //}
-        if (IsValidWideString(wstr)) {
-            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << std::endl;
-            wprintf(L" ** Write WString --> %ls <-\n", wstr);
-        }
+//Remover depois de implementar o memory trace
+//VOID CaptureWriteEa(THREADID threadid, ADDRINT instAddress, VOID* addr) {
+//    ADDRINT address = reinterpret_cast<ADDRINT>(addr) - 0x0;
+//    return;
+//
+//    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
+//    {
+//        std::wstring wstr = aCopyLPCWSTR(address);
+//        //if (true) { // (wstr.find(L"Fracture") != std::wstring::npos) {
+//        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
+//        //    std::cout << "Read from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+//        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
+//        //}
+//        if (IsValidWideString(wstr)) {
+//            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << std::endl;
+//            wprintf(L" ** Write WString --> %ls <-\n", wstr);
+//        }
+//
+//        std::string str = aCopyLPCSTR(address);
+//        //if (true) { //(str.find("Fracture") != std::string::npos) {
+//        //    std::cout << "Str achado:  " << instAddress << std::endl;
+//        //    std::cout << "Read from address: " << std::hex << address  << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+//        //    std::cout << " ** RETURN String --> " << str << std::endl;
+//        //}
+//         if (IsValidString(str)) {
+//            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
+//            std::cout << " ** Write String --> " << str << std::endl;
+//        }
+//
+//    }
+//}
 
-        std::string str = aCopyLPCSTR(address);
-        //if (true) { //(str.find("Fracture") != std::string::npos) {
-        //    std::cout << "Str achado:  " << instAddress << std::endl;
-        //    std::cout << "Read from address: " << std::hex << address  << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-        //    std::cout << " ** RETURN String --> " << str << std::endl;
-        //}
-         if (IsValidString(str)) {
-            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-            std::cout << " ** Write String --> " << str << std::endl;
-        }
 
-    }
-}
-
-
-
-VOID aMemoryTrace(INS ins)
-{
-
-    if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
-    {
-        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_INST_PTR, IARG_MEMORYWRITE_EA, IARG_END);
-
-       /* if (INS_IsValidForIpointAfter(ins))
-        {
-            INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
-        }
-        if (INS_IsValidForIpointTakenBranch(ins))
-        {
-            INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
-                IARG_END);
-        }*/
-    }
-    string memString = INS_Disassemble(ins);
-    if (INS_HasMemoryRead2(ins) && INS_IsStandardMemop(ins))
-    {
-        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE,
-            IARG_END);
-    }
-
-    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins) && INS_IsStandardMemop(ins))
-    {
-        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE,
-            IARG_END);
-    }
-}
+//Remover depois de implementar o memory trace
+//VOID aMemoryTrace(INS ins)
+//{
+//
+//    if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
+//    {
+//        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_INST_PTR, IARG_MEMORYWRITE_EA, IARG_END);
+//
+//       /* if (INS_IsValidForIpointAfter(ins))
+//        {
+//            INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
+//        }
+//        if (INS_IsValidForIpointTakenBranch(ins))
+//        {
+//            INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
+//                IARG_END);
+//        }*/
+//    }
+//    string memString = INS_Disassemble(ins);
+//    if (INS_HasMemoryRead2(ins) && INS_IsStandardMemop(ins))
+//    {
+//        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE,
+//            IARG_END);
+//    }
+//
+//    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins) && INS_IsStandardMemop(ins))
+//    {
+//        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE,
+//            IARG_END);
+//    }
+//}
 
 VOID TraceFunc(TRACE trace, VOID* v)
 {
@@ -1576,8 +1561,6 @@ VOID TraceFunc(TRACE trace, VOID* v)
         for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins))
         {
             InstrumentFuncCall(trace, ins);
-
-            aMemoryTrace(ins);
         }
     }
 }
@@ -1660,7 +1643,7 @@ void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile) {
     callTracker.saveAllExternalCalls(ExternalCallTraceOutFile);
 }
 
-int InitInstrumentation()
+int InitInstrumentation(std::string pid)
 {
     //// Tecnicas evasivas obsiium 1.4.3 Antidbi
     //sequence.push_back("jmp 0x7ff6acccdc2a");
@@ -1757,8 +1740,8 @@ int InitInstrumentation()
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb", "jb 0x7ff7bf17d3eb", "jo 0x7ff6cafbeb87"));
     sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
 
-    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 34, 34);
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
+    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 34, 34);
+    seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
 
@@ -1974,19 +1957,8 @@ int InitInstrumentation()
     read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe19"));
     read_string_cmp4.push_back(CreateInstVector("jz 0x7ff62f10fe35"));*/
 
-    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110eb8"));
-    read_string_cmp4.push_back(CreateInstVector("test eax, eax"));
-    read_string_cmp4.push_back(CreateInstVector("jnb 0x7ff62f110ebf"));
-    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f110eea"));
-    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ec5"));
-    read_string_cmp4.push_back(CreateInstVector("cmp dword ptr [rbp+0x18], 0x8"));
-    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ecd"));
-    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f110eea"));
-    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ed6"));
-    read_string_cmp4.push_back(CreateInstVector("cmp qword ptr [rbp], 0x0"));
-    read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f110ee1"));
-    read_string_cmp4.push_back(CreateInstVector("jnz 0x7ff62f11125f"));
-    seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmpCallback2);
+
+    //seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmpCallback2);
     //seq_detector.AddInstructionSequence(read_string_cmp4, SetZfToZero);
 
     seq_detector.Initialize();
@@ -1996,6 +1968,7 @@ int InitInstrumentation()
 
     INS_AddInstrumentFunction(TraceInst, 0);
 
+    InitTrace(pid);
 
     return 0;
 }

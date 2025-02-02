@@ -26,7 +26,6 @@ using std::wstring;
 PIN_LOCK lock;
 static std::ofstream OutFile;
 static std::ofstream ExternalCallTraceOutFile;
-static std::ofstream* TraceOutFile;
 KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "contradef", "specify file name for output log ");
 KNOB<string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "y", "", "specify file name for YARA rules ");
 KNOB<BOOL> KnobAllowAttachDebugger(KNOB_MODE_WRITEONCE, "pintool", "ad", "0", "Allow attach debugger ");
@@ -171,9 +170,7 @@ int main(int argc, char* argv[]) {
 
     IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
-    InitInstrumentation();
-
-    InitTrace(TraceOutFile, pid);
+    InitInstrumentation(pid);
 
     PIN_AddFiniFunction(Fini, 0);
 

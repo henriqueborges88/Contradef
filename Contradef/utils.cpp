@@ -1,6 +1,217 @@
 // utils.cpp
 #include "utils.h"
 
+
+bool IsPointer(ADDRINT value) {
+    // Verifica se o valor é um ponteiro acessível
+    return PIN_CheckReadAccess(reinterpret_cast<void*>(value));
+}
+
+
+std::string GetNumericValue(ADDRINT ea, UINT32 size) {
+    if (size == 0) {
+        return "0"; // Retorna "0" para tamanho inválido
+    }
+
+    std::stringstream ss;
+
+    switch (size) {
+    case 1:
+    {
+        UINT8 value = static_cast<UINT8>(ea);
+        ss << std::dec << static_cast<unsigned int>(value);
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 value = static_cast<UINT16>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 value = static_cast<UINT32>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 value = static_cast<UINT64>(ea);
+        ss << std::dec << value;
+    }
+    break;
+
+    default:
+        // Trata outros casos como um ponteiro de 64 bits
+        ss << std::dec << static_cast<UINT64>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+std::string GetNumericHexValue(ADDRINT ea, UINT32 size) {
+    if (size == 0) {
+        return "0"; // Retorna "0" para tamanho inválido
+    }
+
+    std::stringstream ss;
+    ss << "0x"; // Prefixo hexadecimal para maior clareza
+
+    switch (size) {
+    case 1:
+    {
+        UINT8 value = static_cast<UINT8>(ea);
+        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(value);
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 value = static_cast<UINT16>(ea);
+        ss << std::setfill('0') << std::setw(4) << std::hex << value;
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 value = static_cast<UINT32>(ea);
+        ss << std::setfill('0') << std::setw(8) << std::hex << value;
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 value = static_cast<UINT64>(ea);
+        ss << std::setfill('0') << std::setw(16) << std::hex << value;
+    }
+    break;
+
+    default:
+        // Trata outros casos como um ponteiro de 64 bits
+        ss << std::hex << static_cast<UINT64>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+std::string GetNumericValueFromRef(VOID* ea, UINT32 size) {
+    if (!IsPointer(reinterpret_cast<ADDRINT>(ea))) {
+        return ""; // Retorna um valor padrão se o ponteiro for inválido
+    }
+
+    std::stringstream ss;
+    ss << "0x"; // Prefixo hexadecimal para maior clareza
+
+    switch (size) {
+    case 0:
+        return ""; // Tamanho inválido
+        break;
+
+    case 1:
+    {
+        UINT8 x;
+        PIN_SafeCopy(&x, static_cast<UINT8*>(ea), 1);
+        ss << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(x) << " (" << std::dec << static_cast<unsigned int>(x) << ")"; // Converte UINT8 para string
+    }
+    break;
+
+    case 2:
+    {
+        UINT16 x;
+        PIN_SafeCopy(&x, static_cast<UINT16*>(ea), 2);
+        ss << std::setfill('0') << std::setw(4) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT16 para string
+    }
+    break;
+
+    case 4:
+    {
+        UINT32 x;
+        PIN_SafeCopy(&x, static_cast<UINT32*>(ea), 4);
+        ss << std::setfill('0') << std::setw(8) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT32 para string
+    }
+    break;
+
+    case 8:
+    {
+        UINT64 x;
+        PIN_SafeCopy(&x, static_cast<UINT64*>(ea), 8);
+        ss << std::setfill('0') << std::setw(16) << std::hex << x << " (" << std::dec << x << ")"; // Converte UINT64 para string
+    }
+    break;
+
+    default:
+        // Converte o ponteiro em string hexadecimal
+        ss << "0x" << std::hex << reinterpret_cast<uintptr_t>(ea);
+        break;
+    }
+
+    return ss.str();
+}
+
+bool IsStringPointer(UINT64 addr) {
+    if (!IsPointer(addr)) {
+        return false; // Ponteiro inválido
+    }
+
+    char* str = reinterpret_cast<char*>(addr);
+    for (int i = 0; i < 256; ++i) { // Limite para evitar leitura fora do contexto
+        if (!PIN_CheckReadAccess(&str[i])) {
+            return false; // Parte da string não é acessível
+        }
+        if (str[i] == '\0') {
+            return true; // Encontrou o final da string
+        }
+        if (str[i] < 0x20 || str[i] > 0x7E) {
+            return false; // Não é um caractere imprimível
+        }
+    }
+    return false; // Não encontrou um final de string válido
+}
+
+
+std::string GetStringValueFromRegister(UINT64 value, UINT32 size) {
+    std::ostringstream result;
+
+    // Caso de um único caractere (1 byte)
+    if (size == 1) {
+        char c = static_cast<char>(value & 0xFF); // Apenas o byte menos significativo
+        if (c >= 0x20 && c <= 0x7E) { // Verifica se é imprimível
+            result << "'" << c << "'";
+        }
+        else {
+            result << "";
+        }
+        return result.str();
+    }
+
+    // Caso de sequência de caracteres (até 8 bytes)
+    const char* str = reinterpret_cast<const char*>(&value);
+    bool isString = true;
+    for (UINT32 i = 0; i < size && i < 8; ++i) { // Limite do registrador é 8 bytes
+        if (str[i] == '\0') { // Terminação de string
+            break;
+        }
+        if (str[i] < 0x20 || str[i] > 0x7E) { // Não imprimível
+            isString = false;
+            break;
+        }
+    }
+
+    if (isString) {
+        result << "\"" << std::string(str, size).c_str() << "\""; // Converte para string
+    }
+    else {
+        result << "";
+    }
+
+    return result.str();
+}
+
 std::wstring ConvertAddrToWideString(ADDRINT addr) {
     if (addr != 0) {
         wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);

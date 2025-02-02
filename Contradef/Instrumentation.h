@@ -17,6 +17,7 @@
 #include "CallStackManager.h"
 #include "DllFunctionTracker.h"
 #include "DllFunctionMapper.h"
+#include "PinDebugTrace.h"
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h
 
@@ -31,6 +32,6 @@ VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADD
 VOID InstrumentFuncCall(TRACE trace, INS ins);
 VOID TraceFunc(TRACE trace, VOID* v);
 void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
-int InitInstrumentation();
+int InitInstrumentation(std::string pid);
 
 #endif // INSTRUMENTATION_H
