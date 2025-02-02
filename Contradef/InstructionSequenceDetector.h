@@ -152,6 +152,7 @@ public:
     // Implementações não estáticas
     VOID ThreadStartImpl(THREADID tid, CONTEXT* ctxt, INT32 flags);
     VOID ThreadFiniImpl(THREADID tid, const CONTEXT* ctxt, INT32 code);
+    std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetInstructionQueue();
 
 private:
     // Estrutura para armazenar dados específicos da thread

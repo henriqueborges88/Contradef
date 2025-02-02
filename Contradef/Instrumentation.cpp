@@ -500,34 +500,8 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
 }
 
 
-
-
-
-
-
-// Função que redireciona a execução para o endereço de destino caso o desvio (jnz) não seja tomado
-void SimulaJnzComoJz(ADDRINT enderecoDestino, BOOL desvioTomado, CONTEXT* ctxt) {
-
-
-    //std::cout << "INST " << std::endl;
-
-    // Verifica se o desvio não foi tomado (como seria em um jz)
-    if (!desvioTomado) {
-        // Redireciona a execução para o endereço destino
-        PIN_SetContextReg(ctxt, REG_INST_PTR, enderecoDestino);
-        PIN_ExecuteAt(ctxt);
-        std::cout << "ALTERANDO " << std::endl;
-
-    }
-
-}
-
-
 InstructionSequenceDetector seq_detector;
-//
-//criar um tipo de objeto com nome e um cb para executar o cb sempre que dé match numa sequencía
-//
-//outra opção é usar uma lista de CBs para cada endereço e registrar as execuções junto com os matchs 
+
 
 #include "xed-interface.h"
 //
@@ -635,218 +609,14 @@ VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInst
     }
 
 
-
-
-
-
-
-
-
-    //ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RAX);
-    //ADDRINT r11_value = PIN_GetContextReg(ctxt, REG_R11);
-    ////std::cout << "RAX = 0x" << std::hex << rax_value << std::endl;
-
-    //ADDRINT result = rax_value + (r11_value * 2) + 0x4;
-
-    //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-    //std::wstring wstr(CharStr);
-
-    //if (wstr.find(L"CDebugger detected - please disable it and restart the application.") != std::wstring::npos) {
-    //    std::cout << "Sequência encontrada na thread " << tid << ", Instaddr: " << ip << ":\n";
-
-    //    /*std::cout << "Debug achado: Fazendo patch" << std::endl;
-    //    CharStr[5] = L'X';
-    //    CharStr[7] = L'Q';
-    //    CharStr[9] = L'Y';*/
-
-
-    //    wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-
-
-
-    //    // OBTENDO A PROXIMA STRING DINAMICAMENTE
-    //    uint8_t* rax = reinterpret_cast<uint8_t*>(rax_value);
-
-    //    uint16_t value16 = *reinterpret_cast<uint16_t*>(rax + 512);
-    //    uint32_t r11d = static_cast<uint32_t>(value16);
-
-    //    // Cálculo do novo valor de rax (lea rax, ptr [rax+r11*2+0x4])
-    //    rax = rax + r11d * 2 + 0x4;
-
-    //    // Impressão do novo valor do ponteiro
-    //    std::cout << "Novo valor de rax: " << static_cast<void*>(rax) << std::endl;
-
-
     //    wchar_t* CharStr2 = reinterpret_cast<wchar_t*>(rax);
     //    fflush(stdout);
     //    wprintf(L" ** RETURN WString2 --> %ls <-\n", CharStr2);
     //    fflush(stdout);
     //}
 
-
-
-
-
-
-
-
-    // Incrementar RAX
-    //PIN_SetContextReg(ctxt, REG_RAX, rax_value + 1);
-
-    // Ler RAX após modificação
-    //ADDRINT new_rax_value = PIN_GetContextReg(ctxt, REG_RAX);
-    //std::cout << "Depois: RAX = 0x" << std::hex << new_rax_value << std::endl;
-
-    //for (const auto& instr : sequence)
-    //{
-    //    std::cout << instr << "\n";
-    //}
-
-
-
-
-
-    // ADDRINT r13_value = PIN_GetContextReg(ctxt, REG_R13);
-    ////std::cout << "RAX = 0x" << std::hex << rax_value << std::endl;
-
-    // ADDRINT result = r13_value + 0x4;
-
-    //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-    //fflush(stdout);
-    //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-    //fflush(stdout);
-    //std::wstring wstr(CharStr);
-
-    //if (wstr.find(L"Error resolving imported function") != std::wstring::npos) {
-    //    std::cout << "Debug achado: Fazendo patch" << std::endl;
-    //    CharStr[5] = L'X';
-    //    CharStr[7] = L'Q';
-    //    CharStr[9] = L'Y';
-    //}
 }
 
-VOID SequenceMatchCallbackx(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    // Obter os flags atuais
-    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-
-    // Verificar o valor atual do ZF
-    BOOL zf_before = (flags & (1 << 6)) != 0;
-    //std::cout << "1 - ZF ->" << zf_before << std::endl;
-
-    if (zf_before == 0) {
-
-        // Para setar o ZF para 1:
-        flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-        std::cout << "2 - APLICANDO CONTRAMEDIDA NO INDICE -> " << sequence.matchCount << std::endl;
-
-        // Para setar o ZF para 0:
-        //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
-
-        // Atualizar os flags
-        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
-
-        // Obter os flags atualizados
-        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-        BOOL zf_after = (flags & (1 << 6)) != 0;
-        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
-
-        PIN_ExecuteAt(ctxt);
-    }
-
-
-}
-
-VOID SequenceMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    // Obter os flags atuais
-    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-
-    // Verificar o valor atual do ZF
-    BOOL zf_before = (flags & (1 << 6)) != 0;
-    std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << " - ZF ->" << zf_before << std::endl;
-
-    if (zf_before == 0) {
-
-        //// Para setar o ZF para 1:
-        //flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-
-        //// Para setar o ZF para 0:
-        //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
-
-        //// Atualizar os flags
-        //PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
-
-        //// Obter os flags atualizados
-        //flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-        //BOOL zf_after = (flags & (1 << 6)) != 0;
-        ////std::cout << "ZF depois da modificação: " << zf_after << std::endl;
-
-        //PIN_ExecuteAt(ctxt);
-    }
-
-
-}
-
-VOID SequenceMatchCallback3(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    // Obter os flags atuais
-    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-
-    // Verificar o valor atual do ZF
-    BOOL zf_before = (flags & (1 << 6)) != 0;
-
-    if (zf_before == 1) {
-        std::cout << "2 - VERIFICANDO O INDICE -> " << sequence.matchCount << std::endl;
-
-        // Para setar o ZF para 1:
-        //flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-
-        // Para setar o ZF para 0:
-        flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
-
-        // Atualizar os flags
-        PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
-
-        // Obter os flags atualizados
-        flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-        BOOL zf_after = (flags & (1 << 6)) != 0;
-        //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
-
-        PIN_ExecuteAt(ctxt);
-    }
-
-
-}
-
-
-VOID Sequence2MatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    // Obter os flags atuais
-    ADDRINT flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-
-    // Verificar o valor atual do ZF
-    BOOL zf_before = (flags & (1 << 6)) != 0;
-    //std::cout << "ZF antes da modificação: " << zf_before << std::endl;
-
-    // Para setar o ZF para 1:
-    flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-
-    // Para setar o ZF para 0:
-    //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
-
-    // Atualizar os flags
-    PIN_SetContextReg(ctxt, REG_RFLAGS, flags);
-
-    // Obter os flags atualizados
-    flags = PIN_GetContextReg(ctxt, REG_RFLAGS);
-    BOOL zf_after = (flags & (1 << 6)) != 0;
-    //std::cout << "ZF depois da modificação: " << zf_after << std::endl;
-
-    PIN_ExecuteAt(ctxt);
-
-}
 
 VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
@@ -956,181 +726,6 @@ VOID SequenceMatchReadStringEnvsCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt
 
         char* CharStr2 = reinterpret_cast<char*>(result);
         std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-    }
-
-
-}
-
-
-
-VOID SequenceMatchReadStringEnvs2Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    //lea rax, ptr [rip+0x25e]
-    ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RAX);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R8);
-
-    //ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = r8_value + rax_value * 1;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-
-        //std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-    }
-
-
-}
-
-
-VOID SequenceMatchReadStringEnvs3Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    //lea rax, ptr [rip+0x25e]
-    ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RSI);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_RBP);
-
-    //ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = rax_value + r8_value * 1;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-
-        //std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-    }
-
-
-}
-
-
-VOID SequenceMatchReadStringStrsCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    //lea rax, ptr [rip+0x25e]
-    ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_R10);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R9);
-
-    //ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = rax_value;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-
-        //std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        //wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        if (IsValidString(std::string(CharStr2))) {
-            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-        }
-    }
-
-
-}
-
-
-
-
-VOID SequenceMatchReadStringDbgNamesCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    //lea rax, ptr [rip+0x25e]
-    ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RCX);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R9);
-
-    //ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = rax_value;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-
-        //std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        std::wstring wstr = ConvertAddrToWideString(result);
-        if (IsValidWideString(wstr)) {
-            wprintf(L" ** RETURN WStringX --> %ls <-\n", wstr);
-
-        }
-        //wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        if (IsValidString(std::string(CharStr2))) {
-            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-        }
-
-        //char* CharStr2 = reinterpret_cast<char*>(result);
-        //std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-
-    }
-
-
-}
-
-
-
-VOID SequenceMatchReadStringCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
-{
-    //lea rax, ptr [rip+0x25e]
-    ADDRINT rax_value = PIN_GetContextReg(ctxt, REG_RDX);
-    ADDRINT r8_value = PIN_GetContextReg(ctxt, REG_R9);
-
-    //ADDRINT rdx_value = PIN_GetContextReg(ctxt, REG_RCX);
-
-    ADDRINT result = rax_value;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        //wchar_t* CharStr = reinterpret_cast<wchar_t*>(result);
-
-
-        //std::wstring wstr(CharStr);
-        //wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-        std::wstring wstr = ConvertAddrToWideString(result);
-        if (IsValidWideString(wstr)) {
-            wprintf(L" ** RETURN WStringX --> %ls <-\n", wstr);
-
-        }
-        //wprintf(L" ** RETURN WStringX --> %ls <-\n", ConvertAddrToWideString(result));
-
-
-
-        char* CharStr2 = reinterpret_cast<char*>(result);
-        if (IsValidString(std::string(CharStr2))) {
-            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-        }
-
-        //char* CharStr2 = reinterpret_cast<char*>(result);
-        //std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-
     }
 
 
@@ -1263,6 +858,7 @@ VOID SequenceMatchReadStringCmp40Callback(THREADID tid, ADDRINT ip, CONTEXT* ctx
 }
 
 
+// IMPORTANTE - Contem os valores a serem comparados com os nomes de alguns depuradores
 VOID SequenceMatchReadStringCmp41Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
     ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RBP) + PIN_GetContextReg(ctxt, REG_RCX) * 2 + 0x0;
@@ -1289,57 +885,52 @@ VOID SequenceMatchReadStringCmp41Callback(THREADID tid, ADDRINT ip, CONTEXT* ctx
 
 
 
-VOID SequenceMatchReadStringCmp4Callback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+VOID SequenceMatchAntiDebugSameTarget(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    //ADDRINT rip_value = PIN_GetContextReg(ctxt, REG_RIP);
-    //PIN_LockClient();
-    //IMG tgtImg = IMG_FindByAddress(rip_value);
-    //RTN tgtRtn = RTN_FindByAddress(rip_value);
-    //string rtnN = RTN_FindNameByAddress(rip_value);
+    std::deque<InstrumentedInstruction*> instruction_queue = seq_detector.GetInstructionQueue();
 
-    //string imgN = "";
-    //if (IMG_Valid(tgtImg)) {
-    //    imgN = IMG_Name(tgtImg);
-    //}
-    //std::cout << "=== " << IsMainExecutable(ip) << " - " << imgN << " - " << rtnN << std::endl;
-    //PIN_UnlockClient();
+    InstrumentedInstruction* inst = instruction_queue[instruction_queue.size() - 2];
+    InstrumentedInstruction* inst2 = instruction_queue[instruction_queue.size() - 1];
+
+    std::string inststr = inst->instructionStr;
+    std::string inststr2 = inst2->instructionStr;
+
+    std::string subinst = inststr.substr(2, 15);
+    std::string subinst2 = inststr2.substr(3, 15);
+
+    if (subinst == subinst2 && (inst->instAddr + inst->size) == inst2->instAddr) {
+        std::cout << "\n[CONTRADEF][ANTIDEBUG] Instruções de Salto com o Mesmo Alvo:" << std::endl;
+        std::cout << "    " << std::hex << inst->instAddr << " | " << inststr << std::dec << std::endl;
+        std::cout << "    " << std::hex << inst2->instAddr << " | " << inststr2 << std::dec << std::endl;
+    }
+}
 
 
+VOID SequenceMatchAntiDebugConstCondition(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    std::deque<InstrumentedInstruction*> instruction_queue = seq_detector.GetInstructionQueue();
+
+    InstrumentedInstruction* inst = instruction_queue[instruction_queue.size() - 2];
+    InstrumentedInstruction* inst2 = instruction_queue[instruction_queue.size() - 1];
+
+    std::string inststr = inst->instructionStr;
+    std::string inststr2 = inst2->instructionStr;
+
+    if ((inst->instAddr + inst->size) == inst2->instAddr) {
+        std::cout << "\n[CONTRADEF][ANTIDEBUG] Instruções com Condição Constante:" << std::endl;
+        std::cout << "    " << std::hex << inst->instAddr << " | " << inststr << std::dec << std::endl;
+        std::cout << "    " << std::hex << inst2->instAddr << " | " << inststr2 << std::dec << std::endl;
+    }
+}
 
 
-    //UINT64 rbxValue = PIN_GetContextReg(ctxt, REG_RBX);
-    //UINT16 bxValue = static_cast<UINT16>(rbxValue & 0xFFFF);
-    //std::cout << "Valor de BX: 0x" << std::hex << bxValue << std::endl;
-
+VOID SequenceMatchPauseCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
     OS_PROCESS_ID pid = PIN_GetPid();
     std::cout << "Sequencia de instrucoes identificada, endereco de instrucao " << std::hex << ip << std::dec << ", corresponde a funcao: " << GetFunctionFromAddress(ip, pid).functionName << std::endl;
     PauseAtAddress(ip);
-    return;
-   
-    // ADDRINT r_value = PIN_GetContextReg(ctxt, REG_R10) + PIN_GetContextReg(ctxt, REG_RCX) * 1 + 0x1;
-    //ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RBP) + 0x158;
-    ADDRINT r_value = PIN_GetContextReg(ctxt, REG_RCX) ;
-
-    for (size_t i = 0; i < 1; i++)
-    {
-        //std::cout << "ADDR1: " << std::hex << *(reinterpret_cast<ADDRINT*>(r_value)) << std::dec << " T[" << tid << "]" << std::endl;
-        std::cout << "ADDR: " << std::hex << r_value << std::dec << " T[" << tid << "]" << std::endl;
-
-
-        if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(r_value))) {
-            wchar_t* CharStr = reinterpret_cast<wchar_t*>(r_value);
-            std::wstring wstr(CharStr);
-            wprintf(L" ** RETURN WString --> %ls <-\n", CharStr);
-
-            char* CharStr2 = reinterpret_cast<char*>(r_value);
-            std::cout << " ** RETURN StringArg --> " << CharStr2 << std::endl;
-            r_value = r_value + 0x1;
-        }
-
-    }
-
-
 }
+
 
 // From regval.cpp
 static void PrintRegisters(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
@@ -1406,6 +997,15 @@ VOID SetZfToZero(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& 
 
 }
 
+// Função que redireciona a execução para o endereço de destino
+void JumpToAddress(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
+{
+    ADDRINT destAddr = 0; // Definir o valor
+    // Redireciona a execução para o endereço destino
+    PIN_SetContextReg(ctxt, REG_INST_PTR, destAddr);
+    PIN_ExecuteAt(ctxt);
+}
+
 VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID* ea, UINT32 size)
 {
     ADDRINT address = reinterpret_cast<ADDRINT>(ea);
@@ -1414,76 +1014,17 @@ VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID
     if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(ea)))
     {
         std::wstring wstr = aCopyLPCWSTR(address);
-        //if (wstr.find(L"Fracture") != std::wstring::npos) {
-        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
-        //    std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
-        //}
         if (IsValidWideString(wstr)) {
             std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
             wprintf(L" ** Read WString --> %ls <-\n", wstr);
         }
         
         std::string str = aCopyLPCSTR(address);
-        //if (str.find("Fracture") != std::string::npos) {
-        //    std::cout << "Str achado:  " << instAddress << std::endl;
-        //    std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-        //    std::cout << " ** RETURN String --> " << str << std::endl;
-        //}
-         if (IsValidString(str)) {
+        if (IsValidString(str)) {
             std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
             std::cout << " ** Read String --> " << str << std::endl;
         }
                 
-    }
-    //UINT16 value;
-    //PIN_SafeCopy(&value, reinterpret_cast<UINT16*>(ea), size);
-    //std::cout << "Value read: " << value << std::endl;
-
-    return;
-
-    switch (size)
-    {
-    case 0:
-        std::cout << "0 repeat count" << std::endl;
-        break;
-
-    case 1:
-    {
-        UINT8 x;
-        PIN_SafeCopy(&x, static_cast<UINT8*>(ea), 1);
-        std::cout << static_cast<UINT32>(x) << " = *(UINT8*)" << ea << std::endl;
-    }
-    break;
-
-    case 2:
-    {
-        UINT16 x;
-        PIN_SafeCopy(&x, static_cast<UINT16*>(ea), 2);
-        std::cout << x << " = *(UINT16*)" << ea << std::endl;
-    }
-    break;
-
-    case 4:
-    {
-        UINT32 x;
-        PIN_SafeCopy(&x, static_cast<UINT32*>(ea), 4);
-        std::cout << x << " = *(UINT32*)" << ea << std::endl;
-    }
-    break;
-
-    case 8:
-    {
-        UINT64 x;
-        PIN_SafeCopy(&x, static_cast<UINT64*>(ea), 8);
-        std::cout << x << " = *(UINT64*)" << ea << std::endl;
-    }
-    break;
-
-    default:
-        //ShowN(size, ea);
-        std::cout << " = *(UINT" << std::dec << size * 8 << std::hex << ")" << ea << std::endl;
-        break;
     }
 
 }
@@ -1589,36 +1130,9 @@ VOID RecordLEA(VOID* ip, std::string* insstr, REG reg, ADDRINT regValue) {
 }
 
 
-
-/////
-#include <set>
-constexpr BYTE SPECIAL_VALUE = 0xFFF34433;    // Valor a interceptar
-constexpr BYTE MODIFIED_VALUE = 0xFFFFFFFF;  // Novo valor a ser escrito
-
-std::set<ADDRINT> interceptedAddresses; // Endereços modificados
-
-VOID ModifyValue(ADDRINT addr) {
-    BYTE* target = reinterpret_cast<BYTE*>(addr);
-    if (*target == SPECIAL_VALUE) {
-        *target = MODIFIED_VALUE; // Altera o valor especial
-        interceptedAddresses.insert(addr);
-        std::cout << "Valor especial interceptado e alterado no endereço: " << std::hex << addr << std::endl;
-    }
-}
-
-/////
-
 VOID TraceInst(INS ins, VOID* v)
 {
     seq_detector.InstructionTrace(ins, &seq_detector);
-
-    // Intercepta instruções de escrita em memória
-    //if (INS_IsMemoryWrite(ins)) {
-    //    INS_InsertCall(
-    //        ins, IPOINT_BEFORE, (AFUNPTR)ModifyValue,
-    //        IARG_MEMORYWRITE_EA, // Endereço efetivo de escrita
-    //        IARG_END);
-    //}
 
     return;
 
@@ -1645,95 +1159,8 @@ void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile) {
 
 int InitInstrumentation(std::string pid)
 {
-    //// Tecnicas evasivas obsiium 1.4.3 Antidbi
-    //sequence.push_back("jmp 0x7ff6acccdc2a");
-    //sequence.push_back("test word ptr [rdi+0xa], 0x2");
-    //sequence.push_back("jmp 0x7ff6226ddc33");
-    //sequence.push_back("jz 0x7ff6226dd7c2");
-    //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback);
 
-    //// Tecnicas evasivas obsiium 1.4.3 AntiVM
-    //std::vector<std::string> sequence2;
-    //sequence2.push_back("jmp 0x7ff6acccdc2a");
-    //sequence2.push_back("test word ptr [rsi+0xa], 0x2");
-    //sequence2.push_back("jmp 0x7ff6226ddc33");
-    //sequence2.push_back("jz 0x7ff6226dd7c2");
-    //seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
-
-
-
-
-
-    //Funciona parcialmente 1.4 e 1.8
-    //std::vector<std::vector<std::string>> sequence2;
-
-    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
-    //sequence2.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
-    //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d928"));
-    //sequence2.push_back(CreateInstVector("test rax, rax"));
-    //sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d8cd", "jo 0x7ff6f499d8cd"));
-    //sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-
-    //seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
-
-
-
-
-
-
-    ////Sequencia invalida, pesquisar mais sobre
-    //std::vector<std::vector<std::string>> sequence3;
-
-    //sequence3.push_back(CreateInstVector("test word ptr [rsi+0xa], 0x2"));
-    //sequence3.push_back(CreateInstVector("jno 0x7ff6889700d1"));
-    //sequence3.push_back(CreateInstVector("jz 0x7ff68896f179"));
-    //sequence3.push_back(CreateInstVector("jmp 0x7ff68896f9d4"));
-    //sequence3.push_back(CreateInstVector("test rax, rax"));
-    //sequence3.push_back(CreateInstVector("jnb 0x7ff68896f9dc"));
-    //sequence3.push_back(CreateInstVector("jnz 0x7ff68896f594"));
-
-    //seq_detector.AddInstructionSequence(sequence3, SequenceMatchCallback3);
-
-
-
-
-
-
-    //// Tecnicas evasivas obsiium 1.8.5 AntVM
-    //std::vector<std::string> sequence2;
-    //sequence2.push_back("jmp 0x7ff6f499d6e1");
-    //sequence2.push_back("test word ptr [rdi+0xa], 0x2");
-    //sequence2.push_back("jnb 0x7ff6f499d6eb");
-    //sequence2.push_back("jz 0x7ff6f499d2da");
-
-    //seq_detector.AddInstructionSequence(sequence2, Sequence2MatchCallback);
-
-    //// Tecnicas evasivas obsiium 1.8.5 Antidbi
-    //std::vector<std::string> sequence3;
-    //sequence3.push_back("jmp 0x7ff6f499d6e1");
-    //sequence3.push_back("test word ptr [rdi+0xa], 0x2");
-    //sequence3.push_back("jno 0x7ff6f499d6eb");
-    //sequence3.push_back("jz 0x7ff6f499d2da");
-
-    //seq_detector.AddInstructionSequence(sequence3, Sequence2MatchCallback);
-
-    //// Tecnicas evasivas obsiium 1.8.5 Antidbi
-    //std::vector<std::string> sequence4;
-    //sequence4.push_back("jmp 0x7ff6f499d6e1");
-    //sequence4.push_back("test word ptr [rsi+0xa], 0x2");
-    //sequence4.push_back("jno 0x7ff6f499d6eb");
-    //sequence4.push_back("jz 0x7ff6f499d2da");
-
-    //seq_detector.AddInstructionSequence(sequence4, Sequence2MatchCallback);
-
-
-
-
-
-
-        // Tecnicas evasivas obsiium 1.8.5 Antidbi
+    // Tecnicas evasivas obsiium 1.8.5 Antidbi
     std::vector<std::vector<std::string>> sequence;
     sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
     sequence.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
@@ -1743,39 +1170,6 @@ int InitInstrumentation(std::string pid)
     //seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 34, 34);
     seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
-
-
-
-    ///TESTE
-    // Testar em outra release do obsidium o motivo de ter funcionado apenas com uma alteração (mais acima)
-    std::vector<std::vector<std::string>> sequencex;
-    sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
-    sequencex.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-    sequencex.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb"));
-    sequencex.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    //seq_detector.AddInstructionSequence(sequencex, SequenceMatchCallbackx, 31, 31); // não é mais necessário nessa release do obsidium, verificar o motivo
-    ///FIM Teste
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // parte 2 da anterior
-    std::vector<std::vector<std::string>> sequence2;
-    sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d928"));
-    sequence2.push_back(CreateInstVector("test rax, rax"));
-    sequence2.push_back(CreateInstVector("jmp 0x7ff6f499d8cd", "jo 0x7ff6f499d8cd"));
-    sequence2.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-    //seq_detector.AddInstructionSequence(sequence2, SequenceMatchCallback2);
 
 
     // Instrução para ver as funções que será chamadas
@@ -1825,37 +1219,6 @@ int InitInstrumentation(std::string pid)
 
 
 
-    // Variaveis de amboente
-    //std::vector<std::vector<std::string>> sequence_read_string_fcn;
-    //sequence_read_string_fcn.push_back(CreateInstVector("lea rax, ptr [rcx+0x1]"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmovz rax, rcx"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov rcx, rax"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("or rax, 0xffffffffffffffff"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("inc rax"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmp byte ptr [r8+rax*1], 0x0"));
-    //seq_detector.AddInstructionSequence(sequence_read_string_fcn, SequenceMatchReadStringEnvs2Callback);
-
-
-
-
-    ////Variaveis de amboente 3, contem PIN_CRT_TZDATA e VBOX_MSI_INSTALL_PATH
-    //std::vector<std::vector<std::string>> sequence_read_string_fcn;
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov al, byte ptr [rsi]"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("test al, al"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("jz 0x7ff6d6ea14fa"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("or rbp, 0xffffffffffffffff"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("inc rbp"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("cmp byte ptr [rsi+rbp*1], 0x0"));
-    //seq_detector.AddInstructionSequence(sequence_read_string_fcn, SequenceMatchReadStringEnvs3Callback);
-
-
-    ////Algumas strings, nada importante
-    //std::vector<std::vector<std::string>> sequence_read_string_fcn;
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov r10, rdi"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("sub r10, rax"));
-    //sequence_read_string_fcn.push_back(CreateInstVector("mov al, byte ptr [r10]"));
-    //seq_detector.AddInstructionSequence(sequence_read_string_fcn, SequenceMatchReadStringStrsCallback);
-
 
 
 
@@ -1902,19 +1265,6 @@ int InitInstrumentation(std::string pid)
     read_string_cmp3.push_back(CreateInstVector("mov qword ptr [rsp+0x20], rdi"));
     //seq_detector.AddInstructionSequence(read_string_cmp3, SequenceMatchReadStringCmp3Callback);
 
-    // Verificar Com R12 e R13 
-    //std::vector<std::vector<std::string>> read_string_cmp4;
-    //read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x20"));
-    //read_string_cmp4.push_back(CreateInstVector("mov r15d, ecx"));
-    //read_string_cmp4.push_back(CreateInstVector("lea r14, ptr [rip-0x14c32]"));
-    //read_string_cmp4.push_back(CreateInstVector("or rdi, 0xffffffffffffffff"));
-    //read_string_cmp4.push_back(CreateInstVector("mov r12, r9"));
-    //read_string_cmp4.push_back(CreateInstVector("mov rbp, r8"));
-    //read_string_cmp4.push_back(CreateInstVector("mov r13, rdx"));
-    //read_string_cmp4.push_back(CreateInstVector("mov r10, qword ptr [r14+r15*8+0x372c0]"));
-    //seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmp4Callback);
-
-
 
     // IMPORTANTE - Contem o nome de alguns depuradores
     std::vector<std::vector<std::string>> read_string_cmp40;
@@ -1937,15 +1287,25 @@ int InitInstrumentation(std::string pid)
     //seq_detector.AddInstructionSequence(read_string_cmp41, SequenceMatchReadStringCmp41Callback);
 
 
+    // Tecnica antidebug, verificada
+    std::vector<std::vector<std::string>> ad_same_target;
+    ad_same_target.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
+    ad_same_target.push_back(CreateInstVector("jnz 0x7ff62f10fe35"));
+    //seq_detector.AddInstructionSequence(ad_same_target, SequenceMatchAntiDebugSameTarget);
+
+
+    // Tecnica antidebug, verificada
+    std::vector<std::vector<std::string>> ad_const_condition;
+    ad_const_condition.push_back(CreateInstVector("xor eax, eax"));
+    ad_const_condition.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
+    //seq_detector.AddInstructionSequence(ad_const_condition, SequenceMatchAntiDebugConstCondition);
+
+
+    // para testes
     std::vector<std::vector<std::string>> read_string_cmp4;
     //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rsi], 0x56"));
     //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbp], 0x43"));
-    //read_string_cmp4.push_back(CreateInstVector("cmp qword ptr [rdx-0x10], 0x48")); pesquisar mais
-    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdx], 0x6c")); pesquisar mais
-    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rsi], 0x6c")); pesquisar mais
-    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdx], 0x32")); pesquisar mais
-    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbx], 0x23")); pesquisar mais
-    //read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rdi], 0x22")); // procura aspas
+
 
 
     /*read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x58"));
@@ -1958,7 +1318,7 @@ int InitInstrumentation(std::string pid)
     read_string_cmp4.push_back(CreateInstVector("jz 0x7ff62f10fe35"));*/
 
 
-    //seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchReadStringCmpCallback2);
+    //seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchAntiDebugSameTarget);
     //seq_detector.AddInstructionSequence(read_string_cmp4, SetZfToZero);
 
     seq_detector.Initialize();
@@ -1968,7 +1328,7 @@ int InitInstrumentation(std::string pid)
 
     INS_AddInstrumentFunction(TraceInst, 0);
 
-    InitTrace(pid);
+    //InitTrace(pid);
 
     return 0;
 }

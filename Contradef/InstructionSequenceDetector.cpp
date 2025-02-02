@@ -304,4 +304,8 @@ InstructionSequenceDetector::ThreadData* InstructionSequenceDetector::GetThreadD
     return tdata;
 }
 
-
+std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetInstructionQueue()
+{
+    ThreadData* tdata = GetThreadData();
+    return tdata->instruction_queue;
+}
