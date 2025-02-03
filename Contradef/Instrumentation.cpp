@@ -1308,7 +1308,6 @@ int InitInstrumentation(std::string pid)
 
     // Tecnica antidebug, verificada
     std::vector<std::vector<std::string>> ad_const_condition;
-    ad_const_condition.push_back(CreateInstVector("jmp 0x1bc7d3c6b32"));
     ad_const_condition.push_back(CreateInstVector("xor eax, eax"));
     ad_const_condition.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
     disassembly_seq_detector.AddInstructionSequence(ad_const_condition, SequenceMatchAntiDebugConstCondition);
