@@ -28,14 +28,14 @@ struct InstrumentedInstruction {
     std::string instructionStr;
     std::string normalizedInstructionStr;
     bool insHasWildcard;
-    int size;
+    int strSize;
     OPCODE insClass;
 
     InstrumentedInstruction(OPCODE insCl, std::string instructionStr)
-        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), insHasWildcard(false), size(0), insClass(insCl)
+        : instAddr(0), instructionStr(instructionStr), normalizedInstructionStr(instructionStr), insHasWildcard(false), strSize(0), insClass(insCl)
     {
         NormalizeInstructionText(normalizedInstructionStr);
-        size = strlen(normalizedInstructionStr.c_str());
+        strSize = strlen(normalizedInstructionStr.c_str());
     }
 };
 
@@ -127,6 +127,11 @@ struct InstructionKeyHash {
     }
 };
 
+enum CaptureMode
+{
+    onCall,
+    onDisassembly
+};
 
 class InstructionSequenceDetector
 {
@@ -141,8 +146,7 @@ public:
     void Initialize();
 
     // Função de instrumentação que deve ser chamada para cada instrução
-    VOID Instruction(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_text);
-    VOID InstructionTrace(INS ins, VOID* v);
+    VOID InstructionTrace(INS ins, VOID* v, CaptureMode captureMode = onCall);
     VOID seqInstCB(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr);
     static VOID seqInstCBWrapper(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr, InstructionSequenceDetector* self);
 
@@ -153,12 +157,14 @@ public:
     VOID ThreadStartImpl(THREADID tid, CONTEXT* ctxt, INT32 flags);
     VOID ThreadFiniImpl(THREADID tid, const CONTEXT* ctxt, INT32 code);
     std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetInstructionQueue();
+    std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetDisassembledInstructionQueue();
 
 private:
     // Estrutura para armazenar dados específicos da thread
     struct ThreadData
     {
         std::deque<InstrumentedInstruction*> instruction_queue;
+        std::deque<InstrumentedInstruction*> disassembled_instruction_queue;
     };
 
     // Key para o Thread-Local Storage
@@ -174,6 +180,9 @@ private:
 
     // Métodos auxiliares
     ThreadData* GetThreadData();
+
+    VOID Instruction(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_text);
+    VOID DisassembledInstruction(ADDRINT ip, InstrumentedInstruction* ins_instr);
 };
 
 #endif // INSTRUCTION_SEQUENCE_DETECTOR_H

@@ -69,7 +69,7 @@ void NormalizeInstructionText(std::string& instr)
 
 BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMatch& seq_inst) {
     if (seq_inst.hasWildcard) {
-        if (queue_inst.size != seq_inst.size) {
+        if (queue_inst.strSize != seq_inst.size) {
             return false; // Tamanho diferente não pode corresponder
         }
         // Comparar caracter a caracter, considerando coringas
@@ -165,6 +165,59 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
     }
 }
 
+
+VOID InstructionSequenceDetector::DisassembledInstruction(ADDRINT ip, InstrumentedInstruction* ins_instr)
+{
+    ThreadData* tdata = GetThreadData();
+
+    // Adicionar a instrução atual à fila (com limite fixo de tamanho)
+    ins_instr->instAddr = ip;
+    if (tdata->disassembled_instruction_queue.size() == max_sequence_length) {
+        tdata->disassembled_instruction_queue.pop_front();
+    }
+    tdata->disassembled_instruction_queue.push_back(ins_instr);
+
+    // Comparar a fila de instruções com as sequências armazenadas
+    for (auto* sequence : instruction_sequences)
+    {
+
+        size_t seq_length = sequence->instruction_sequences.size();
+        if (tdata->disassembled_instruction_queue.size() < seq_length) {
+            continue; // Não há instruções suficientes na fila para realizar a comparação
+        }
+
+        // Comparar a sequência da fila com a sequência armazenada
+        auto start_it = tdata->disassembled_instruction_queue.end() - seq_length;
+
+        bool match = std::equal(start_it, tdata->disassembled_instruction_queue.end(), sequence->instruction_sequences.begin(),
+            [](const InstrumentedInstruction* queue_inst, std::vector<InstructionToMatch*>& seq_inst) {
+                bool match = false;
+                for (const auto* inst : seq_inst) {
+                    if (inst->isAnyInst) {
+                        match = true;
+                        break;
+                    }
+                    if (inst->insClass != queue_inst->insClass) {
+                        continue; // As instruções devem ser do mesmo tipo
+                    }
+                    if (InstMatch(*queue_inst, *inst)) {
+                        match = true;
+                        break;
+                    }
+                }
+                return match;
+            });
+
+        if (match) {
+            // Sequência encontrada, chamar o callback
+            sequence->matchCount++;
+            if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || (sequence->matchCount >= sequence->matchOcurrenceIndex && sequence->matchCount <= sequence->matchOcurrenceIndexEnd))) {
+                sequence->match_callback(PIN_ThreadId(), ip, nullptr, *sequence);
+            }
+        }
+    }
+}
+
 VOID InstructionSequenceDetector::seqInstCB(ADDRINT ip, CONTEXT* ctxt, InstrumentedInstruction* ins_instr)
 {
     Instruction(ip, ctxt, ins_instr);
@@ -176,7 +229,7 @@ VOID InstructionSequenceDetector::seqInstCBWrapper(ADDRINT ip, CONTEXT* ctxt, In
     self->seqInstCB(ip, ctxt, ins_instr);
 }
 
-VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
+VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v, CaptureMode captureMode)
 {
     bool add = false;
     OPCODE iOpCode = INS_Opcode(ins);
@@ -184,12 +237,19 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
     ADDRINT address = INS_Address(ins);
     std::string disassembledInstr = INS_Disassemble(ins);
 
+    InstrumentedInstruction* ins_inst = nullptr;
+
+    if (captureMode == onDisassembly) {
+        ins_inst = new InstrumentedInstruction(iOpCode, disassembledInstr);
+        DisassembledInstruction(address, ins_inst);
+        return;
+    }
+
     // Criar a chave para o cache
     InstructionKey key(address, disassembledInstr);
 
     // Verificar se já está no cache
     auto cachedInstr = instructionCache.find(key);
-    InstrumentedInstruction* ins_inst = nullptr;
 
     if (cachedInstr != instructionCache.end()) {
         // Recuperar do cache
@@ -243,18 +303,19 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v)
 
     InstructionSequenceDetector* detector = reinterpret_cast<InstructionSequenceDetector*>(v);
 
-
     if (add) {
-        //std::cout << "add instru -> " << INS_Address(ins) << " - " << ins_inst->instructionStr << std::endl;
+        if (captureMode == onCall) {
 
-        INS_InsertCall(ins,
-            IPOINT_BEFORE,
-            AFUNPTR(seqInstCBWrapper),
-            IARG_INST_PTR,
-            IARG_CONTEXT,
-            IARG_PTR, ins_inst,
-            IARG_PTR, detector,
-            IARG_END);
+            INS_InsertCall(ins,
+                IPOINT_BEFORE,
+                AFUNPTR(seqInstCBWrapper),
+                IARG_INST_PTR,
+                IARG_CONTEXT,
+                IARG_PTR, ins_inst,
+                IARG_PTR, detector,
+                IARG_END);
+        }
+;
     }
 }
 
@@ -308,4 +369,10 @@ std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetInstruction
 {
     ThreadData* tdata = GetThreadData();
     return tdata->instruction_queue;
+}
+
+std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetDisassembledInstructionQueue()
+{
+    ThreadData* tdata = GetThreadData();
+    return tdata->disassembled_instruction_queue;
 }

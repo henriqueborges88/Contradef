@@ -1,5 +1,9 @@
 #include "Instrumentation.h"
 
+KNOB< BOOL > KnobDisassembly(KNOB_MODE_WRITEONCE, "pintool", "dasm", "1", "Trace memory");
+
+std::ofstream disassemblyTraceOut;
+
 //CallStackManager callStackManager;
 std::map<THREADID, CallStackManager> callStacks;
 DllFunctionTracker callTracker(100000); // Máximo de 100000 funções rastreadas
@@ -501,6 +505,7 @@ VOID InstrumentFuncCall(TRACE trace, INS ins)
 
 
 InstructionSequenceDetector seq_detector;
+InstructionSequenceDetector disassembly_seq_detector;
 
 
 #include "xed-interface.h"
@@ -887,7 +892,7 @@ VOID SequenceMatchReadStringCmp41Callback(THREADID tid, ADDRINT ip, CONTEXT* ctx
 
 VOID SequenceMatchAntiDebugSameTarget(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    std::deque<InstrumentedInstruction*> instruction_queue = seq_detector.GetInstructionQueue();
+    std::deque<InstrumentedInstruction*> instruction_queue = disassembly_seq_detector.GetDisassembledInstructionQueue();
 
     InstrumentedInstruction* inst = instruction_queue[instruction_queue.size() - 2];
     InstrumentedInstruction* inst2 = instruction_queue[instruction_queue.size() - 1];
@@ -898,7 +903,7 @@ VOID SequenceMatchAntiDebugSameTarget(THREADID tid, ADDRINT ip, CONTEXT* ctxt, S
     std::string subinst = inststr.substr(2, 15);
     std::string subinst2 = inststr2.substr(3, 15);
 
-    if (subinst == subinst2 && (inst->instAddr + inst->size) == inst2->instAddr) {
+    if (subinst == subinst2 && (inst->instAddr + 2) == inst2->instAddr) {  // 2 = tamanho da instrução jz (SHORT JUMP)
         std::cout << "\n[CONTRADEF][ANTIDEBUG] Instruções de Salto com o Mesmo Alvo:" << std::endl;
         std::cout << "    " << std::hex << inst->instAddr << " | " << inststr << std::dec << std::endl;
         std::cout << "    " << std::hex << inst2->instAddr << " | " << inststr2 << std::dec << std::endl;
@@ -908,7 +913,7 @@ VOID SequenceMatchAntiDebugSameTarget(THREADID tid, ADDRINT ip, CONTEXT* ctxt, S
 
 VOID SequenceMatchAntiDebugConstCondition(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence)
 {
-    std::deque<InstrumentedInstruction*> instruction_queue = seq_detector.GetInstructionQueue();
+    std::deque<InstrumentedInstruction*> instruction_queue = disassembly_seq_detector.GetDisassembledInstructionQueue();
 
     InstrumentedInstruction* inst = instruction_queue[instruction_queue.size() - 2];
     InstrumentedInstruction* inst2 = instruction_queue[instruction_queue.size() - 1];
@@ -916,10 +921,12 @@ VOID SequenceMatchAntiDebugConstCondition(THREADID tid, ADDRINT ip, CONTEXT* ctx
     std::string inststr = inst->instructionStr;
     std::string inststr2 = inst2->instructionStr;
 
-    if ((inst->instAddr + inst->size) == inst2->instAddr) {
+    if ((inst->instAddr + 2) == inst2->instAddr) { // 2 = tamanho da instrução xor
         std::cout << "\n[CONTRADEF][ANTIDEBUG] Instruções com Condição Constante:" << std::endl;
         std::cout << "    " << std::hex << inst->instAddr << " | " << inststr << std::dec << std::endl;
         std::cout << "    " << std::hex << inst2->instAddr << " | " << inststr2 << std::dec << std::endl;
+
+
     }
 }
 
@@ -1132,12 +1139,17 @@ VOID RecordLEA(VOID* ip, std::string* insstr, REG reg, ADDRINT regValue) {
 
 VOID TraceInst(INS ins, VOID* v)
 {
-    seq_detector.InstructionTrace(ins, &seq_detector);
+    seq_detector.InstructionTrace(ins, &seq_detector, onCall);
+    disassembly_seq_detector.InstructionTrace(ins, &disassembly_seq_detector, onDisassembly);
 
+    std::string disassembledInstr = INS_Disassemble(ins);
+
+    if (KnobDisassembly) {
+        disassemblyTraceOut << INS_Address(ins) << " | " << disassembledInstr << std::endl;
+    }
     return;
 
 
-    std::string disassembledInstr = INS_Disassemble(ins);
     // Identifica instruções do tipo LEA
     if (INS_Mnemonic(ins) == "LEA") {
         // Obtém o registrador de destino (primeiro operando)
@@ -1291,14 +1303,15 @@ int InitInstrumentation(std::string pid)
     std::vector<std::vector<std::string>> ad_same_target;
     ad_same_target.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
     ad_same_target.push_back(CreateInstVector("jnz 0x7ff62f10fe35"));
-    //seq_detector.AddInstructionSequence(ad_same_target, SequenceMatchAntiDebugSameTarget);
+    disassembly_seq_detector.AddInstructionSequence(ad_same_target, SequenceMatchAntiDebugSameTarget);
 
 
     // Tecnica antidebug, verificada
     std::vector<std::vector<std::string>> ad_const_condition;
+    ad_const_condition.push_back(CreateInstVector("jmp 0x1bc7d3c6b32"));
     ad_const_condition.push_back(CreateInstVector("xor eax, eax"));
     ad_const_condition.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
-    //seq_detector.AddInstructionSequence(ad_const_condition, SequenceMatchAntiDebugConstCondition);
+    disassembly_seq_detector.AddInstructionSequence(ad_const_condition, SequenceMatchAntiDebugConstCondition);
 
 
     // para testes
@@ -1322,7 +1335,15 @@ int InitInstrumentation(std::string pid)
     //seq_detector.AddInstructionSequence(read_string_cmp4, SetZfToZero);
 
     seq_detector.Initialize();
+    disassembly_seq_detector.Initialize();
 
+    if (KnobDisassembly) {
+        string disassemblyFilename = "contradef";
+        disassemblyFilename += "." + pid + ".disassembly.cdf";
+        disassemblyTraceOut.open(disassemblyFilename.c_str());
+        disassemblyTraceOut << hex << right;
+        disassemblyTraceOut.setf(ios::showbase);
+    }
     
     TRACE_AddInstrumentFunction(TraceFunc, 0);
 
