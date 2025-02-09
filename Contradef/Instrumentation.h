@@ -13,11 +13,13 @@
 #include <cwctype> // Para funções de verificação de caracteres wide, como iswalnum
 #include "regvalue_utils.h"
 #include "Utils.h"
+#include "InstrumentationUtils.h"
 #include "InstructionSequenceDetector.h"
 #include "CallStackManager.h"
 #include "DllFunctionTracker.h"
 #include "DllFunctionMapper.h"
 #include "PinDebugTrace.h"
+#include "InstrumentationCallbacks.h"
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h
 

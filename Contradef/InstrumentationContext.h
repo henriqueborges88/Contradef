@@ -144,9 +144,6 @@
 #include "InstWriteFile.h"
 #include "InstCompareStringEx.h"
 
-
-
-
 typedef void (*RTNFunction)(RTN, Notifier&);
 
 class InstrumentationContext {

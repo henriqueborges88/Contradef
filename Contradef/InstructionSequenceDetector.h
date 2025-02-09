@@ -21,7 +21,7 @@ void NormalizeInstructionText(std::string& instr);
 struct SequenceInstructions;
 
 // Definição do tipo de callback usando a declaração antecipada de SequenceInstruction
-using SeqMatchCallbackFunc = VOID(*)(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence);
+using SeqMatchCallbackFunc = VOID(*)(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v);
 
 struct InstrumentedInstruction {
     ADDRINT instAddr;
@@ -85,9 +85,12 @@ struct SequenceInstructions {
     // Callback a ser chamado quando uma sequência for encontrada
     SeqMatchCallbackFunc match_callback;
 
+    // Pointeiro para um valor ou estrutura a ser passado para o callback
+    VOID* v;
+
     // Construtor para inicializar o contexto com IDs
-    SequenceInstructions(const std::vector<std::vector<std::string>>& instruction_seq, SeqMatchCallbackFunc callback, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1)
-        : instruction_sequences(), matchOcurrenceIndex(matchOcurrenceIndex), matchOcurrenceIndexEnd(matchOcurrenceIndexEnd), matchCount(0), match_callback(callback)
+    SequenceInstructions(const std::vector<std::vector<std::string>>& instruction_seq, SeqMatchCallbackFunc callback, VOID* v, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1)
+        : instruction_sequences(), matchOcurrenceIndex(matchOcurrenceIndex), matchOcurrenceIndexEnd(matchOcurrenceIndexEnd), matchCount(0), match_callback(callback), v(v)
     {
         for (const auto& instructionArr : instruction_seq)
         {
@@ -140,7 +143,7 @@ public:
     ~InstructionSequenceDetector();
 
     // Adiciona uma nova sequência de instruções para detecção
-    void AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1);
+    void AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack = nullptr, VOID* v = nullptr, int matchOcurrenceIndex = -1, int matchOcurrenceIndexEnd = -1);
 
     // Inicializa a estrutura necessária (deve ser chamado após adicionar todas as sequências)
     void Initialize();

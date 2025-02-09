@@ -97,12 +97,12 @@ InstructionSequenceDetector::~InstructionSequenceDetector()
     // Nada a destruir explicitamente
 }
 
-void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
+void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack, VOID* v, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
 {
     if (matchOcurrenceIndex >= 0 && matchOcurrenceIndexEnd < 0) {
         matchOcurrenceIndexEnd = matchOcurrenceIndex;
     }
-    SequenceInstructions* sequenceInstructions = new SequenceInstructions(sequence, matchCallBack, matchOcurrenceIndex, matchOcurrenceIndexEnd);
+    SequenceInstructions* sequenceInstructions = new SequenceInstructions(sequence, matchCallBack, v, matchOcurrenceIndex, matchOcurrenceIndexEnd);
 
     instruction_sequences.push_back(sequenceInstructions);
 
@@ -159,7 +159,7 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
             // Sequência encontrada, chamar o callback
             sequence->matchCount++;
             if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || (sequence->matchCount >= sequence->matchOcurrenceIndex && sequence->matchCount <= sequence->matchOcurrenceIndexEnd))) {
-                sequence->match_callback(PIN_ThreadId(), ip, ctxt, *sequence);
+                sequence->match_callback(PIN_ThreadId(), ip, ctxt, *sequence, sequence->v);
             }
         }
     }
@@ -212,7 +212,7 @@ VOID InstructionSequenceDetector::DisassembledInstruction(ADDRINT ip, Instrument
             // Sequência encontrada, chamar o callback
             sequence->matchCount++;
             if (sequence->match_callback && (sequence->matchOcurrenceIndex == -1 || (sequence->matchCount >= sequence->matchOcurrenceIndex && sequence->matchCount <= sequence->matchOcurrenceIndexEnd))) {
-                sequence->match_callback(PIN_ThreadId(), ip, nullptr, *sequence);
+                sequence->match_callback(PIN_ThreadId(), ip, nullptr, *sequence, sequence->v);
             }
         }
     }
