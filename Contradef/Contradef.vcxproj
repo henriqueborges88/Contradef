@@ -327,6 +327,8 @@
     <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
     <ClCompile Include="Params.cpp" />
+    <ClCompile Include="TraceDisassembly.cpp" />
+    <ClCompile Include="TraceFcnCall.cpp" />
     <ClCompile Include="TraceInstructions.cpp" />
     <ClCompile Include="RegistryKeys.cpp" />
     <ClCompile Include="TraceMemory.cpp" />
@@ -482,6 +484,8 @@
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Params.h" />
+    <ClInclude Include="TraceDisassembly.h" />
+    <ClInclude Include="TraceFcnCall.h" />
     <ClInclude Include="TraceInstructions.h" />
     <ClInclude Include="RegistryErrors.h" />
     <ClInclude Include="RegistryKeys.h" />

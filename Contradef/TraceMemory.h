@@ -20,7 +20,7 @@ namespace TraceMemory {
     void EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size);
     void InstTraceMemory(INS ins, VOID* v);
 
-    int InitMemoryTrace(std::string pid);
+    int InitMemoryTrace(std::string pid, std::string filename);
 }
 
 #endif // TRACE_MEMORY_H

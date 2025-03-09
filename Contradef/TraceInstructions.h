@@ -72,7 +72,7 @@ namespace TraceInstructions {
 	VOID InstructionTrace(TRACE trace, INS ins);
 	VOID Trace(TRACE trace, VOID* v);
 	VOID OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig, VOID* v);
-	int InitTrace(std::string pid);
+	int InitTrace(std::string pid, std::string filename);
 }
 
 #endif // TRACE_INSTRUCTIONS_H

@@ -21,6 +21,9 @@
 #include "TraceInstructions.h"
 #include "TraceMemory.h"
 #include "InstrumentationCallbacks.h"
+#include "TraceFcnCall.h"
+#include "TraceDisassembly.h"
+
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h
 
@@ -30,10 +33,7 @@ std::string getFileName(const std::string& filePath);
 VOID GetSectionInfo(IMG img, std::ofstream& OutFile);
 VOID PauseAtEntryPoint(ADDRINT entryAddress);
 VOID PauseAtAddress(ADDRINT address);
-VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtn, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT returnAddress, ADDRINT rspValue, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
-VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADDRINT ret0, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6);
 VOID InstrumentFuncCall(TRACE trace, INS ins);
-VOID TraceFunc(TRACE trace, VOID* v);
 void saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
 int InitInstrumentation(std::string pid);
 

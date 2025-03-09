@@ -158,7 +158,7 @@ public:
     std::vector<std::string> scanScope; 
 
     bool IsStringInScanScope(const std::string& scope) const;
-    void InstrumentationContext::InitStrategies();
+    void InitStrategies();
     void ExecuteStrategy(const std::string& name, RTN rtn, Notifier& globalNotifier);
     bool HasStrategy(const std::string& name) const;
     void ExecuteAllStrategies(IMG img, Notifier& globalNotifier);

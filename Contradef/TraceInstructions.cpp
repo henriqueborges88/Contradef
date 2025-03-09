@@ -14,7 +14,6 @@
 using namespace CONTROLLER;
 using namespace INSTLIB;
 
-KNOB< std::string > KnobTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "to", "contradef", "trace file");
 KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "Thread to watch, -1 for all");
 KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
@@ -765,10 +764,8 @@ static void TraceInstructions::OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON
 static CONTROL_MANAGER control;
 static SKIPPER skipper;
 
-int TraceInstructions::InitTrace(string pid)
+int TraceInstructions::InitTrace(string pid, std::string filename)
 {
-
-    string filename = KnobTraceOutputFile.Value();
     filename += "." + pid + ".trace.cdf";
     out.open(filename.c_str());
     out << hex << right;

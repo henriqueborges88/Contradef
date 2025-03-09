@@ -24,11 +24,8 @@ using std::wstring;
 
 PIN_LOCK lock;
 static std::ofstream OutFile;
-static std::ofstream ExternalCallTraceOutFile;
-KNOB<string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "contradef", "specify file name for output log ");
 KNOB<string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "y", "", "specify file name for YARA rules ");
 KNOB<BOOL> KnobAllowAttachDebugger(KNOB_MODE_WRITEONCE, "pintool", "ad", "0", "Allow attach debugger ");
-KNOB<BOOL> KnobSaveExternalCallTrace(KNOB_MODE_WRITEONCE, "pintool", "et", "1", "Save external call trace file ");
 
 InstrumentationContext context; // As estratégias já estão adicionadas no contexto
 
@@ -84,20 +81,6 @@ VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
     OutFile.flush();  // Esvazia o buffer de saída
 }
 
-
-VOID Fini(int, VOID* v)
-{
-    OutFile.close();
-    //TraceOutFile->close();
-
-    if (KnobSaveExternalCallTrace)
-    {
-        saveAllExternalCalls(ExternalCallTraceOutFile);
-    }
-
-    ExternalCallTraceOutFile.close();
-}
-
 // Instrumenta o carregamento de imagens
 VOID ImageLoad(IMG img, VOID* v) {
     if (IMG_IsMainExecutable(img)) {
@@ -129,7 +112,7 @@ int main(int argc, char* argv[]) {
 
     string filename;
     string pid = decstr(WindowsAPI::getpid());
-    filename = KnobOutputFile.Value();
+    filename = "contradef"; //KnobOutputFile.Value();
 
     string logfilename = filename + "." + pid + ".log.cdf";
     OutFile.open(logfilename.c_str(), std::ios::binary);
@@ -142,12 +125,6 @@ int main(int argc, char* argv[]) {
         //PIN_ToolFullPath() para obter o yara rules file do mesmo diretorio do PIN tool
         //std::cerr << "Por favor, forneça o caminho para o arquivo de regras YARA usando -y." << std::endl;
         //return 1;
-    }
-
-    if (KnobSaveExternalCallTrace)
-    {
-        string logfilename = filename + "." + pid + ".externalcalltrace.cdf";
-        ExternalCallTraceOutFile.open(logfilename.c_str(), std::ios::binary);
     }
 
     PIN_InitSymbols();
@@ -170,8 +147,6 @@ int main(int argc, char* argv[]) {
     IMG_AddInstrumentFunction(InstrumentFunctions, 0);
 
     InitInstrumentation(pid);
-
-    PIN_AddFiniFunction(Fini, 0);
 
     if (KnobAllowAttachDebugger)
     {

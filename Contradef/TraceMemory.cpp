@@ -3,7 +3,6 @@
 #include "TraceMemory.h"
 
 KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "1", "Trace memory");
-KNOB< std::string > KnobMemTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "mto", "contradef", "Memory trace file");
 
 std::ofstream TraceMemory::memTraceOut;
 PIN_MUTEX TraceMemory::fileMemTraceOutMutex;
@@ -129,11 +128,10 @@ VOID TraceMemory::InstTraceMemory(INS ins, VOID* v)
 }
 
 
-int TraceMemory::InitMemoryTrace(std::string pid)
+int TraceMemory::InitMemoryTrace(std::string pid, std::string filename)
 {
-    std::string memTraceFilename = KnobMemTraceOutputFile.Value();
-    memTraceFilename += "." + pid + ".memtrace.cdf";
-    memTraceOut.open(memTraceFilename.c_str());
+    filename += "." + pid + ".memtrace.cdf";
+    memTraceOut.open(filename.c_str());
     memTraceOut << std::hex << std::right;
     memTraceOut.setf(std::ios_base::showbase);
 
