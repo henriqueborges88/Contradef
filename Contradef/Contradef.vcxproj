@@ -303,7 +303,7 @@
     <ClCompile Include="InstructionSequenceDetector.cpp" />
     <ClCompile Include="Instrumentation.cpp" />
     <ClCompile Include="InstrumentationContext.cpp" />
-    <ClCompile Include="InstrumentationUtils..cpp" />
+    <ClCompile Include="InstrumentationUtils.cpp" />
     <ClCompile Include="InstrumentationCallbacks.cpp" />
     <ClCompile Include="InstSetEvent.cpp" />
     <ClCompile Include="InstSetFilePointerEx.cpp" />
@@ -327,8 +327,9 @@
     <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
     <ClCompile Include="Params.cpp" />
-    <ClCompile Include="PinDebugTrace.cpp" />
+    <ClCompile Include="TraceInstructions.cpp" />
     <ClCompile Include="RegistryKeys.cpp" />
+    <ClCompile Include="TraceMemory.cpp" />
     <ClCompile Include="Utils.cpp" />
     <ClCompile Include="YaraContradef.cpp" />
   </ItemGroup>
@@ -481,9 +482,10 @@
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Params.h" />
-    <ClInclude Include="PinDebugTrace.h" />
+    <ClInclude Include="TraceInstructions.h" />
     <ClInclude Include="RegistryErrors.h" />
     <ClInclude Include="RegistryKeys.h" />
+    <ClInclude Include="TraceMemory.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="InstNtQueryKey.h" />
     <ClInclude Include="YaraContradef.h" />

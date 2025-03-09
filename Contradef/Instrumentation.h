@@ -18,7 +18,8 @@
 #include "CallStackManager.h"
 #include "DllFunctionTracker.h"
 #include "DllFunctionMapper.h"
-#include "PinDebugTrace.h"
+#include "TraceInstructions.h"
+#include "TraceMemory.h"
 #include "InstrumentationCallbacks.h"
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h

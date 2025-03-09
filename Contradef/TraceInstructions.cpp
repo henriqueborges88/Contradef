@@ -8,10 +8,13 @@
   *  It is designed to help debugging.
   */
 
-#include "PinDebugTrace.h"
+#include "TraceInstructions.h"
+#include "InstrumentationUtils.h"
+
+using namespace CONTROLLER;
+using namespace INSTLIB;
 
 KNOB< std::string > KnobTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "to", "contradef", "trace file");
-KNOB< std::string > KnobMemTraceOutputFile(KNOB_MODE_WRITEONCE, "pintool", "mto", "contradef", "Memory trace file");
 KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "Thread to watch, -1 for all");
 KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
@@ -20,7 +23,6 @@ KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "1", "Include li
 KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
 KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
-KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "1", "Trace memory");
 KNOB< BOOL > KnobTraceMemoryInstructions(KNOB_MODE_WRITEONCE, "pintool", "atmemory", "0", "Attach trace memory to trace instrucions");
 KNOB< BOOL > KnobSilent(KNOB_MODE_WRITEONCE, "pintool", "silent", "0", "Do everything but write file (for debugging).");
 KNOB< BOOL > KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exit after tracing the first region.");
@@ -29,31 +31,30 @@ KNOB< BOOL > KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exi
 /* Global Variables */
 /* ===================================================================== */
 
-PIN_MUTEX fileOutMutex;
-PIN_MUTEX fileMemTraceOutMutex;
-std::ofstream out;
-std::ofstream memTraceOut;
-INT32 enabled = 0;
-FILTER filter;
-ICOUNT icount;
-const UINT32 MaxEmitArgs = 4;
-AFUNPTR emitFuns[] = { AFUNPTR(EmitNoValues), AFUNPTR(Emit1Values), AFUNPTR(Emit2Values), AFUNPTR(Emit3Values), AFUNPTR(Emit4Values) };
-std::stack<ADDRINT> callStack;
+PIN_MUTEX TraceInstructions::fileOutMutex;
+
+std::ofstream TraceInstructions::out;
+INT32 TraceInstructions::enabled = 0;
+FILTER TraceInstructions::filter;
+ICOUNT TraceInstructions::icount;
+const UINT32 TraceInstructions::MaxEmitArgs = 4;
+AFUNPTR TraceInstructions::emitFuns[] = { AFUNPTR(TraceInstructions::EmitNoValues), AFUNPTR(TraceInstructions::Emit1Values), AFUNPTR(TraceInstructions::Emit2Values), AFUNPTR(TraceInstructions::Emit3Values), AFUNPTR(TraceInstructions::Emit4Values) };
+std::stack<ADDRINT> TraceInstructions::callStack;
 
 /* ===================================================================== */
 /* Function Implementations */
 /* ===================================================================== */
 
-BOOL Emit(THREADID threadid) {
+BOOL TraceInstructions::Emit(THREADID threadid) {
     if (!enabled || KnobSilent || (KnobWatchThread != static_cast<THREADID>(-1) && KnobWatchThread != threadid)) return false;
     return true;
 }
 
-VOID Flush() {
+VOID TraceInstructions::Flush() {
     if (KnobFlush) out << std::flush;
 }
 
-VOID Handler(EVENT_TYPE ev, VOID*, CONTEXT* ctxt, VOID*, THREADID, bool bcast) {
+VOID TraceInstructions::Handler(EVENT_TYPE ev, VOID*, CONTEXT* ctxt, VOID*, THREADID, bool bcast) {
     switch (ev) {
     case EVENT_START:
         enabled = 1;
@@ -78,7 +79,7 @@ VOID Handler(EVENT_TYPE ev, VOID*, CONTEXT* ctxt, VOID*, THREADID, bool bcast) {
     }
 }
 
-VOID EmitNoValues(THREADID threadid, std::string* str) {
+VOID TraceInstructions::EmitNoValues(THREADID threadid, std::string* str) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "]" << std::endl;
@@ -86,7 +87,7 @@ VOID EmitNoValues(THREADID threadid, std::string* str) {
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID Emit1Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val) {
+VOID TraceInstructions::Emit1Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << std::endl;
@@ -94,7 +95,7 @@ VOID Emit1Values(THREADID threadid, std::string* str, std::string* reg1str, ADDR
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID Emit2Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val) {
+VOID TraceInstructions::Emit2Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << std::endl;
@@ -102,7 +103,7 @@ VOID Emit2Values(THREADID threadid, std::string* str, std::string* reg1str, ADDR
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID Emit3Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val) {
+VOID TraceInstructions::Emit3Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << std::endl;
@@ -110,7 +111,7 @@ VOID Emit3Values(THREADID threadid, std::string* str, std::string* reg1str, ADDR
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID Emit4Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val, std::string* reg4str, ADDRINT reg4val) {
+VOID TraceInstructions::Emit4Values(THREADID threadid, std::string* str, std::string* reg1str, ADDRINT reg1val, std::string* reg2str, ADDRINT reg2val, std::string* reg3str, ADDRINT reg3val, std::string* reg4str, ADDRINT reg4val) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << *str << " | [T" << std::dec << threadid << std::hex << "] " << *reg1str << " = " << reg1val << ", " << *reg2str << " = " << reg2val << ", " << *reg3str << " = " << reg3val << ", " << *reg4str << " = " << reg4val << std::endl;
@@ -118,7 +119,7 @@ VOID Emit4Values(THREADID threadid, std::string* str, std::string* reg1str, ADDR
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID EmitXMM(THREADID threadid, UINT32 regno, PINTOOL_REGISTER* xmm) {
+VOID TraceInstructions::EmitXMM(THREADID threadid, UINT32 regno, PINTOOL_REGISTER* xmm) {
     if (!Emit(threadid)) return;
     PIN_MutexLock(&fileOutMutex);
     out << "\t\t\tXMM" << std::dec << regno << " := " << std::setfill('0') << std::hex;
@@ -133,11 +134,11 @@ VOID EmitXMM(THREADID threadid, UINT32 regno, PINTOOL_REGISTER* xmm) {
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID AddXMMEmit(INS ins, IPOINT point, REG xmm_dst) {
+VOID TraceInstructions::AddXMMEmit(INS ins, IPOINT point, REG xmm_dst) {
     INS_InsertCall(ins, point, AFUNPTR(EmitXMM), IARG_THREAD_ID, IARG_UINT32, xmm_dst - REG_XMM0, IARG_REG_CONST_REFERENCE, xmm_dst, IARG_END);
 }
 
-void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::string* reg1str, INT32 reg1ismem, UINT32 reg1size, VOID* reg1val, std::string* reg2str, INT32 reg2ismem, UINT32 reg2size, VOID* reg2val, std::string* reg3str, UINT64 reg3val) {
+VOID TraceInstructions::EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::string* reg1str, INT32 reg1ismem, UINT32 reg1size, VOID* reg1val, std::string* reg2str, INT32 reg2ismem, UINT32 reg2size, VOID* reg2val, std::string* reg3str, UINT64 reg3val) {
     if (!Emit(threadid)) return;
 
     std::string valnum1 = "";
@@ -193,7 +194,7 @@ void EmitCmpValues(ADDRINT addr, THREADID threadid, std::string* str, std::strin
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
+VOID TraceInstructions::AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
     // Instrumenta a instrução CMP
     if (INS_OperandIsReg(ins, 0) && INS_OperandIsReg(ins, 1)) {
         // CMP com dois registradores
@@ -294,7 +295,7 @@ VOID AddEmitCmp(INS ins, IPOINT point, std::string& traceString, REG reg3val) {
 }
 
 
-VOID AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, REG regs[]) {
+VOID TraceInstructions::AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, REG regs[]) {
     if (regCount > MaxEmitArgs) regCount = MaxEmitArgs;
     IARGLIST args = IARGLIST_Alloc();
     for (UINT32 i = 0; i < regCount; i++) {
@@ -312,11 +313,11 @@ VOID AddEmit(INS ins, IPOINT point, std::string& traceString, UINT32 regCount, R
 
 static VOID* WriteEa[PIN_MAX_THREADS];
 
-VOID CaptureWriteEa(THREADID threadid, VOID* addr) {
+VOID TraceInstructions::CaptureWriteEa(THREADID threadid, VOID* addr) {
     WriteEa[threadid] = addr;
 }
 
-VOID ShowN(UINT32 n, VOID* ea)
+VOID TraceInstructions::ShowN(UINT32 n, VOID* ea)
 {
     out.unsetf(ios::showbase);
     // Print out the bytes in "big endian even though they are in memory little endian.
@@ -340,35 +341,14 @@ VOID ShowN(UINT32 n, VOID* ea)
     if (n > 512) delete[] x;
 }
 
-VOID writeMemTraceOut(THREADID threadid, std::string* str, VOID* ea, UINT32 size)
-{
-    std::string opval = "";
-    std::stringstream hexval;
-    hexval << GetNumericHexValue((UINT64)ea, 8);
 
-    if (IsStringPointer((ADDRINT)ea)) {
-        opval = GetNumericValueFromRef(ea, size) + " | \"" + std::string(reinterpret_cast<const char*>(ea)) + "\"";
-    }
-    else {
-        std::stringstream ss;
-        opval = GetNumericValueFromRef(ea, size);
-    }
 
-    PIN_MutexLock(&fileMemTraceOutMutex);
-    memTraceOut << "[T" << std::dec << threadid << std::hex << "] " << *str << "        [" << hexval.str() << "] = " << opval << "\n" << std::string(133, '-') << "\n";
-    PIN_MutexUnlock(&fileMemTraceOutMutex);
-
-}
-
-VOID EmitWrite(ADDRINT addr, THREADID threadid, std::string * str, UINT32 size)
+VOID TraceInstructions::EmitWrite(ADDRINT addr, THREADID threadid, std::string * str, UINT32 size)
 {
     if (!Emit(threadid)) return;
 
 
     VOID* ea = WriteEa[threadid];
-
-    // Memory trace
-    writeMemTraceOut(threadid, str, ea, size);
 
     if (!KnobTraceMemoryInstructions) return;
 
@@ -425,12 +405,9 @@ VOID EmitWrite(ADDRINT addr, THREADID threadid, std::string * str, UINT32 size)
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size)
+VOID TraceInstructions::EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size)
 {
     if (!Emit(threadid)) return;
-
-    // Memory trace
-    writeMemTraceOut(threadid, str, ea, size);
 
     if (!KnobTraceMemoryInstructions) return;
 
@@ -489,7 +466,7 @@ VOID EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT3
 
 static INT32 indent = 0;
 
-VOID Indent()
+VOID TraceInstructions::Indent()
 {
     for (INT32 i = 0; i < indent; i++)
     {
@@ -497,12 +474,12 @@ VOID Indent()
     }
 }
 
-VOID EmitICount() 
+VOID TraceInstructions::EmitICount()
 { 
     out << setw(10) << dec << icount.Count() << hex << " "; 
 }
 
-VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
+VOID TraceInstructions::EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 tailCall, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
     if (!Emit(threadid)) return;
 
@@ -530,55 +507,7 @@ VOID EmitDirectCall(THREADID threadid, ADDRINT instAddress, string* str, INT32 t
 
 }
 
-string FormatAddress(ADDRINT address, RTN rtn)
-{
-    string s = StringFromAddrint(address);
-
-    if (KnobSymbols && RTN_Valid(rtn))
-    {
-        IMG img = SEC_Img(RTN_Sec(rtn));
-        s += " ";
-        if (IMG_Valid(img))
-        {
-            if (KnobFullImgName)
-            {
-                s += IMG_Name(img) + ":";
-            }
-            else
-            {
-                s += getFileName(IMG_Name(img)) + ":";
-            }
-        }
-        else
-        {
-            s += "UNKNOW-IMG:";
-        }
-
-        s += RTN_Name(rtn);
-
-        ADDRINT delta = address - RTN_Address(rtn);
-        if (delta != 0)
-        {
-            s += "+" + hexstr(delta, 4);
-        }
-    }
-
-    if (KnobLines)
-    {
-        INT32 line;
-        string file;
-
-        PIN_GetSourceLocation(address, NULL, &line, &file);
-
-        if (file != "")
-        {
-            s += " (" + file + ":" + decstr(line) + ")";
-        }
-    }
-    return s;
-}
-
-VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
+VOID TraceInstructions::EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT target, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
 {
     if (!Emit(threadid)) return;
 
@@ -591,7 +520,7 @@ VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRI
 
     PIN_LockClient();
 
-    string s = FormatAddress(target, RTN_FindByAddress(target));
+    string s = FormatAddress(target, RTN_FindByAddress(target), KnobSymbols, KnobFullImgName, KnobLines);
 
     PIN_UnlockClient();
     
@@ -602,7 +531,7 @@ VOID EmitIndirectCall(THREADID threadid, ADDRINT instAddress, string* str, ADDRI
     PIN_MutexUnlock(&fileOutMutex);
 }
 
-VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0)
+VOID TraceInstructions::EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0)
 {
     if (!Emit(threadid)) return;
 
@@ -631,7 +560,7 @@ VOID EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT ret
 
 }
 
-VOID CallTrace(TRACE trace, INS ins)
+VOID TraceInstructions::CallTrace(TRACE trace, INS ins)
 {
     if (!KnobTraceCalls) return;
 
@@ -640,7 +569,7 @@ VOID CallTrace(TRACE trace, INS ins)
     if (INS_IsCall(ins) && !INS_IsDirectControlFlow(ins))
     {
         // Indirect call
-        string s = "Call " + FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
+        string s = "Call " + FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)), KnobSymbols, KnobFullImgName, KnobLines);
         s += " -> ";
 
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitIndirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s),
@@ -678,13 +607,13 @@ VOID CallTrace(TRACE trace, INS ins)
 
             //s += INS_Mnemonic(ins) + " ";
 
-            s += FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
+            s += FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)), KnobSymbols, KnobFullImgName, KnobLines);
             s += " -> ";
 
             ADDRINT target = INS_DirectControlFlowTargetAddress(ins);
 
             PIN_LockClient();
-            s += FormatAddress(target, RTN_FindByAddress(target));
+            s += FormatAddress(target, RTN_FindByAddress(target), KnobSymbols, KnobFullImgName, KnobLines);
             PIN_UnlockClient();
 
             INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitDirectCall), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(s), IARG_BOOL,
@@ -699,13 +628,13 @@ VOID CallTrace(TRACE trace, INS ins)
         //        if( RTN_Name(rtn) ==  "_dl_debug_state") return;
         if (RTN_Valid(rtn) && RTN_Name(rtn) == "_dl_runtime_resolve") return;
 #endif
-        string tracestring = "Return " + FormatAddress(INS_Address(ins), rtn);
+        string tracestring = "Return " + FormatAddress(INS_Address(ins), rtn, KnobSymbols, KnobFullImgName, KnobLines);
         INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(EmitReturn), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new string(tracestring),
             IARG_RETURN_IP, IARG_FUNCRET_EXITPOINT_VALUE, IARG_END);
     }
 }
 
-VOID InstructionTrace(TRACE trace, INS ins)
+VOID TraceInstructions::InstructionTrace(TRACE trace, INS ins)
 {
     if (!KnobTraceInstructions) return;
 
@@ -714,7 +643,7 @@ VOID InstructionTrace(TRACE trace, INS ins)
 
     // Format the string at instrumentation time
     string traceString = "";
-    string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
+    string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)), KnobSymbols, KnobFullImgName, KnobLines);
     for (INT32 length = astring.length(); length < 95; length++)
     {
         traceString += " ";
@@ -767,86 +696,9 @@ VOID InstructionTrace(TRACE trace, INS ins)
     }
 }
 
-VOID MemoryTrace(INS ins)
-{
-    if (!KnobTraceMemory) return;
-
-    ADDRINT addr = INS_Address(ins);
-    ASSERTX(addr);
-
-    // Format the string at instrumentation time
-    string traceString = "";
-    string astring = FormatAddress(INS_Address(ins), RTN_FindByAddress(INS_Address(ins)));
-    for (INT32 length = astring.length(); length < 30; length++)
-    {
-        traceString += " ";
-    }
-    traceString = astring + traceString;
-
-    traceString += " | " + INS_Disassemble(ins);
-
-    if (INS_IsMemoryWrite(ins)) // && INS_IsStandardMemop(ins)
-    {
-        traceString += " | [Write]: \n";
-
-        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_MEMORYWRITE_EA, IARG_END);
-
-        LEVEL_VM::IPOINT ipoint = LEVEL_VM::IPOINT::IPOINT_INVALID;
-        if (INS_IsValidForIpointAfter(ins))
-        {
-            ipoint = IPOINT_AFTER;
-            //INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
-        }
-        if (INS_IsValidForIpointTakenBranch(ins))
-        {
-            ipoint = IPOINT_TAKEN_BRANCH;
-            //INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
-        }
-
-        if (ipoint != LEVEL_VM::IPOINT::IPOINT_INVALID) {
-            INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitWrite,
-                IARG_ADDRINT, INS_Address(ins),
-                IARG_THREAD_ID,
-                IARG_PTR, new std::string(traceString),
-                IARG_MEMORYWRITE_SIZE,
-                IARG_END);
-        }
-    }
-
-    if (INS_HasMemoryRead2(ins)) // && INS_IsStandardMemop(ins)
-    {
-        //INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE, IARG_END);
-        traceString += " | [Read 2Op]: \n";
-
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitRead,
-            IARG_ADDRINT, INS_Address(ins),
-            IARG_THREAD_ID,
-            IARG_PTR, new std::string(traceString),
-            IARG_MEMORYREAD2_EA,
-            IARG_MEMORYREAD_SIZE,
-            IARG_END);
-    }
-
-    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins)) // && INS_IsStandardMemop(ins)
-    {
-        //INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE, IARG_END);
-        traceString += " | [Read 1Op]: \n";
-
-        REG reg2 = INS_OperandReg(ins, 1);
-        INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitRead,
-            IARG_ADDRINT, INS_Address(ins),
-            IARG_THREAD_ID,
-            IARG_PTR, new std::string(traceString),
-            IARG_MEMORYREAD_EA,
-            IARG_MEMORYREAD_SIZE,
-            IARG_END);
-    }
-
-}
-
 /* ===================================================================== */
 
-VOID Trace(TRACE trace, VOID* v)
+VOID TraceInstructions::Trace(TRACE trace, VOID* v)
 {
     if (!filter.SelectTrace(trace)) return;
 
@@ -860,7 +712,6 @@ VOID Trace(TRACE trace, VOID* v)
 
                 CallTrace(trace, ins);
 
-                MemoryTrace(ins);
             }
         }
     }
@@ -868,7 +719,7 @@ VOID Trace(TRACE trace, VOID* v)
 
 /* ===================================================================== */
 
-static void OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig, VOID* v)
+static void TraceInstructions::OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONTEXT* ctxtFrom, CONTEXT* ctxtTo, INT32 sig, VOID* v)
 {
     PIN_MutexLock(&fileOutMutex);
 
@@ -914,7 +765,7 @@ static void OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON reason, const CONT
 static CONTROL_MANAGER control;
 static SKIPPER skipper;
 
-int InitTrace(string pid)
+int TraceInstructions::InitTrace(string pid)
 {
 
     string filename = KnobTraceOutputFile.Value();
@@ -922,14 +773,6 @@ int InitTrace(string pid)
     out.open(filename.c_str());
     out << hex << right;
     out.setf(ios::showbase);
-
-
-    string memTraceFilename = KnobMemTraceOutputFile.Value();
-    memTraceFilename += "." + pid + ".memtrace.cdf";
-    memTraceOut.open(memTraceFilename.c_str());
-    memTraceOut << hex << right;
-    memTraceOut.setf(ios::showbase);
-    
 
     control.RegisterHandler(Handler, 0, FALSE);
     control.Activate();

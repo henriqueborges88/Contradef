@@ -806,7 +806,9 @@ int InitInstrumentation(std::string pid)
 
     INS_AddInstrumentFunction(TraceInst, 0);
 
-    //InitTrace(pid);
+    //TraceInstructions::InitTrace(pid);
+
+    TraceMemory::InitMemoryTrace(pid);
 
     return 0;
 }

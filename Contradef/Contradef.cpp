@@ -11,7 +11,6 @@
 #include <cstdint>
 #include "YaraContradef.h"
 #include "NtStructures.h"
-#include "PinDebugTrace.h"
 #include "Instrumentation.h"
 
 using std::string;
