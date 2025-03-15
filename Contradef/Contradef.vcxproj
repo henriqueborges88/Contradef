@@ -185,6 +185,7 @@
     <ClCompile Include="DllFunctionMapper.cpp" />
     <ClCompile Include="DllFunctionMapper.h" />
     <ClCompile Include="DllFunctionTracker.cpp" />
+    <ClCompile Include="FunctionInterceptor.cpp" />
     <ClCompile Include="InstBasepConstructSxsCreateProcessMessage.cpp" />
     <ClCompile Include="InstBaseRegEnumKey.cpp" />
     <ClCompile Include="InstBaseRegOpenKey.cpp" />
@@ -302,7 +303,6 @@
     <ClCompile Include="InstRtlRemoveVectoredExceptionHandler.cpp" />
     <ClCompile Include="InstructionSequenceDetector.cpp" />
     <ClCompile Include="Instrumentation.cpp" />
-    <ClCompile Include="InstrumentationContext.cpp" />
     <ClCompile Include="InstrumentationUtils.cpp" />
     <ClCompile Include="InstrumentationCallbacks.cpp" />
     <ClCompile Include="InstSetEvent.cpp" />
@@ -326,7 +326,6 @@
     <ClCompile Include="InstWriteConsoleW.cpp" />
     <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
-    <ClCompile Include="Params.cpp" />
     <ClCompile Include="TraceDisassembly.cpp" />
     <ClCompile Include="TraceFcnCall.cpp" />
     <ClCompile Include="TraceInstructions.cpp" />
@@ -341,6 +340,7 @@
     <ClInclude Include="ContextOperations.h" />
     <ClInclude Include="DllFunctionTracker.h" />
     <ClInclude Include="EventData.h" />
+    <ClInclude Include="FunctionInterceptor.h" />
     <ClInclude Include="InstBasepConstructSxsCreateProcessMessage.h" />
     <ClInclude Include="InstBaseRegEnumKey.h" />
     <ClInclude Include="InstBaseRegOpenKey.h" />
@@ -456,7 +456,6 @@
     <ClInclude Include="InstructionSequenceDetector.h" />
     <ClInclude Include="Instrumentation.h" />
     <ClInclude Include="InstrumentationCallbacks.h" />
-    <ClInclude Include="InstrumentationContext.h" />
     <ClInclude Include="InstrumentationStrategy.h" />
     <ClInclude Include="InstrumentationUtils.h" />
     <ClInclude Include="InstSetEvent.h" />
@@ -483,7 +482,6 @@
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
-    <ClInclude Include="Params.h" />
     <ClInclude Include="TraceDisassembly.h" />
     <ClInclude Include="TraceFcnCall.h" />
     <ClInclude Include="TraceInstructions.h" />

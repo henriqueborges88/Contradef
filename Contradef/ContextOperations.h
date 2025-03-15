@@ -4,7 +4,6 @@
 #define CONTEXT_OPERATIONS_H
 
 #include "pin.H"
-#include "params.h"
 #include <iostream>
 #include <string>
 #include "regvalue_utils.h"

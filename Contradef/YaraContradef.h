@@ -5,7 +5,7 @@
 #include <cctype>
 #include <string>
 #include "utils.h"
-#include "InstrumentationContext.h"
+#include "FunctionInterceptor.h"
 
 namespace WindowsAPI
 {
@@ -19,4 +19,4 @@ namespace YaraAPI
     #include "yaracdef.h"
 }
 
-int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& OutFile, InstrumentationContext& context);
+int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& OutFile, std::vector<std::string>& matched);

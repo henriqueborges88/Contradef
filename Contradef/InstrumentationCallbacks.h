@@ -3,14 +3,13 @@
 #define INSTRUMENTATION_CALLBACKS_H
 
 #include "pin.H"
-#include "params.h"
 #include <iostream>
 #include <string>
+#include "DllFunctionMapper.h"
 #include "regvalue_utils.h"
 #include "Utils.h"
 #include "InstructionSequenceDetector.h"
 #include "InstrumentationUtils.h"
-#include "DllFunctionMapper.h"
 
 VOID SequenceMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v);
 VOID SequenceMatchCallFcnCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v);

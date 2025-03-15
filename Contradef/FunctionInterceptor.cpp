@@ -1,4 +1,4 @@
-﻿#include "InstrumentationContext.h"
+﻿#include "FunctionInterceptor.h"
 #include "Notifier.h"
 
 /*
@@ -63,32 +63,27 @@ obsedium:
     EtwLogTraceEvent de ntdll.dll
 */
 
-InstrumentationContext::InstrumentationContext() {
+FunctionInterceptor::FunctionInterceptor() {
     // Contrutor
 }
 
-InstrumentationContext::~InstrumentationContext() {
+FunctionInterceptor::~FunctionInterceptor() {
     // Não é necessário deletar os ponteiros de função
 
     scanScope.clear(); // Limpa a memória de scanScope ao destruir o objeto
     strategyMap.clear();  // Limpa o mapa de estratégias
 }
 
-bool InstrumentationContext::IsStringInScanScope(const std::string& scope) const {
+bool FunctionInterceptor::IsStringInScanScope(const std::string& scope) const {
     return std::find(scanScope.begin(), scanScope.end(), scope) != scanScope.end();
 }
 
-void InstrumentationContext::InitStrategies() {
-
-    
-
-
-
+void FunctionInterceptor::InitStrategies() {
 
     for (const std::string& scope : scanScope) {
         if (scope == "Obsidium") {
-            
-            std::cout << "Instrumentando o Obsidium" << std::endl;
+
+            std::cout << "[CONTRADEF] Instrumentando o Obsidium" << std::endl;
             strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
             strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
             strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
@@ -105,7 +100,7 @@ void InstrumentationContext::InitStrategies() {
             strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
             strategyMap["ZwSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
             strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
-            
+
             strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
 
 
@@ -172,9 +167,9 @@ void InstrumentationContext::InitStrategies() {
     }
 
 
-    
-    
-    
+
+
+
     strategyMap["lstrcpynA"] = &InstLstrcpynA::InstrumentFunction;
     strategyMap["lstrcpy"] = &InstLstrcpy::InstrumentFunction;
     strategyMap["WriteConsoleW"] = &InstWriteConsoleW::InstrumentFunction;
@@ -183,8 +178,8 @@ void InstrumentationContext::InitStrategies() {
     strategyMap["DeleteFileA"] = &InstDeleteFileA::InstrumentFunction;
     strategyMap["ShellExecute"] = &InstShellExecute::InstrumentFunction;
     strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;
-    
-    
+
+
     // Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
 
 
@@ -213,7 +208,7 @@ void InstrumentationContext::InitStrategies() {
     strategyMap["ZwQueryKey"] = &InstNtQueryKey::InstrumentFunction;
 
 
-   //// // Experimentando
+    //// // Experimentando
     strategyMap["CoCreateInstance"] = &InstWmi::InstrumentFunction;
     strategyMap["ConnectServer"] = &InstWmi::InstrumentFunction;
     strategyMap["ExecQuery"] = &InstWmi::InstrumentFunction;
@@ -224,10 +219,10 @@ void InstrumentationContext::InitStrategies() {
     strategyMap["GetObjectA"] = &InstWmiEx::InstrumentFunction;
     strategyMap["GetObjectW"] = &InstWmiEx::InstrumentFunction;
     strategyMap["GetWriteWatch"] = &InstGetWriteWatch::InstrumentFunction;
-   //// // Fin Experimentando
+    //// // Fin Experimentando
 
-   //// 
-   // // Falta implementar a lógica de detecção
+    //// 
+    // // Falta implementar a lógica de detecção
     strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
     strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
     strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction;
@@ -251,7 +246,7 @@ void InstrumentationContext::InitStrategies() {
     strategyMap["CreateProcess"] = &InstCreateProcess::InstrumentFunction;
     strategyMap["CreateProcessAsUser"] = &InstCreateProcessAsUser::InstrumentFunction;
     strategyMap["ShellExecute"] = &InstShellExecute::InstrumentFunction;
-   // strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;
+    // strategyMap["ShellExecuteEx"] = &InstShellExecuteEx::InstrumentFunction;
     strategyMap["WinExec"] = &InstWinExec::InstrumentFunction;
     strategyMap["CreateService"] = &InstCreateService::InstrumentFunction;
     strategyMap["StartService"] = &InstStartService::InstrumentFunction;
@@ -307,18 +302,18 @@ void InstrumentationContext::InitStrategies() {
 
 }
 
-void InstrumentationContext::ExecuteStrategy(const std::string& name, RTN rtn, Notifier& globalNotifier) {
+void FunctionInterceptor::ExecuteStrategy(const std::string& name, RTN rtn, Notifier& globalNotifier) {
     auto it = strategyMap.find(name);
     if (it != strategyMap.end()) {
         (*it->second)(rtn, globalNotifier);
     }
 }
 
-bool InstrumentationContext::HasStrategy(const std::string& name) const {
+bool FunctionInterceptor::HasStrategy(const std::string& name) const {
     return strategyMap.find(name) != strategyMap.end();
 }
 
-void InstrumentationContext::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
+void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
     ModuleRange range;
     range.start = IMG_LowAddress(img);
     range.end = IMG_HighAddress(img);

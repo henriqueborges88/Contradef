@@ -1,5 +1,5 @@
 #include "YaraContradef.h"
-int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& OutFile, InstrumentationContext& context)
+int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& OutFile, std::vector<std::string>& matched)
 {
     // Carregando a API do YARA de forma dinâmica para evitar erros ou conflitos da biblioteca windows.h com pin.h
     using namespace YaraAPI;
@@ -54,7 +54,7 @@ int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& Ou
         {
             std::string ruleid = rule->identifier;
             if (ruleid.find("Obsidium") != std::string::npos) {
-                context.scanScope.push_back("Obsidium");
+                matched.push_back("Obsidium");
             }
             
             OutFile << "        " << rule->identifier << std::endl;

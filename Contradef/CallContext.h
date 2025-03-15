@@ -3,7 +3,6 @@
 #define CALL_CONTEXT_H
 
 #include "pin.H"
-#include "params.h"
 #include "EventData.h"
 #include "Observer.h"
 #include "Notifier.h"

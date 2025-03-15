@@ -1,6 +1,6 @@
 #pragma once
-#ifndef INSTRUMENTATION_CONTEXT_H
-#define INSTRUMENTATION_CONTEXT_H
+#ifndef FUNCTION_INTERCEPTOR_H
+#define FUNCTION_INTERCEPTOR_H
 
 #include <iostream>
 #include "InstrumentationStrategy.h"
@@ -146,16 +146,16 @@
 
 typedef void (*RTNFunction)(RTN, Notifier&);
 
-class InstrumentationContext {
+class FunctionInterceptor {
 private:
     std::map<std::string, RTNFunction> strategyMap;
 
 public:
-    InstrumentationContext();
-    ~InstrumentationContext();
+    FunctionInterceptor();
+    ~FunctionInterceptor();
 
 
-    std::vector<std::string> scanScope; 
+    std::vector<std::string> scanScope;
 
     bool IsStringInScanScope(const std::string& scope) const;
     void InitStrategies();
@@ -164,4 +164,4 @@ public:
     void ExecuteAllStrategies(IMG img, Notifier& globalNotifier);
 };
 
-#endif // INSTRUMENTATION_CONTEXT_H
+#endif // FUNCTION_INTERCEPTOR_H

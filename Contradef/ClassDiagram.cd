@@ -514,11 +514,11 @@
       <FileName>InstRegQueryValueW.h</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="InstrumentationContext" Collapsed="true">
+  <Class Name="FunctionInterceptor" Collapsed="true">
     <Position X="194" Y="0.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAQAACAAAAgAAABAAAAAAAAAAIAAAAAAIAAAAAA=</HashCode>
-      <FileName>InstrumentationContext.h</FileName>
+      <FileName>FunctionInterceptor.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="InstrumentationStrategy">
@@ -1400,7 +1400,7 @@
     <Position X="204.5" Y="13.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>InstrumentationContext.h</FileName>
+      <FileName>FunctionInterceptor.h</FileName>
     </TypeIdentifier>
   </Typedef>
   <Typedef Name="SHELLEXECUTEINFO" Collapsed="true">
