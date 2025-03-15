@@ -84,81 +84,12 @@ void FunctionInterceptor::InitStrategies() {
         if (scope == "Obsidium") {
 
             std::cout << "[CONTRADEF] Instrumentando o Obsidium" << std::endl;
-            strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
-            strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
-            strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
-            strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
-            strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
-            strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
-
-            strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-            strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
-
-            strategyMap["GetCurrentProcess"] = &InstGetCurrentProcess::InstrumentFunction;
-
-            strategyMap["GetCurrentThread"] = &InstGetCurrentThread::InstrumentFunction;
-            strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
-            strategyMap["ZwSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
-            strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
-
-            strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
-
-
-            //Seq ANTIDBI
-            strategyMap["OpenThread"] = &InstOpenThread::InstrumentFunction;
-            strategyMap["RtlInstallFunctionTableCallback"] = &InstRtlInstallFunctionTableCallback::InstrumentFunction;
-            strategyMap["CreateEventW"] = &InstCreateEventW::InstrumentFunction;
-            strategyMap["CreateThread"] = &InstCreateThread::InstrumentFunction;
-            strategyMap["WaitForSingleObject"] = &InstWaitForSingleObject::InstrumentFunction;
-            strategyMap["SuspendThread"] = &InstSuspendThread::InstrumentFunction;
-            strategyMap["GetThreadContext"] = &InstGetThreadContext::InstrumentFunction;
-            strategyMap["SetThreadContext"] = &InstSetThreadContext::InstrumentFunction;
-            strategyMap["ResumeThread"] = &InstResumeThread::InstrumentFunction;
-            strategyMap["SetEvent"] = &InstSetEvent::InstrumentFunction;
-            strategyMap["ResetEvent"] = &InstResetEvent::InstrumentFunction;
-            strategyMap["RtlAddFunctionTable"] = &InstRtlAddFunctionTable::InstrumentFunction;
-            strategyMap["RtlDeleteFunctionTable"] = &InstRtlDeleteFunctionTable::InstrumentFunction;
-            //EndSeq
-
-            strategyMap["VirtualAlloc"] = &InstVirtualAlloc::InstrumentFunction;
-            strategyMap["VirtualFree"] = &InstVirtualFree::InstrumentFunction;
-
-            strategyMap["ReadFile"] = &InstReadFile::InstrumentFunction;
-
-            strategyMap["GetProcAddress"] = &InstGetProcAddress::InstrumentFunction;
-            strategyMap["QueueUserAPC2"] = &InstQueueUserAPC2::InstrumentFunction;
-            strategyMap["SleepEx"] = &InstSleepEx::InstrumentFunction;
-            strategyMap["RtlAddVectoredExceptionHandler"] = &InstRtlAddVectoredExceptionHandler::InstrumentFunction;
-            strategyMap["RaiseException"] = &InstRaiseException::InstrumentFunction;
-            strategyMap["RtlRemoveVectoredExceptionHandler"] = &InstRtlRemoveVectoredExceptionHandler::InstrumentFunction;
-            strategyMap["GetVersionExW"] = &InstGetVersionExW::InstrumentFunction;
-            strategyMap["NtdllDefWindowProc_W"] = &InstNtdllDefWindowProc_W::InstrumentFunction;
-            strategyMap["CreateToolhelp32Snapshot"] = &InstCreateToolhelp32Snapshot::InstrumentFunction;
-            strategyMap["GetFileSizeEx"] = &InstGetFileSizeEx::InstrumentFunction;
-            strategyMap["SetFilePointerEx"] = &InstSetFilePointerEx::InstrumentFunction;
-            strategyMap["QueryDosDeviceW"] = &InstQueryDosDeviceW::InstrumentFunction;
-            strategyMap["GetSystemFirmwareTable"] = &InstGetSystemFirmwareTable::InstrumentFunction;
-            strategyMap["BasepConstructSxsCreateProcessMessage"] = &InstBasepConstructSxsCreateProcessMessage::InstrumentFunction;
-            strategyMap["InstGetVolumePathNameW"] = &InstGetVolumePathNameW::InstrumentFunction;
-            strategyMap["DeviceIoControl"] = &InstDeviceIoControl::InstrumentFunction;
-            strategyMap["RtlQueryPerformanceCounter"] = &InstRtlQueryPerformanceCounter::InstrumentFunction;
-            strategyMap["GetCommandLineA"] = &InstGetCommandLineA::InstrumentFunction;
-            strategyMap["GetCommandLineW"] = &InstGetCommandLineW::InstrumentFunction;
-            strategyMap["GetComputerNameA"] = &InstGetComputerNameA::InstrumentFunction;
-            strategyMap["LCMapStringEx"] = &InstLCMapStringEx::InstrumentFunction;
-            strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
-            strategyMap["ZwQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
-            strategyMap["NtQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
-            strategyMap["ZwQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
-            strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
-            strategyMap["GetEnvironmentStringsW"] = &InstGetEnvironmentStringsW::InstrumentFunction;
-            strategyMap["GetEnvironmentVariableW"] = &InstGetEnvironmentVariableW::InstrumentFunction;
-            strategyMap["WriteFile"] = &InstWriteFile::InstrumentFunction;
-            strategyMap["CompareStringEx"] = &InstCompareStringEx::InstrumentFunction;
+     
         }
 
         if (scope == "Themida") {
             //Estrategias do Themida
+            std::cout << "[CONTRADEF] Instrumentando o Themida" << std::endl;
         }
 
         if (scope == "VM") {
@@ -167,7 +98,77 @@ void FunctionInterceptor::InitStrategies() {
     }
 
 
+    strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
+    strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
+    strategyMap["GetModuleFileNameW"] = &InstGetModuleFileNameW::InstrumentFunction;
+    strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
+    strategyMap["GetModuleHandleW"] = &InstGetModuleHandleA::InstrumentFunction;
+    strategyMap["GetTickCount"] = &InstGetTickCount::InstrumentFunction;
 
+    strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+    strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+
+    strategyMap["GetCurrentProcess"] = &InstGetCurrentProcess::InstrumentFunction;
+
+    strategyMap["GetCurrentThread"] = &InstGetCurrentThread::InstrumentFunction;
+    strategyMap["NtSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
+    strategyMap["ZwSetInformationThread"] = &InstNtSetInformationThread::InstrumentFunction;
+    strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
+
+    strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction; // <- Falhando, verificar
+
+
+    //Seq ANTIDBI
+    strategyMap["OpenThread"] = &InstOpenThread::InstrumentFunction;
+    strategyMap["RtlInstallFunctionTableCallback"] = &InstRtlInstallFunctionTableCallback::InstrumentFunction;
+    strategyMap["CreateEventW"] = &InstCreateEventW::InstrumentFunction;
+    strategyMap["CreateThread"] = &InstCreateThread::InstrumentFunction;
+    strategyMap["WaitForSingleObject"] = &InstWaitForSingleObject::InstrumentFunction;
+    strategyMap["SuspendThread"] = &InstSuspendThread::InstrumentFunction;
+    strategyMap["GetThreadContext"] = &InstGetThreadContext::InstrumentFunction;
+    strategyMap["SetThreadContext"] = &InstSetThreadContext::InstrumentFunction;
+    strategyMap["ResumeThread"] = &InstResumeThread::InstrumentFunction;
+    strategyMap["SetEvent"] = &InstSetEvent::InstrumentFunction;
+    strategyMap["ResetEvent"] = &InstResetEvent::InstrumentFunction;
+    strategyMap["RtlAddFunctionTable"] = &InstRtlAddFunctionTable::InstrumentFunction;
+    strategyMap["RtlDeleteFunctionTable"] = &InstRtlDeleteFunctionTable::InstrumentFunction;
+    //EndSeq
+
+    strategyMap["VirtualAlloc"] = &InstVirtualAlloc::InstrumentFunction;
+    strategyMap["VirtualFree"] = &InstVirtualFree::InstrumentFunction;
+
+    strategyMap["ReadFile"] = &InstReadFile::InstrumentFunction;
+
+    strategyMap["GetProcAddress"] = &InstGetProcAddress::InstrumentFunction;
+    strategyMap["QueueUserAPC2"] = &InstQueueUserAPC2::InstrumentFunction;
+    strategyMap["SleepEx"] = &InstSleepEx::InstrumentFunction;
+    strategyMap["RtlAddVectoredExceptionHandler"] = &InstRtlAddVectoredExceptionHandler::InstrumentFunction;
+    strategyMap["RaiseException"] = &InstRaiseException::InstrumentFunction;
+    strategyMap["RtlRemoveVectoredExceptionHandler"] = &InstRtlRemoveVectoredExceptionHandler::InstrumentFunction;
+    strategyMap["GetVersionExW"] = &InstGetVersionExW::InstrumentFunction;
+    strategyMap["NtdllDefWindowProc_W"] = &InstNtdllDefWindowProc_W::InstrumentFunction;
+    strategyMap["CreateToolhelp32Snapshot"] = &InstCreateToolhelp32Snapshot::InstrumentFunction;
+    strategyMap["GetFileSizeEx"] = &InstGetFileSizeEx::InstrumentFunction;
+    strategyMap["SetFilePointerEx"] = &InstSetFilePointerEx::InstrumentFunction;
+    strategyMap["QueryDosDeviceW"] = &InstQueryDosDeviceW::InstrumentFunction;
+    strategyMap["GetSystemFirmwareTable"] = &InstGetSystemFirmwareTable::InstrumentFunction;
+    strategyMap["BasepConstructSxsCreateProcessMessage"] = &InstBasepConstructSxsCreateProcessMessage::InstrumentFunction;
+    strategyMap["InstGetVolumePathNameW"] = &InstGetVolumePathNameW::InstrumentFunction;
+    strategyMap["DeviceIoControl"] = &InstDeviceIoControl::InstrumentFunction;
+    strategyMap["RtlQueryPerformanceCounter"] = &InstRtlQueryPerformanceCounter::InstrumentFunction;
+    strategyMap["GetCommandLineA"] = &InstGetCommandLineA::InstrumentFunction;
+    strategyMap["GetCommandLineW"] = &InstGetCommandLineW::InstrumentFunction;
+    strategyMap["GetComputerNameA"] = &InstGetComputerNameA::InstrumentFunction;
+    strategyMap["LCMapStringEx"] = &InstLCMapStringEx::InstrumentFunction;
+    strategyMap["NtQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["ZwQuerySystemInformation"] = &InstNtQuerySystemInformation::InstrumentFunction;
+    strategyMap["NtQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
+    strategyMap["ZwQuerySystemInformationEx"] = &InstNtQuerySystemInformationEx::InstrumentFunction;
+    strategyMap["RtlGetNativeSystemInformation"] = &InstRtlGetNativeSystemInformation::InstrumentFunction;
+    strategyMap["GetEnvironmentStringsW"] = &InstGetEnvironmentStringsW::InstrumentFunction;
+    strategyMap["GetEnvironmentVariableW"] = &InstGetEnvironmentVariableW::InstrumentFunction;
+    strategyMap["WriteFile"] = &InstWriteFile::InstrumentFunction;
+    strategyMap["CompareStringEx"] = &InstCompareStringEx::InstrumentFunction;
 
 
     strategyMap["lstrcpynA"] = &InstLstrcpynA::InstrumentFunction;
