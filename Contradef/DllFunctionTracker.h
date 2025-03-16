@@ -41,6 +41,7 @@ public:
     void printAllCalls() const;
 
     void DllFunctionTracker::saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
+    void DllFunctionTracker::saveLastExternalCall(std::ofstream& ExternalCallTraceOutFile);
 
     // Verifica se uma função específica foi chamada
     bool wasFunctionCalled(const std::string& dllName, const std::string& functionName) const;

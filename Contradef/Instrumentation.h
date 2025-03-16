@@ -30,10 +30,9 @@
 #include "DllFunctionMapper.h"
 #include "TraceInstructions.h"
 #include "TraceMemory.h"
-#include "InstrumentationCallbacks.h"
 #include "TraceFcnCall.h"
 #include "TraceDisassembly.h"
-
+#include "TestSeqInst.h"
 
 extern KNOB<bool> KnobDetailLevel; // Assume que KnobDetailLevel está definido em params.h
 

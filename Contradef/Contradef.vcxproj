@@ -326,6 +326,7 @@
     <ClCompile Include="InstWriteConsoleW.cpp" />
     <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
+    <ClCompile Include="TestSeqInst.cpp" />
     <ClCompile Include="TraceDisassembly.cpp" />
     <ClCompile Include="TraceFcnCall.cpp" />
     <ClCompile Include="TraceInstructions.cpp" />
@@ -482,6 +483,7 @@
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="TestSeqInst.h" />
     <ClInclude Include="TraceDisassembly.h" />
     <ClInclude Include="TraceFcnCall.h" />
     <ClInclude Include="TraceInstructions.h" />

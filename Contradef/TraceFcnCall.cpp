@@ -8,10 +8,10 @@ namespace TraceFcnCall {
 
     std::map<THREADID, CallStackManager> callStacks;
     DllFunctionTracker callTracker(100000); // Máximo de 100000 funções rastreadas
+    bool saveAtFini = false;
 
     VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT returnAddress, ADDRINT rspValue, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
     {
-
         if (IsMainExecutable(instAddress)) {
             PIN_LockClient();
             RTN rtnTgt = RTN_FindByAddress(targetRtnAddr);
@@ -43,8 +43,10 @@ namespace TraceFcnCall {
 
             }
 
-            UINT64 stackValue = *reinterpret_cast<UINT64*>(rspValue);
-            callStacks[threadid].pushFunction(instAddress, returnAddress, stackValue, tailCall, rtnName);
+            ///// Desativando call stack. Ainda em testes
+            // UINT64 stackValue = *reinterpret_cast<UINT64*>(rspValue);
+            // callStacks[threadid].pushFunction(instAddress, returnAddress, stackValue, tailCall, rtnName);
+            /////
 
             if (print) {
                 //std::cout << "----> " << instAddress << " -> " << targetRtn << s << std::endl;
@@ -78,6 +80,10 @@ namespace TraceFcnCall {
                 imgName = "[forced] " + fcnData.fullModuleName;
             }
             callTracker.addFunctionCall(threadid, imgName, tgtRtnName, tgtRtnAddr);
+            if (KnobSaveExternalCallTrace && !saveAtFini) {
+                saveLastExternalCall(ExternalCallTraceOutFile);
+            }
+
             std::string retRtnName = "INVALID_RTN";
             RTN rtnt = RTN_FindByAddress(returnAddress);
             if (RTN_Valid(rtnt)) {
@@ -168,16 +174,17 @@ namespace TraceFcnCall {
 
     VOID EmitFuncReturn(THREADID threadid, ADDRINT instAddress, ADDRINT retAddr, ADDRINT ret0, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
     {
-        if (IsMainExecutable(retAddr)) {
-            callStacks[threadid].popUntilAddress(retAddr);
-            //callStacks[threadid].popFunction();
-            //callStackManager.peekTopFunction();
-        }
+        ///// Desativando call stack. Ainda em testes
+        //if (IsMainExecutable(retAddr)) {
+        //    callStacks[threadid].popUntilAddress(retAddr);
+        //    
+        //    //callStacks[threadid].popFunction();
+        //    //callStackManager.peekTopFunction();
+        //}
     }
 
     VOID InstrumentFuncCall(TRACE trace, INS ins)
     {
-
         if (INS_IsCall(ins) && !INS_IsDirectControlFlow(ins))
         {
             BOOL isCall = INS_IsCall(ins);
@@ -284,7 +291,7 @@ namespace TraceFcnCall {
         else {
             if (INS_IsDirectControlFlow(ins)) {
 
-                std::cout << INS_Disassemble(ins) << "não \n";
+                std::cout << INS_Disassemble(ins) << "\n";
             }
         }
     }
@@ -305,8 +312,13 @@ namespace TraceFcnCall {
         callTracker.saveAllExternalCalls(ExternalCallTraceOutFile);
     }
 
+    VOID saveLastExternalCall(std::ofstream& ExternalCallTraceOutFile)
+    {
+        callTracker.saveLastExternalCall(ExternalCallTraceOutFile);
+    }
+
     VOID Fini(int, VOID* v) {
-        if (KnobSaveExternalCallTrace) {
+        if (KnobSaveExternalCallTrace && saveAtFini) {
             saveAllExternalCalls(ExternalCallTraceOutFile);
         }
         ExternalCallTraceOutFile.close();

@@ -50,6 +50,18 @@ void DllFunctionTracker::saveAllExternalCalls(std::ofstream& ExternalCallTraceOu
     }
 }
 
+void DllFunctionTracker::saveLastExternalCall(std::ofstream& ExternalCallTraceOutFile) {
+
+    if (!ExternalCallTraceOutFile.is_open()) {
+        std::cerr << "Erro: Arquivo de saída não está aberto!\n";
+        return;
+    }
+
+    const auto& func = functionList.back();
+    ExternalCallTraceOutFile << std::hex << func.address << std::dec << "   T[" << func.threadId << "]  " << func.dllName << ":" << func.functionName << std::endl;
+    ExternalCallTraceOutFile << std::flush;
+}
+
 // Verifica se uma função específica foi chamada
 bool DllFunctionTracker::wasFunctionCalled(const std::string& dllName, const std::string& functionName) const {
     for (const auto& func : functionList) {

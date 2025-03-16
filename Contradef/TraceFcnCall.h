@@ -22,6 +22,7 @@ namespace TraceFcnCall {
     VOID InstrumentFuncCall(TRACE trace, INS ins);
     VOID TraceFunc(TRACE trace, VOID* v);
     VOID saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
+    VOID saveLastExternalCall(std::ofstream& ExternalCallTraceOutFile);
     VOID Fini(int, VOID* v);
     int InitFcnCallTrace(std::string pid, std::string filename);
 
