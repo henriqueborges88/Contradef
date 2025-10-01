@@ -1,0 +1,399 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\henri\\source\\repos\\Contradef\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TestSeqInst.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceInstructions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TraceInstructions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateEventW.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\InstCreateEventW.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\Instrumentation.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TestSeqInst.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\InstructionSequenceDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateFileW.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\InstCreateFileW.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\ContextOperations.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\ContextOperations.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\FunctionInterceptor.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\FunctionInterceptor.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Contradef.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\Contradef.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\InstructionSequenceDetector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\EvasiveRetDetector.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\NtStructures.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\NtStructures.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\Instrumentation.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\RegistryKeys.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\RegistryKeys.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceFcnCall.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TraceFcnCall.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\Utils.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\YaraContradef.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\YaraContradef.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\EvasiveRetDetector.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstrumentationStrategy.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\InstrumentationStrategy.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TraceMemory.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0BCF239C-6533-4AA8-BD99-1741A44BADAB}|Contradef\\Contradef.vcxproj|solutionrelative:Contradef\\TraceMemory.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\henri\\source\\repos\\Contradef\\pin\\source\\tools\\InstLib\\regions_control.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:pin\\source\\tools\\InstLib\\regions_control.H||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 1759,
+          "SelectedChildIndex": 7,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Instrumentation.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.h",
+              "RelativeDocumentMoniker": "Contradef\\Instrumentation.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.h",
+              "RelativeToolTip": "Contradef\\Instrumentation.h",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAADIAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-11-04T12:20:50.514Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "InstructionSequenceDetector.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.cpp",
+              "RelativeDocumentMoniker": "Contradef\\InstructionSequenceDetector.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.cpp",
+              "RelativeToolTip": "Contradef\\InstructionSequenceDetector.cpp",
+              "ViewState": "AgIAAHkBAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-16T19:52:23.943Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TestSeqInst.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.h",
+              "RelativeDocumentMoniker": "Contradef\\TestSeqInst.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.h",
+              "RelativeToolTip": "Contradef\\TestSeqInst.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-04T20:58:50.002Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "RegistryKeys.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\RegistryKeys.h",
+              "RelativeDocumentMoniker": "Contradef\\RegistryKeys.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\RegistryKeys.h",
+              "RelativeToolTip": "Contradef\\RegistryKeys.h",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAACEAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-03T16:04:05.099Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "YaraContradef.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\YaraContradef.h",
+              "RelativeDocumentMoniker": "Contradef\\YaraContradef.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\YaraContradef.h",
+              "RelativeToolTip": "Contradef\\YaraContradef.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-01T22:28:06.84Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "InstCreateEventW.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateEventW.cpp",
+              "RelativeDocumentMoniker": "Contradef\\InstCreateEventW.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateEventW.cpp",
+              "RelativeToolTip": "Contradef\\InstCreateEventW.cpp",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAAAEoAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-01T21:54:23.444Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "TestSeqInst.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.cpp",
+              "RelativeDocumentMoniker": "Contradef\\TestSeqInst.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TestSeqInst.cpp",
+              "RelativeToolTip": "Contradef\\TestSeqInst.cpp",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABcAAABRAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-16T01:04:10.954Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Instrumentation.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.cpp",
+              "RelativeDocumentMoniker": "Contradef\\Instrumentation.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Instrumentation.cpp",
+              "RelativeToolTip": "Contradef\\Instrumentation.cpp",
+              "ViewState": "AgIAALgAAAAAAAAAAAAAAMAAAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2024-11-03T21:07:31.641Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "TraceInstructions.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceInstructions.cpp",
+              "RelativeDocumentMoniker": "Contradef\\TraceInstructions.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceInstructions.cpp",
+              "RelativeToolTip": "Contradef\\TraceInstructions.cpp",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABUAAABUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-03-30T16:27:14.497Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "InstructionSequenceDetector.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.h",
+              "RelativeDocumentMoniker": "Contradef\\InstructionSequenceDetector.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstructionSequenceDetector.h",
+              "RelativeToolTip": "Contradef\\InstructionSequenceDetector.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-03T20:06:29.909Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "regions_control.H",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\pin\\source\\tools\\InstLib\\regions_control.H",
+              "RelativeDocumentMoniker": "pin\\source\\tools\\InstLib\\regions_control.H",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\pin\\source\\tools\\InstLib\\regions_control.H",
+              "RelativeToolTip": "pin\\source\\tools\\InstLib\\regions_control.H",
+              "ViewState": "AgIAAJcBAAAAAAAAAAAAAJMBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-03T20:07:10.978Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "NtStructures.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\NtStructures.h",
+              "RelativeDocumentMoniker": "Contradef\\NtStructures.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\NtStructures.h",
+              "RelativeToolTip": "Contradef\\NtStructures.h",
+              "ViewState": "AgIAACMBAAAAAAAAAAAtwDEBAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-03T20:07:39.877Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Contradef.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Contradef.cpp",
+              "RelativeDocumentMoniker": "Contradef\\Contradef.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\Contradef.cpp",
+              "RelativeToolTip": "Contradef\\Contradef.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-09T20:02:47.336Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "InstrumentationStrategy.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstrumentationStrategy.h",
+              "RelativeDocumentMoniker": "Contradef\\InstrumentationStrategy.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstrumentationStrategy.h",
+              "RelativeToolTip": "Contradef\\InstrumentationStrategy.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-04-30T02:03:08.767Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "FunctionInterceptor.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\FunctionInterceptor.cpp",
+              "RelativeDocumentMoniker": "Contradef\\FunctionInterceptor.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\FunctionInterceptor.cpp",
+              "RelativeToolTip": "Contradef\\FunctionInterceptor.cpp",
+              "ViewState": "AgIAADEBAAAAAAAAAAAQwD8BAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-16T01:39:28.385Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ContextOperations.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\ContextOperations.cpp",
+              "RelativeDocumentMoniker": "Contradef\\ContextOperations.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\ContextOperations.cpp",
+              "RelativeToolTip": "Contradef\\ContextOperations.cpp",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-16T01:39:25.048Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Utils.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\utils.h",
+              "RelativeDocumentMoniker": "Contradef\\utils.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\utils.h",
+              "RelativeToolTip": "Contradef\\utils.h",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAACcAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-04-02T16:55:28.114Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "TraceMemory.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.h",
+              "RelativeDocumentMoniker": "Contradef\\TraceMemory.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.h",
+              "RelativeToolTip": "Contradef\\TraceMemory.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-04-02T15:57:36.752Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "TraceMemory.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.cpp",
+              "RelativeDocumentMoniker": "Contradef\\TraceMemory.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceMemory.cpp",
+              "RelativeToolTip": "Contradef\\TraceMemory.cpp",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAACMAAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-02T15:56:39.763Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "InstCreateFileW.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateFileW.cpp",
+              "RelativeDocumentMoniker": "Contradef\\InstCreateFileW.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\InstCreateFileW.cpp",
+              "RelativeToolTip": "Contradef\\InstCreateFileW.cpp",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAEMAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-04-02T14:06:45.859Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "TraceFcnCall.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceFcnCall.cpp",
+              "RelativeDocumentMoniker": "Contradef\\TraceFcnCall.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\TraceFcnCall.cpp",
+              "RelativeToolTip": "Contradef\\TraceFcnCall.cpp",
+              "ViewState": "AgIAAJsBAAAAAAAAAAAQwKkBAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-03-20T16:06:04.838Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "EvasiveRetDetector.h",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.h",
+              "RelativeDocumentMoniker": "Contradef\\EvasiveRetDetector.h",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.h",
+              "RelativeToolTip": "Contradef\\EvasiveRetDetector.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-03-22T15:20:05.474Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "EvasiveRetDetector.cpp",
+              "DocumentMoniker": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.cpp",
+              "RelativeDocumentMoniker": "Contradef\\EvasiveRetDetector.cpp",
+              "ToolTip": "C:\\Users\\henri\\source\\repos\\Contradef\\Contradef\\EvasiveRetDetector.cpp",
+              "RelativeToolTip": "Contradef\\EvasiveRetDetector.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-03-22T15:20:02.593Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

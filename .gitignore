@@ -1,9 +1,0 @@
-.vs/
-contradef.out*
-Contradef/x32/Debug
-Contradef/x64/Debug/
-tmp/*
-x64/Debug/
-yaracontradef/libyara/Debug
-yaracontradef/yaraCdef/Debug
-Contradef/Debug
