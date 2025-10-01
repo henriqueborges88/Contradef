@@ -11,18 +11,16 @@ VOID InstCreateFileW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
         return;
     }
 
-    CreateFileWArgs args;
-    args.lpFileName = lpFileName;
-    args.dwDesiredAccess = dwDesiredAccess;
-    args.dwShareMode = dwShareMode;
-    args.lpSecurityAttributes = lpSecurityAttributes;
-    args.dwCreationDisposition = dwCreationDisposition;
-    args.dwFlagsAndAttributes = dwFlagsAndAttributes;
-    args.hTemplateFile = hTemplateFile;
-
+    CreateFileWArgs* args = new CreateFileWArgs;
+    args->lpFileName = ConvertAddrToWideStringSafe(lpFileName);
+    args->dwDesiredAccess = dwDesiredAccess;
+    args->dwShareMode = dwShareMode;
+    args->lpSecurityAttributes = lpSecurityAttributes;
+    args->dwCreationDisposition = dwCreationDisposition;
+    args->dwFlagsAndAttributes = dwFlagsAndAttributes;
+    args->hTemplateFile = hTemplateFile;
     UINT32 callCtxId = callId * 100 + fcnCallId;
-
-    auto* callContext = new CallContext(callCtxId, tid, instAddress, &args);
+    auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
     CallContextKey key = { callCtxId, tid };
     callContextMap[key] = callContext;
@@ -51,12 +49,14 @@ VOID InstCreateFileW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         return;
     }
 
+
     UINT32 callCtxId = callId * 100 + fcnCallId;
     CallContextKey key = { callCtxId, tid };
     auto it = callContextMap.find(key);
     if (it != callContextMap.end()) {
         PIN_LockClient();
         CallContext* callContext = it->second;
+        const CreateFileWArgs* args = reinterpret_cast<CreateFileWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Handle retornado: " << std::hex << *retValAddr << std::dec << std::endl;
@@ -67,14 +67,41 @@ VOID InstCreateFileW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
         ExecutionEventData executionEvent(executionCompletedInfo);
         globalNotifierPtr->NotifyAll(&executionEvent);
 
+        // CONTRAMEDIDA
+        if (args->lpFileName == L"\\\\.\\TitanHide") {
+            if (retValAddr != nullptr) {
+                HANDLE* returnValue = reinterpret_cast<HANDLE*>(retValAddr);
+                if (*returnValue != INVALID_HANDLE_VALUE) {
+                    std::cout << "[CONTRADEF] Aplicando Contramedida TitanHideDetect\n";
+                    *returnValue = INVALID_HANDLE_VALUE; // INVALID_HANDLE_VALUE -> -1
+                }
+            }
+        }
+
+        delete reinterpret_cast<CreateFileWArgs*>(callContext->functionArgs);
         delete callContext;
         PIN_UnlockClient();
     }
+
+
 
     fcnCallId++;
 }
 
 VOID InstCreateFileW::InstrumentFunction(RTN rtn, Notifier& globalNotifier) {
+
+    SEC sec = RTN_Sec(rtn);
+    IMG img = SEC_Img(sec);
+    if (IMG_Valid(img)) {
+        std::string imageName = IMG_Name(img);
+        std::string moduleName = ExtractModuleName(IMG_Name(img));
+        if (toUpperCase(moduleName) != "KERNELBASE.DLL") {
+            return;
+        }
+    }
+    else {
+        return;
+    }
 
     std::string rtnName = RTN_Name(rtn);
     if (rtnName == "CreateFileW") {

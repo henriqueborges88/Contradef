@@ -120,7 +120,7 @@
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4530;5208;4267;4005;4210;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/GR- /GS- /EHs- /EHa- /FP:strict /Oi- /FIinclude/msvc_compat.h %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader />
       <Optimization>Disabled</Optimization>
@@ -154,7 +154,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
-      <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4530;5208;4267;4005;4210;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <AdditionalOptions>/GR- /GS- /EHs- /EHa- /FP:strict /Oi- /FIinclude/msvc_compat.h %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeader />
       <Optimization>Disabled</Optimization>
@@ -326,6 +326,7 @@
     <ClCompile Include="InstWriteConsoleW.cpp" />
     <ClCompile Include="InstWriteFile.cpp" />
     <ClCompile Include="ModulesDetection.cpp" />
+    <ClCompile Include="EvasiveRetDetector.cpp" />
     <ClCompile Include="TestSeqInst.cpp" />
     <ClCompile Include="TraceDisassembly.cpp" />
     <ClCompile Include="TraceFcnCall.cpp" />
@@ -483,6 +484,7 @@
     <ClInclude Include="Notifier.h" />
     <ClInclude Include="NtStructures.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="EvasiveRetDetector.h" />
     <ClInclude Include="TestSeqInst.h" />
     <ClInclude Include="TraceDisassembly.h" />
     <ClInclude Include="TraceFcnCall.h" />

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <map>
 #include <deque>
 #include <queue>
@@ -17,7 +18,7 @@
 #include "InstrumentationStrategy.h"
 
 struct CreateFileWArgs {
-    ADDRINT lpFileName;
+    std::wstring lpFileName;
     ADDRINT dwDesiredAccess;
     ADDRINT dwShareMode;
     ADDRINT lpSecurityAttributes;

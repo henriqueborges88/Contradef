@@ -28,7 +28,7 @@ struct InstrumentedInstruction {
     std::string instructionStr;
     std::string normalizedInstructionStr;
     bool insHasWildcard;
-    int strSize;
+    size_t strSize;
     OPCODE insClass;
 
     InstrumentedInstruction(OPCODE insCl, std::string instructionStr)
@@ -45,7 +45,7 @@ struct InstructionToMatch {
     std::string normalizedInstructionStr;
     bool isAnyInst;
     bool hasWildcard;
-    int size;
+    size_t size;
     OPCODE insClass;
 
     // Construtor para inicializar o contexto com IDs

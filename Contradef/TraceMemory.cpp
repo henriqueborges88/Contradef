@@ -3,6 +3,7 @@
 #include "TraceMemory.h"
 
 KNOB< BOOL > KnobTraceMemory(KNOB_MODE_WRITEONCE, "pintool", "memory", "1", "Trace memory");
+KNOB< BOOL > KnobTraceMemoryOnlyStr(KNOB_MODE_WRITEONCE, "pintool", "memory-only-str", "1", "Trace memory");
 
 std::ofstream TraceMemory::memTraceOut;
 PIN_MUTEX TraceMemory::fileMemTraceOutMutex;
@@ -18,14 +19,33 @@ VOID TraceMemory::WriteMemTraceOut(THREADID threadid, std::string* str, VOID* ea
     std::string opval = "";
     std::stringstream hexval;
     hexval << GetNumericHexValue((UINT64)ea, 8);
+    ADDRINT address = reinterpret_cast<ADDRINT>(ea);
 
-    if (IsStringPointer((ADDRINT)ea)) {
-        opval = GetNumericValueFromRef(ea, size) + " | \"" + std::string(reinterpret_cast<const char*>(ea)) + "\"";
+    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(ea)))
+    {
+        std::string str = CopyLPCSTR(address);
+        if (IsValidString(str)) {
+            opval = GetNumericValueFromRef(ea, size) + " | \"" + str + "\"";
+        }
+        else {
+            std::wstring wstr = CopyLPCWSTR(address);
+            if (IsValidWideString(wstr)) {
+                opval = GetNumericValueFromRef(ea, size) + " | \"" + WStringToString(wstr) + "\"";
+            }
+            else {
+                if (IsStringPointer(address)) {
+                    opval = GetNumericValueFromRef(ea, size) + " | \"" + std::string(reinterpret_cast<const char*>(ea)) + "\"";
+                }
+                else {
+                    std::stringstream ss;
+                    opval = GetNumericValueFromRef(ea, size);
+                }
+            }
+        }
+
     }
-    else {
-        std::stringstream ss;
-        opval = GetNumericValueFromRef(ea, size);
-    }
+
+
 
     PIN_MutexLock(&fileMemTraceOutMutex);
     memTraceOut << "[T" << std::dec << threadid << std::hex << "] " << *str << "        [" << hexval.str() << "] = " << opval << "\n" << std::string(133, '-') << "\n";
@@ -115,7 +135,6 @@ VOID TraceMemory::InstTraceMemory(INS ins, VOID* v)
         //INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(EmitRead), IARG_THREAD_ID, IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE, IARG_END);
         traceString += " | [Read 1Op]: \n";
 
-        REG reg2 = INS_OperandReg(ins, 1);
         INS_InsertCall(ins, IPOINT_BEFORE, (AFUNPTR)EmitRead,
             IARG_ADDRINT, INS_Address(ins),
             IARG_THREAD_ID,

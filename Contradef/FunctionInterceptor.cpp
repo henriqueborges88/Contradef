@@ -97,6 +97,9 @@ void FunctionInterceptor::InitStrategies() {
         }
     }
 
+    // Para o Themida
+    //EvasiveRetDetector::InitEvasiveRetDetector(); <- verificar erro
+
 
     strategyMap["VirtualProtect"] = &InstVirtualProtect::InstrumentFunction;
     strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
@@ -314,39 +317,6 @@ bool FunctionInterceptor::HasStrategy(const std::string& name) const {
     return strategyMap.find(name) != strategyMap.end();
 }
 
-///////TESTE
-bool inited = false;
-VOID CallbackBefore(THREADID tid, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress) {
-    if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) {
-        return;
-    }
-    PIN_LockClient();
-    RTN rtnCurrent = RTN_FindByAddress(instAddress);
-    std::string rtnName = RTN_Name(rtnCurrent);
-    std::cout << instAddress << " " << rtnName << " T=" << tid << std::endl;
-    if ("GetProcessHeap" == rtnName && !inited) {
-        inited = true;
-        std::cout << "Hook inserido" << std::endl;
-        TraceInstructions::InitTrace("3", "GetProcessHeap3");
-    }
-    PIN_UnlockClient();
-}
-
-VOID InstrumentFcn(RTN rtn) {
-    RTN_Open(rtn);
-
-    RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CallbackBefore,
-        IARG_THREAD_ID,
-        IARG_INST_PTR,
-        IARG_ADDRINT, RTN_Address(rtn),
-        IARG_CONTEXT,
-        IARG_RETURN_IP,          // Endereço da função chamante
-        IARG_END);
-
-    RTN_Close(rtn);
-}
-///////FIM TESTE
-
 void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
     ModuleRange range;
     range.start = IMG_LowAddress(img);
@@ -367,11 +337,6 @@ void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier
                     func(rtn, globalNotifier);
                 }
             }
-
-
-
-            InstrumentFcn(rtn);
-
         }
     }
 

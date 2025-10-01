@@ -174,6 +174,101 @@ bool IsStringPointer(UINT64 addr) {
 }
 
 
+bool IsValidWideString(const std::wstring& str) {
+    // Verifique primeiro o tamanho mínimo
+    if (str.size() < 3) {
+        return false;
+    }
+
+    for (wchar_t ch : str) {
+        // Permitir apenas caracteres ASCII alfanuméricos e os permitidos extras
+        if (!((ch >= L'0' && ch <= L'9') || // Números
+            (ch >= L'A' && ch <= L'Z') || // Letras maiúsculas
+            (ch >= L'a' && ch <= L'z') || // Letras minúsculas
+            ch == L'.' || ch == L'-' || ch == L'_' ||
+            ch == L':' || ch == L'\\' || ch == L'/')) {
+            return false; // Caractere inválido encontrado
+        }
+    }
+
+    return true; // Todos os caracteres são válidos
+}
+
+
+bool IsValidString(const std::string& str) {
+    // Verifique primeiro o tamanho mínimo
+    if (str.size() < 3) {
+        return false;
+    }
+
+    for (char ch : str) {
+        // Permitir apenas caracteres ASCII alfanuméricos e os extras permitidos
+        if (!((ch >= '0' && ch <= '9') || // Números
+            (ch >= 'A' && ch <= 'Z') || // Letras maiúsculas
+            (ch >= 'a' && ch <= 'z') || // Letras minúsculas
+            ch == '.' || ch == '-' || ch == '_' ||
+            ch == ':' || ch == '\\' || ch == '/')) {
+            return false; // Caractere inválido encontrado
+        }
+    }
+
+    return true; // Todos os caracteres são válidos
+}
+
+std::wstring CopyLPCWSTR(ADDRINT addr) {
+    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
+    wchar_t buffer[MAX_STRING_LENGTH];    // Buffer para armazenar a string copiada
+    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
+
+    size_t copied = 0;                    // Contador de caracteres copiados
+
+    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
+        // Use PIN_SafeCopy para copiar um único caractere wide por vez (2 bytes em UTF-16/UCS-2)
+        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i * sizeof(wchar_t)), sizeof(wchar_t));
+
+        // Se a cópia falhar ou encontrar o terminador nulo, finalize
+        if (result != sizeof(wchar_t) || buffer[i] == L'\0') {
+            break;
+        }
+
+        copied++;
+    }
+
+    // Verifica se o tamanho máximo foi excedido
+    if (copied == MAX_STRING_LENGTH - 1) {
+        //std::wcerr << L"Warning: Wide string copy reached the maximum limit." << std::endl;
+    }
+
+    return std::wstring(buffer); // Retorna a string wide copiada como um std::wstring
+}
+
+std::string CopyLPCSTR(ADDRINT addr) {
+    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
+    char buffer[MAX_STRING_LENGTH];       // Buffer para armazenar a string copiada
+    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
+
+    size_t copied = 0;                    // Contador de bytes copiados
+
+    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
+        // Use PIN_SafeCopy para copiar um único caractere por vez
+        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i), 1);
+
+        // Se a cópia falhar ou encontrar o terminador nulo, finalize
+        if (result == 0 || buffer[i] == '\0') {
+            break;
+        }
+
+        copied++;
+    }
+
+    // Verifica se o tamanho máximo foi excedido
+    if (copied == MAX_STRING_LENGTH - 1) {
+        //std::cerr << "Warning: String copy reached the maximum limit." << std::endl;
+    }
+
+    return std::string(buffer); // Retorna a string copiada como um std::string
+}
+
 std::string GetStringValueFromRegister(UINT64 value, UINT32 size) {
     std::ostringstream result;
 
@@ -212,6 +307,43 @@ std::string GetStringValueFromRegister(UINT64 value, UINT32 size) {
     return result.str();
 }
 
+size_t GetSafeWStringLength(ADDRINT addr, size_t maxLen) {
+    size_t length = 0;
+    wchar_t ch = 0;
+
+    for (; length < maxLen; ++length) {
+        // Copia apenas 1 wchar_t por vez de forma segura
+        if (PIN_SafeCopy(&ch, reinterpret_cast<void*>(addr + length * sizeof(wchar_t)), sizeof(wchar_t)) != sizeof(wchar_t)) {
+            break; // Falha ao acessar a memória -> parar
+        }
+
+        if (ch == L'\0') {
+            break; // Fim da string
+        }
+    }
+
+    return length;
+}
+
+std::wstring ConvertAddrToWideStringSafe(ADDRINT addr, size_t maxLen) {
+    std::wstring result;
+
+    size_t length = GetSafeWStringLength(addr, maxLen);
+    if (length == 0) return result;
+
+    // Buffer temporário com terminador adicional
+    std::vector<wchar_t> buffer(length + 1, L'\0');
+
+    // Use &buffer[0] no lugar de buffer.data() — compatível com C++11
+    size_t copied = PIN_SafeCopy(&buffer[0], reinterpret_cast<void*>(addr), (length + 1) * sizeof(wchar_t));
+    if (copied >= length * sizeof(wchar_t)) {
+        result = std::wstring(&buffer[0]);
+    }
+
+    return result;
+}
+
+
 std::wstring ConvertAddrToWideString(ADDRINT addr) {
     if (addr != 0) {
         wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
@@ -232,100 +364,61 @@ std::string ConvertAddrToAnsiString(ADDRINT addr) {
     }
 }
 
-std::string WStringToString(const std::wstring& wstr) {
-    std::string str;
-    for (wchar_t wc : wstr) {
-        if (wc < 128) {
-            str += static_cast<char>(wc);
-        }
-        else {
-            // Converte caracteres fora do ASCII
-            char buffer[5] = { 0 };
-            if (wc < 0x0800) {
-                buffer[0] = 0xC0 | ((wc >> 6) & 0x1F);
-                buffer[1] = 0x80 | (wc & 0x3F);
-            }
-            else {
-                buffer[0] = 0xE0 | ((wc >> 12) & 0x0F);
-                buffer[1] = 0x80 | ((wc >> 6) & 0x3F);
-                buffer[2] = 0x80 | (wc & 0x3F);
-            }
-            str += buffer;
-        }
+std::string WStringToString(const std::wstring& wstr)
+{
+    if (wstr.empty())
+    {
+        return std::string();
     }
-    return str;
+
+    // Obtém o tamanho necessário do buffer para a string convertida (em UTF-8)
+    int sizeNeeded = WindowsAPI::WideCharToMultiByte(
+        CP_UTF8,          // Código de página para UTF-8
+        0,                // Nenhum flag extra
+        wstr.data(),      // Ponteiro para a string wide char
+        static_cast<int>(wstr.size()), // Comprimento da string wide char
+        nullptr,          // Sem buffer de saída por enquanto (queremos saber o tamanho necessário)
+        0,
+        nullptr,          // Sem uso de caractere de substituição
+        nullptr           // Sem retorno de caractere substituto usado
+    );
+
+    if (sizeNeeded <= 0)
+    {
+        return std::string();
+    }
+
+    // Cria um buffer de tamanho adequado para a string resultante
+    std::string result(sizeNeeded, 0);
+
+    // Converte de wide char para string em UTF-8
+    WindowsAPI::WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        wstr.data(),
+        static_cast<int>(wstr.size()),
+        &result[0],
+        sizeNeeded,
+        nullptr,
+        nullptr
+    );
+
+    return result;
 }
 
-std::string CopyLPCSTR(ADDRINT addr) {
-    const size_t MAX_STRING_LENGTH = 1024; // Defina o tamanho máximo da string
-    char buffer[MAX_STRING_LENGTH];       // Buffer para armazenar a string copiada
-    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
-
-    size_t copied = 0;                    // Contador de bytes copiados
-
-    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
-        // Use PIN_SafeCopy para copiar um único caractere por vez
-        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i), 1);
-
-        // Se a cópia falhar ou encontrar o terminador nulo, finalize
-        if (result == 0 || buffer[i] == '\0') {
-            break;
-        }
-
-        copied++;
-    }
-
-    // Verifica se o tamanho máximo foi excedido
-    if (copied == MAX_STRING_LENGTH - 1) {
-        std::cerr << "Warning: String copy reached the maximum limit." << std::endl;
-    }
-
-    return std::string(buffer); // Retorna a string copiada como um std::string
+// Função para converter std::string para const wchar_t*
+const wchar_t* StringToWString(const std::string& str)
+{
+    using namespace WindowsAPI;
+    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
+    wchar_t* wideStr = new wchar_t[size_needed];
+    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wideStr, size_needed);
+    return wideStr;
 }
 
 void LogWString(const std::wstring& wstr) {
     std::string str = WStringToString(wstr);
     LOG("Converted String: %s\n", str.c_str());
-}
-
-std::string PrintNormalized(const std::wstring& wstr) {
-    /*    
-        Converter de addrint:    
-        std::wstring wsBuffer = ConvertAddrToWideString(addr);
-        std::cout << " STRING -> " << PrintNormalized(wsBuffer) << std::endl;
-    */
-
-    std::string str;
-    for (wchar_t wc : wstr) {
-        if (wc < 128) {
-            str += static_cast<char>(wc);  // Simplificação: assume que o caractere está dentro do ASCII
-        }
-        else {
-            str += '?'; // Caracteres fora do ASCII são substituídos por '?'
-        }
-    }
-    return str.c_str();
-}
-
-//
-//std::string WStringToString(const std::wstring& wstr) {
-//    std::string str(wstr.begin(), wstr.end());
-//    return str;
-//}
-
-// Função para converter std::wstring para std::string
-std::string ConvertWideStringToString(const std::wstring& wstr) {
-    std::setlocale(LC_ALL, "en_US.UTF-8"); // Definir o local adequado
-
-    std::mbstate_t state = std::mbstate_t();
-    const wchar_t* src = wstr.c_str();
-    size_t len = std::wcsrtombs(nullptr, &src, 0, &state) + 1;
-
-    std::string dest(len, '\0');
-    std::wcsrtombs(&dest[0], &src, len, &state);
-    dest.resize(len - 1); // Remover o terminador nulo adicionado
-
-    return dest;
 }
 
 std::string ExtractModuleName(const std::string& fullPath) {
@@ -371,52 +464,6 @@ void PrintCallContextMap(std::map<CallContextKey, CallContext*>& callContextMap)
     }
 }
 
-// Função para converter std::string para const wchar_t*
-const wchar_t* ConvertToWideString(const std::string& str)
-{
-    using namespace WindowsAPI;
-    int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, NULL, 0);
-    wchar_t* wideStr = new wchar_t[size_needed];
-    MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wideStr, size_needed);
-    return wideStr;
-}
-
-std::string ConvertWStringToUTF8(const std::wstring& wstr)
-{
-    std::string result;
-    for (wchar_t wc : wstr)
-    {
-        if (wc <= 0x7F) // ASCII character
-        {
-            result.push_back(static_cast<char>(wc));
-        }
-        else if (wc <= 0x7FF) // 2-byte UTF-8
-        {
-            result.push_back(static_cast<char>(0xC0 | ((wc >> 6) & 0x1F)));
-            result.push_back(static_cast<char>(0x80 | (wc & 0x3F)));
-        }
-        else // 3-byte UTF-8
-        {
-            result.push_back(static_cast<char>(0xE0 | ((wc >> 12) & 0x0F)));
-            result.push_back(static_cast<char>(0x80 | ((wc >> 6) & 0x3F)));
-            result.push_back(static_cast<char>(0x80 | (wc & 0x3F)));
-        }
-    }
-    return result;
-}
-
-std::string WideStringToStringFromPointer(ADDRINT addr)
-{
-    wchar_t* wideCharStr = reinterpret_cast<wchar_t*>(addr);
-    if (wideCharStr == nullptr)
-    {
-        return std::string();  // Retorna uma string vazia se o endereço for nulo
-    }
-
-    std::wstring wstr(wideCharStr);
-    std::string str = ConvertWStringToUTF8(wstr);
-    return str;
-}
 
 void GetParentProcessName() {
     using namespace WindowsAPI;
@@ -486,7 +533,7 @@ DWORD GetProcessIdByName(std::string processName) {
         do {
             // Compara o nome do executável
             std::transform(processName.begin(), processName.end(), processName.begin(), ::tolower);
-            std::string pName = ConvertWideStringToString(pe32.szExeFile);
+            std::string pName = WStringToString(pe32.szExeFile);
             std::transform(pName.begin(), pName.end(), pName.begin(), ::tolower);
             if (processName == pName) {
                 processId = pe32.th32ProcessID;

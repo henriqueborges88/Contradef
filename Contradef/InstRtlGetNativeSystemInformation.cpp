@@ -17,7 +17,7 @@ VOID printParentProcess(DWORD parentProcessId) {
         WCHAR parentProcessName[MAX_PATH] = { 0 };
         if (GetModuleBaseName(hParentProcess, nullptr, parentProcessName, MAX_PATH)) {
             std::wstring ppName(parentProcessName);
-            std::string pName = ConvertWideStringToString(ppName);
+            std::string pName = WStringToString(ppName);
             if (ppName == L"pin.exe") {
                 std::cout << "[CONTRADEF] Instrumentador PIN detectado. (nome do processo pai: " << pName << ")" << std::endl;
             }
@@ -42,11 +42,11 @@ VOID InstRtlGetNativeSystemInformation::CallbackBefore(THREADID tid, UINT32 call
         return;
     }
 
-    RtlGetNativeSystemInformationArgs args;
-    args.SystemInformationClass = SystemInformationClass;
-    args.SystemInformation = SystemInformation;
-    args.SystemInformationLength = SystemInformationLength;
-    args.ReturnLength = ReturnLength;
+    RtlGetNativeSystemInformationArgs* args = new RtlGetNativeSystemInformationArgs;
+    args->SystemInformationClass = SystemInformationClass;
+    args->SystemInformation = SystemInformation;
+    args->SystemInformationLength = SystemInformationLength;
+    args->ReturnLength = ReturnLength;
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
@@ -104,9 +104,7 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
             DWORD currentProcessId = GetCurrentProcessId();
 
             PSYSTEM_PROCESS_INFORMATION processInfo = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(args->SystemInformation);
-
             while (processInfo) {
-
                 if (reinterpret_cast<DWORD>(processInfo->UniqueProcessId) == currentProcessId) {
                     stringStream << "  [-] Aplicando contramedida" << std::endl;
 
@@ -136,6 +134,7 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
         ExecutionEventData executionEvent(executionCompletedInfo);
         globalNotifierPtr->NotifyAll(&executionEvent);
 
+        delete reinterpret_cast<RtlGetNativeSystemInformationArgs*>(callContext->functionArgs);
         delete callContext;
         callContextMap.erase(it);
         PIN_UnlockClient();

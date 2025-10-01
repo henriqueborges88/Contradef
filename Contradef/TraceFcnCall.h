@@ -12,6 +12,7 @@
 #include "CallStackManager.h"
 #include "DllFunctionTracker.h"
 #include "DllFunctionMapper.h"
+#include "TraceInstructions.h"
 
 namespace TraceFcnCall {
 
@@ -23,6 +24,9 @@ namespace TraceFcnCall {
     VOID TraceFunc(TRACE trace, VOID* v);
     VOID saveAllExternalCalls(std::ofstream& ExternalCallTraceOutFile);
     VOID saveLastExternalCall(std::ofstream& ExternalCallTraceOutFile);
+    VOID CallbackBefore(THREADID tid, ADDRINT instAddress, CONTEXT* ctx, ADDRINT returnAddress);
+    VOID InstrumentFcn(RTN rtn);
+    void TraceFuncM2(IMG img, VOID* v);
     VOID Fini(int, VOID* v);
     int InitFcnCallTrace(std::string pid, std::string filename);
 

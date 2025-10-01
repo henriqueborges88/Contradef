@@ -1,4 +1,15 @@
 #include "TestSeqInst.h"
+#include "ContextOperations.h"
+
+
+
+VOID TestSeqCB(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v)
+{
+	std::cout << "\n[CONTRADEF][ANTIDEBUG] Sleep" << std::endl;
+
+	SetZfToZero(ctxt);
+}
+
 
 void testSequences(InstructionSequenceDetector& seq_detector, InstructionSequenceDetector& disassembly_seq_detector) {
 	// Tecnicas evasivas obsiium 1.8.5 Antidbi
@@ -8,8 +19,9 @@ void testSequences(InstructionSequenceDetector& seq_detector, InstructionSequenc
 	sequence.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb", "jb 0x7ff7bf17d3eb", "jo 0x7ff6cafbeb87"));
 	sequence.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
 
-	//seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 34, 34);
-	seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
+	seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 0, 1, 33);
+	seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback, 0, 13, 33);
+	//seq_detector.AddInstructionSequence(sequence, SequenceMatchCallback); // TODAS
 
 
 
@@ -128,14 +140,14 @@ void testSequences(InstructionSequenceDetector& seq_detector, InstructionSequenc
 	//seq_detector.AddInstructionSequence(read_string_cmp41, SequenceMatchReadStringCmp41Callback);
 
 
-	// Tecnica antidebug, verificada
+	// Tecnica antidesmontagem, verificada
 	std::vector<std::vector<std::string>> ad_same_target;
 	ad_same_target.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
 	ad_same_target.push_back(CreateInstVector("jnz 0x7ff62f10fe35"));
 	disassembly_seq_detector.AddInstructionSequence(ad_same_target, SequenceMatchAntiDebugSameTarget, &disassembly_seq_detector);
 
 
-	// Tecnica antidebug, verificada
+	// Tecnica antidesmontagem, verificada
 	std::vector<std::vector<std::string>> ad_const_condition;
 	ad_const_condition.push_back(CreateInstVector("xor eax, eax"));
 	ad_const_condition.push_back(CreateInstVector("jz 0x7ff62f10fe35"));
@@ -143,23 +155,14 @@ void testSequences(InstructionSequenceDetector& seq_detector, InstructionSequenc
 
 
 	// para testes
-	std::vector<std::vector<std::string>> read_string_cmp4;
-	//read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rsi], 0x56"));
-	//read_string_cmp4.push_back(CreateInstVector("cmp byte ptr [rbp], 0x43"));
+	//std::vector<std::vector<std::string>> read_string_cmp4;
+	//read_string_cmp4.push_back(CreateInstVector("call qword ptr [rip+0x1231f]"));
+	//read_string_cmp4.push_back(CreateInstVector("mov r10, rcx"));
+	//read_string_cmp4.push_back(CreateInstVector("mov eax, 0x1067"));
+	//read_string_cmp4.push_back(CreateInstVector("test byte ptr [0x7ffe0308], 0x1"));
+	//read_string_cmp4.push_back(CreateInstVector("jnz 0x7fffb26b21c5"));
 
 
-
-	/*read_string_cmp4.push_back(CreateInstVector("sub rsp, 0x58"));
-	read_string_cmp4.push_back(CreateInstVector("mov rdx, qword ptr [rcx]"));
-	read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe09"));
-	read_string_cmp4.push_back(CreateInstVector("mov eax, dword ptr [rdx]"));
-	read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe0e"));
-	read_string_cmp4.push_back(CreateInstVector("cmp eax, 0x4001000a"));
-	read_string_cmp4.push_back(CreateInstVector("jmp 0x7ff62f10fe19"));
-	read_string_cmp4.push_back(CreateInstVector("jz 0x7ff62f10fe35"));*/
-
-
-	//seq_detector.AddInstructionSequence(read_string_cmp4, SequenceMatchAntiDebugSameTarget);
-	//seq_detector.AddInstructionSequence(read_string_cmp4, SetZfToZero);
+	//seq_detector.AddInstructionSequence(read_string_cmp4, TestSeqCB);
 
 }

@@ -5,13 +5,18 @@ KNOB<BOOL> KnobSaveExternalCallTrace(KNOB_MODE_WRITEONCE, "pintool", "et", "1", 
 namespace TraceFcnCall {
     // Arquivo de saída para rastreamento de chamadas externas
     std::ofstream ExternalCallTraceOutFile;
-
+    std::ofstream ExternalCallTraceOutFileM2;
+    
+    PIN_MUTEX traceFcnMutex;
     std::map<THREADID, CallStackManager> callStacks;
     DllFunctionTracker callTracker(100000); // Máximo de 100000 funções rastreadas
     bool saveAtFini = false;
 
     VOID EmitFuncCall(THREADID threadid, ADDRINT instAddress, ADDRINT targetRtnAddr, BOOL isCall, BOOL isDirect, INT32 tailCall, ADDRINT returnAddress, ADDRINT rspValue, ADDRINT arg0, ADDRINT arg1, ADDRINT arg2, ADDRINT arg3, ADDRINT arg4, ADDRINT arg5, ADDRINT arg6)
     {
+        if (targetRtnAddr == 0) {
+            return;
+        }
         if (IsMainExecutable(instAddress)) {
             PIN_LockClient();
             RTN rtnTgt = RTN_FindByAddress(targetRtnAddr);
@@ -57,6 +62,7 @@ namespace TraceFcnCall {
         }
 
         PIN_LockClient();
+
         if (IsMainExecutable(instAddress) && !IsMainExecutable(targetRtnAddr)) {
             std::string tgtRtnName = "";
             std::string imgName = "";
@@ -317,11 +323,95 @@ namespace TraceFcnCall {
         callTracker.saveLastExternalCall(ExternalCallTraceOutFile);
     }
 
+
+    ///////Método 2
+    static bool inited = true;
+    static bool tracing = false;
+    VOID CallbackBefore(THREADID tid, ADDRINT instAddress, CONTEXT* ctx, ADDRINT returnAddress) {
+
+        PIN_MutexLock(&traceFcnMutex);
+
+		if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(returnAddress)))
+		{
+            if (instrumentOnlyMain && !IsMainExecutable(returnAddress)) 
+            {
+                PIN_MutexUnlock(&traceFcnMutex);
+                return;
+            }
+            //
+            PIN_LockClient();
+            RTN rtnTgt = RTN_FindByAddress(instAddress);
+            std::string rtnName = RTN_Name(rtnTgt);
+            if (RTN_Valid(rtnTgt))
+            {
+                IMG img = SEC_Img(RTN_Sec(rtnTgt));
+                if (IMG_Valid(img)) {
+                    std::string imgName = IMG_Name(img);
+                    ExternalCallTraceOutFileM2 << std::hex << instAddress << std::dec << "   T[" << tid << "]  " << imgName << ":" << rtnName << std::endl << std::flush;
+                }
+            }
+
+            if ("IsBadReadPtr" == rtnName) {
+                inited = false;
+                string ipid = decstr(WindowsAPI::getpid());
+                TraceInstructions::disable();
+            }
+            if ("VirtualFree" == rtnName && !inited) {
+                inited = true;
+                TraceInstructions::enable();
+            }
+
+            if ("MapViewOfFile" == rtnName) {
+                inited = false;
+                TraceInstructions::disable();
+            }
+            if ("UnmapViewOfFile" == rtnName && !inited) {
+                inited = true;
+                TraceInstructions::enable();
+            }
+
+            //if ("RegQueryValueExA" == rtnName && !inited) {
+            //    inited = true;
+            //    string ipid = decstr(WindowsAPI::getpid()); // CHAMAR ESTA FUNÇÃO EVITA O ERRO DE INSTRUMENTAÇÃO, VERIFICAR O MOTIVO
+            //    std::cout << "Hook inserido" << std::endl;
+            //    TraceInstructions::InitTrace(ipid, "RegQueryValueExA");
+            //}
+            PIN_UnlockClient();
+		}
+        PIN_MutexUnlock(&traceFcnMutex);
+
+    }
+
+    VOID InstrumentFcn(RTN rtn) {
+        RTN_Open(rtn);
+
+        RTN_InsertCall(rtn, IPOINT_BEFORE, (AFUNPTR)CallbackBefore,
+            IARG_THREAD_ID,
+            IARG_INST_PTR,
+            IARG_CONTEXT,
+            IARG_RETURN_IP,          // Endereço da função chamante
+            IARG_END);
+
+        RTN_Close(rtn);
+    }
+
+    void TraceFuncM2(IMG img, VOID* v) {
+        for (SYM sym = IMG_RegsymHead(img); SYM_Valid(sym); sym = SYM_Next(sym)) {
+            RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
+            if (RTN_Valid(rtn)) {
+                InstrumentFcn(rtn);
+            }
+        }
+    }
+    ///////FIM Método 2
+
+
     VOID Fini(int, VOID* v) {
         if (KnobSaveExternalCallTrace && saveAtFini) {
             saveAllExternalCalls(ExternalCallTraceOutFile);
         }
         ExternalCallTraceOutFile.close();
+        ExternalCallTraceOutFileM2.close();
     }
 
     int InitFcnCallTrace(std::string pid, std::string filename)
@@ -329,13 +419,17 @@ namespace TraceFcnCall {
 
         if (KnobSaveExternalCallTrace)
         {
-            std::string logfilename = filename + "." + pid + ".externalcalltrace.cdf";
+            std::string logfilename = filename + "." + pid + ".externalcalltraceM1.cdf";
             ExternalCallTraceOutFile.open(logfilename.c_str(), std::ios::binary);
-        }
 
+            std::string logfilenameM2 = filename + "." + pid + ".externalcalltraceM2.cdf";
+            ExternalCallTraceOutFileM2.open(logfilenameM2.c_str(), std::ios::binary);
+        }
 
         PIN_AddFiniFunction(Fini, 0);
         TRACE_AddInstrumentFunction(TraceFunc, 0);
+        IMG_AddInstrumentFunction(TraceFuncM2, 0); // Método 2
+
         return 0;
     }
 }

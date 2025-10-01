@@ -9,6 +9,8 @@
 #include <string>
 #include <functional>
 #include <deque>
+#include "EvasiveRetDetector.h"
+
 #include "InstIsDebuggerPresent.h"
 #include "InstCheckRemoteDebuggerPresent.h"
 #include "InstOutputDebugStringW.h"

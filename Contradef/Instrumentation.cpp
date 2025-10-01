@@ -14,101 +14,6 @@ FunctionInterceptor fcnInterceptor; // As estratégias já estão adicionadas no In
 InstructionSequenceDetector seq_detector;
 InstructionSequenceDetector disassembly_seq_detector;
 
-bool IsValidWideString(const std::wstring& str) {
-    // Verifique primeiro o tamanho mínimo
-    if (str.size() < 3) {
-        return false;
-    }
-
-    for (wchar_t ch : str) {
-        // Permitir apenas caracteres ASCII alfanuméricos e os permitidos extras
-        if (!((ch >= L'0' && ch <= L'9') || // Números
-            (ch >= L'A' && ch <= L'Z') || // Letras maiúsculas
-            (ch >= L'a' && ch <= L'z') || // Letras minúsculas
-            ch == L'.' || ch == L'-' || ch == L'_' ||
-            ch == L':' || ch == L'\\' || ch == L'/')) {
-            return false; // Caractere inválido encontrado
-        }
-    }
-
-    return true; // Todos os caracteres são válidos
-}
-
-
-bool IsValidString(const std::string& str) {
-    // Verifique primeiro o tamanho mínimo
-    if (str.size() < 3) {
-        return false;
-    }
-
-    for (char ch : str) {
-        // Permitir apenas caracteres ASCII alfanuméricos e os extras permitidos
-        if (!((ch >= '0' && ch <= '9') || // Números
-            (ch >= 'A' && ch <= 'Z') || // Letras maiúsculas
-            (ch >= 'a' && ch <= 'z') || // Letras minúsculas
-            ch == '.' || ch == '-' || ch == '_' ||
-            ch == ':' || ch == '\\' || ch == '/')) {
-            return false; // Caractere inválido encontrado
-        }
-    }
-
-    return true; // Todos os caracteres são válidos
-}
-
-std::wstring aCopyLPCWSTR(ADDRINT addr) {
-    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
-    wchar_t buffer[MAX_STRING_LENGTH];    // Buffer para armazenar a string copiada
-    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
-
-    size_t copied = 0;                    // Contador de caracteres copiados
-
-    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
-        // Use PIN_SafeCopy para copiar um único caractere wide por vez (2 bytes em UTF-16/UCS-2)
-        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i * sizeof(wchar_t)), sizeof(wchar_t));
-
-        // Se a cópia falhar ou encontrar o terminador nulo, finalize
-        if (result != sizeof(wchar_t) || buffer[i] == L'\0') {
-            break;
-        }
-
-        copied++;
-    }
-
-    // Verifica se o tamanho máximo foi excedido
-    if (copied == MAX_STRING_LENGTH - 1) {
-        //std::wcerr << L"Warning: Wide string copy reached the maximum limit." << std::endl;
-    }
-
-    return std::wstring(buffer); // Retorna a string wide copiada como um std::wstring
-}
-
-std::string aCopyLPCSTR(ADDRINT addr) {
-    const size_t MAX_STRING_LENGTH = 800; // Defina o tamanho máximo da string
-    char buffer[MAX_STRING_LENGTH];       // Buffer para armazenar a string copiada
-    memset(buffer, 0, sizeof(buffer));    // Inicializa o buffer com zeros
-
-    size_t copied = 0;                    // Contador de bytes copiados
-
-    for (size_t i = 0; i < MAX_STRING_LENGTH - 1; i++) {
-        // Use PIN_SafeCopy para copiar um único caractere por vez
-        size_t result = PIN_SafeCopy(&buffer[i], reinterpret_cast<const void*>(addr + i), 1);
-
-        // Se a cópia falhar ou encontrar o terminador nulo, finalize
-        if (result == 0 || buffer[i] == '\0') {
-            break;
-        }
-
-        copied++;
-    }
-
-    // Verifica se o tamanho máximo foi excedido
-    if (copied == MAX_STRING_LENGTH - 1) {
-        //std::cerr << "Warning: String copy reached the maximum limit." << std::endl;
-    }
-
-    return std::string(buffer); // Retorna a string copiada como um std::string
-}
-
 
 // Função para aguardar no Entry Point
 VOID PauseAtEntryPoint(ADDRINT entryAddress) {
@@ -161,129 +66,7 @@ VOID GetSectionInfo(IMG img, std::ofstream& MainOutFile)
     MainOutFile.flush();  // Esvazia o buffer de saída
 }
 
-
-///////////////////
-
-// Test error CB
-EXCEPT_HANDLING_RESULT errCB (THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICAL_CONTEXT* pPhysCtxt, VOID* v)
-{
-    return EXCEPT_HANDLING_RESULT::EHR_HANDLED;
-}
-
-VOID aEmitRead(THREADID threadid, ADDRINT instAddress, std::string* insstr, VOID* ea, UINT32 size)
-{
-    ADDRINT address = reinterpret_cast<ADDRINT>(ea);
-    return;
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(ea)))
-    {
-        std::wstring wstr = aCopyLPCWSTR(address);
-        if (IsValidWideString(wstr)) {
-            std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-            wprintf(L" ** Read WString --> %ls <-\n", wstr);
-        }
-        
-        std::string str = aCopyLPCSTR(address);
-        if (IsValidString(str)) {
-            std::cout << "Read from address: " << std::hex << address << ", size: " << size << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << *insstr << std::endl;
-            std::cout << " ** Read String --> " << str << std::endl;
-        }
-                
-    }
-
-}
-
-
-//Remover depois de implementar o memory trace
-//VOID CaptureWriteEa(THREADID threadid, ADDRINT instAddress, VOID* addr) {
-//    ADDRINT address = reinterpret_cast<ADDRINT>(addr) - 0x0;
-//    return;
-//
-//    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(addr)))
-//    {
-//        std::wstring wstr = aCopyLPCWSTR(address);
-//        //if (true) { // (wstr.find(L"Fracture") != std::wstring::npos) {
-//        //    std::cout << "Wstr achado:  " << instAddress << std::endl;
-//        //    std::cout << "Read from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-//        //    wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
-//        //}
-//        if (IsValidWideString(wstr)) {
-//            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << std::endl;
-//            wprintf(L" ** Write WString --> %ls <-\n", wstr);
-//        }
-//
-//        std::string str = aCopyLPCSTR(address);
-//        //if (true) { //(str.find("Fracture") != std::string::npos) {
-//        //    std::cout << "Str achado:  " << instAddress << std::endl;
-//        //    std::cout << "Read from address: " << std::hex << address  << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-//        //    std::cout << " ** RETURN String --> " << str << std::endl;
-//        //}
-//         if (IsValidString(str)) {
-//            std::cout << "Write from address: " << std::hex << address << " bytes" << " -> " << std::hex << instAddress << std::dec << " > " << std::endl;
-//            std::cout << " ** Write String --> " << str << std::endl;
-//        }
-//
-//    }
-//}
-
-
-//Remover depois de implementar o memory trace
-//VOID aMemoryTrace(INS ins)
-//{
-//
-//    if (INS_IsMemoryWrite(ins) && INS_IsStandardMemop(ins))
-//    {
-//        INS_InsertCall(ins, IPOINT_BEFORE, AFUNPTR(CaptureWriteEa), IARG_THREAD_ID, IARG_INST_PTR, IARG_MEMORYWRITE_EA, IARG_END);
-//
-//       /* if (INS_IsValidForIpointAfter(ins))
-//        {
-//            INS_InsertPredicatedCall(ins, IPOINT_AFTER, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE, IARG_END);
-//        }
-//        if (INS_IsValidForIpointTakenBranch(ins))
-//        {
-//            INS_InsertPredicatedCall(ins, IPOINT_TAKEN_BRANCH, AFUNPTR(EmitWrite), IARG_THREAD_ID, IARG_MEMORYWRITE_SIZE,
-//                IARG_END);
-//        }*/
-//    }
-//    string memString = INS_Disassemble(ins);
-//    if (INS_HasMemoryRead2(ins) && INS_IsStandardMemop(ins))
-//    {
-//        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD2_EA, IARG_MEMORYREAD_SIZE,
-//            IARG_END);
-//    }
-//
-//    if (INS_IsMemoryRead(ins) && !INS_IsPrefetch(ins) && INS_IsStandardMemop(ins))
-//    {
-//        INS_InsertPredicatedCall(ins, IPOINT_BEFORE, AFUNPTR(aEmitRead), IARG_THREAD_ID, IARG_INST_PTR, IARG_PTR, new std::string(memString), IARG_MEMORYREAD_EA, IARG_MEMORYREAD_SIZE,
-//            IARG_END);
-//    }
-//}
-
-
-
-VOID RecordLEA(VOID* ip, std::string* insstr, REG reg, ADDRINT regValue) {
-
-    ADDRINT result = regValue;
-
-
-    if (PIN_CheckReadAccess(reinterpret_cast<VOID*>(result)))
-    {
-        std::wstring wstr = aCopyLPCWSTR(result);
-        if (IsValidWideString(wstr)) {
-            std::cout << "Read from address: " << std::hex << result << " bytes" << " -> " << std::hex << ip << std::dec << " > " << *insstr << std::endl;
-            wprintf(L" ** RETURN WString --> %ls <-\n", wstr);
-        }
-
-        std::string str = aCopyLPCSTR(result);
-        if (IsValidString(str)) {
-            std::cout << "Read from address: " << std::hex << result << " bytes" << " -> " << std::hex << ip << std::dec << " > " << *insstr << std::endl;
-            std::cout << " ** RETURN String --> " << str << std::endl;
-        }
-
-    }
-}
-
-//Passar para o detector de seq de inst
+// TODO: Transferir para o detector de seq de inst
 VOID TraceInstSeq(INS ins, VOID* v)
 {
     seq_detector.InstructionTrace(ins, &seq_detector, onCall);
@@ -314,7 +97,7 @@ VOID InstrumentFunctionInterceptor(IMG img, VOID* v) {
 }
 
 // Instrumenta o carregamento de imagens
-VOID InstrumentImageLoad(IMG img, VOID* v) {
+VOID InitPauseAtEntryPoint(IMG img, VOID* v) {
     if (IMG_IsMainExecutable(img)) {
         ADDRINT entryPoint = IMG_EntryAddress(img); // IMG_Entry(img);
         std::cout << "[CONTRADEF] Executavel principal carregado: " << IMG_Name(img) << std::endl;
@@ -360,6 +143,14 @@ VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
     MainOutFile.flush();  // Esvazia o buffer de saída
 }
 
+EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICAL_CONTEXT* pPhysCtxt, VOID* v) {
+    std::cerr << "Exceção detectada no thread " << tid << ": "
+        << PIN_ExceptionToString(pExceptInfo) << std::endl;
+    exit(1);
+    return EXCEPT_HANDLING_RESULT::EHR_HANDLED;
+    // Pode-se modificar o contexto ou apenas registrar o erro
+}
+
 int InitInstrumentation()
 {
     testSequences(seq_detector, disassembly_seq_detector);
@@ -368,8 +159,6 @@ int InitInstrumentation()
     std::string yaraRulesPath = KnobYaraRulesFile.Value();
     if (yaraRulesPath.empty())
     {
-        //PIN_VmFullPath()
-        //PIN_ToolFullPath() para obter o yara rules file do mesmo diretorio do PIN tool
         //std::cerr << "Por favor, forneça o caminho para o arquivo de regras YARA usando -y." << std::endl;
         //return 1;
     }
@@ -397,27 +186,27 @@ int InitInstrumentation()
 
 
     // Iniciar o PIN e instrumentação
-    PIN_InitLock(&lock);
     PIN_InitSymbols();
 
     IMG_AddInstrumentFunction(InstrumentFunctionInterceptor, 0);
 
-    //INS_AddInstrumentFunction(TraceInstSeq, 0);
+    INS_AddInstrumentFunction(TraceInstSeq, 0);
 
-    //TraceInstructions::InitTrace(pid, logsName);
+    TraceInstructions::InitTrace(pid, logsName);
 
-    //TraceDisassembly::InitTraceDisassembly(pid, logsName);
+   // TraceDisassembly::InitTraceDisassembly(pid, logsName);
 
     //TraceMemory::InitMemoryTrace(pid, logsName);
 
-    //TraceFcnCall::InitFcnCallTrace(pid, logsName);
+    TraceFcnCall::InitFcnCallTrace(pid, logsName);
 
 
     if (KnobAllowAttachDebugger)
     {
-        //IMG_AddInstrumentFunction(InstrumentImageLoad, nullptr);
+        IMG_AddInstrumentFunction(InitPauseAtEntryPoint, nullptr);
     }
 
+    PIN_AddInternalExceptionHandler(ExceptionHandler, NULL);
 
     PIN_StartProgram();
     return 0;

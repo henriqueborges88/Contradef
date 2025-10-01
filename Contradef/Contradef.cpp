@@ -4,6 +4,9 @@
 #include "YaraContradef.h"
 #include "Instrumentation.h"
 
+/// <summary>
+/// Caso apresente falhas de compilação, alterar a versão do "Conjunto de Ferramentas da Plataforma" para "Visual Studio 2019 (v142)" nas propiedades do projeto
+/// </summary>
 
 INT32 Usage()
 {
@@ -15,6 +18,7 @@ INT32 Usage()
 }
 
 int main(int argc, char* argv[]) {
+    WindowsAPI::SetConsoleOutputCP(CP_UTF8);
 
     if (PIN_Init(argc, argv))
     {

@@ -44,7 +44,7 @@ VOID PauseAtEntryPoint(ADDRINT entryAddress);
 VOID PauseAtAddress(ADDRINT address);
 VOID TraceInstSeq(INS ins, VOID* v);
 VOID InstrumentFunctionInterceptor(IMG img, VOID* v);
-VOID InstrumentImageLoad(IMG img, VOID* v);
+VOID InitPauseAtEntryPoint(IMG img, VOID* v);
 VOID configOutput();
 VOID HandleExecutionCompletedEvent(const EventData* data, void* context);
 

@@ -5,8 +5,8 @@ int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& Ou
     using namespace YaraAPI;
 
     // Converter as strings para wchar_t*
-    const wchar_t* rules_file = ConvertToWideString(_rules_file);
-    const wchar_t* target_file = ConvertToWideString(_target_file);
+    const wchar_t* rules_file = StringToWString(_rules_file);
+    const wchar_t* target_file = StringToWString(_target_file);
 
     // LoadLibrary e obter ponteiros para funções do YARA
     HMODULE hYaraLib = LoadLibrary(L"yaraCdef64.dll");

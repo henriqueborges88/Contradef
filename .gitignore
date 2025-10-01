@@ -1,5 +1,4 @@
 .vs/
-*.obj
 contradef.out*
 Contradef/x32/Debug
 Contradef/x64/Debug/

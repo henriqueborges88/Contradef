@@ -15,11 +15,11 @@ using namespace CONTROLLER;
 using namespace INSTLIB;
 
 KNOB< THREADID > KnobWatchThread(KNOB_MODE_WRITEONCE, "pintool", "watch_thread", "-1", "Thread to watch, -1 for all");
-KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "1", "Flush output after every instruction");
+KNOB< BOOL > KnobFlush(KNOB_MODE_WRITEONCE, "pintool", "flush", "0", "Flush output after every instruction");
 KNOB< BOOL > KnobSymbols(KNOB_MODE_WRITEONCE, "pintool", "symbols", "1", "Include symbol information");
 KNOB< BOOL > KnobFullImgName(KNOB_MODE_WRITEONCE, "pintool", "full_img_name", "0", "Include full image name");
 KNOB< BOOL > KnobLines(KNOB_MODE_WRITEONCE, "pintool", "lines", "1", "Include line number information");
-KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "1", "Trace instructions");
+KNOB< BOOL > KnobTraceInstructions(KNOB_MODE_WRITEONCE, "pintool", "instruction", "0", "Trace instructions");
 KNOB< BOOL > KnobTraceCalls(KNOB_MODE_WRITEONCE, "pintool", "call", "1", "Trace calls");
 KNOB< BOOL > KnobTraceOnlyMain(KNOB_MODE_WRITEONCE, "pintool", "only_main", "0", "Trace only main image");
 KNOB< BOOL > KnobTraceMemoryInstructions(KNOB_MODE_WRITEONCE, "pintool", "atmemory", "0", "Attach trace memory to trace instrucions");
@@ -510,6 +510,8 @@ VOID TraceInstructions::EmitIndirectCall(THREADID threadid, ADDRINT instAddress,
 {
     if (!Emit(threadid)) return;
 
+    if (target == 0) return;
+
     callStack.push(instAddress);
 
     PIN_MutexLock(&fileOutMutex);
@@ -533,6 +535,8 @@ VOID TraceInstructions::EmitIndirectCall(THREADID threadid, ADDRINT instAddress,
 VOID TraceInstructions::EmitReturn(THREADID threadid, ADDRINT instAddress, string* str, ADDRINT retAddr, ADDRINT ret0)
 {
     if (!Emit(threadid)) return;
+
+    if (retAddr == 0) return;
 
     PIN_MutexLock(&fileOutMutex);
 
@@ -707,6 +711,7 @@ VOID TraceInstructions::Trace(TRACE trace, VOID* v)
         {
             for (INS ins = BBL_InsHead(bbl); INS_Valid(ins); ins = INS_Next(ins))
             {
+
                 InstructionTrace(trace, ins);
 
                 CallTrace(trace, ins);
@@ -763,6 +768,13 @@ static void TraceInstructions::OnSig(THREADID threadIndex, CONTEXT_CHANGE_REASON
 /* ===================================================================== */
 static CONTROL_MANAGER control;
 static SKIPPER skipper;
+
+void TraceInstructions::enable() {
+    TraceInstructions::enabled = 1;
+}
+void TraceInstructions::disable() {
+    TraceInstructions::enabled = 0;
+}
 
 int TraceInstructions::InitTrace(string pid, std::string filename)
 {

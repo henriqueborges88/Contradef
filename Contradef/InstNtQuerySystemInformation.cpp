@@ -63,6 +63,36 @@ VOID InstNtQuerySystemInformation::CallbackAfter(THREADID tid, UINT32 callId, AD
         stringStream << "    Valor de retorno: " << *retValAddr << std::endl;
         stringStream << "[*] Concluído" << std::endl << std::endl;
 
+        // CONTRAMEDIDA
+        if (args->SystemInformationClass == 5) {
+            using namespace WindowsAPI;
+            DWORD currentProcessId = GetCurrentProcessId();
+
+            PSYSTEM_PROCESS_INFORMATION processInfo = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(args->SystemInformation);
+            while (processInfo) {
+                if (reinterpret_cast<DWORD>(processInfo->UniqueProcessId) == currentProcessId) {
+                    stringStream << "  [-] Aplicando contramedida" << std::endl;
+
+                    DWORD* parentProcessId = reinterpret_cast<DWORD*>(&(processInfo->Reserved2));
+                    DWORD fakePID = GetProcessIdByName("explorer.exe");
+                    stringStream << "    Substituindo o PID do processo pai (pin.exe - " << *parentProcessId << ") pelo do explorer.exe (" << fakePID << ")" << std::endl;
+                    *parentProcessId = fakePID;
+                    stringStream << "  [-] Contramedida aplicada" << std::endl;
+
+                    break;
+                }
+
+                // Avançar para o próximo processo
+                if (processInfo->NextEntryOffset == 0) {
+                    break;
+                }
+                processInfo = reinterpret_cast<PSYSTEM_PROCESS_INFORMATION>(
+                    reinterpret_cast<BYTE*>(processInfo) + processInfo->NextEntryOffset
+                    );
+            }
+        }
+        /////
+
         ExecutionInformation executionCompletedInfo = { stringStream.str() };
         // Cria evento
         ExecutionEventData executionEvent(executionCompletedInfo);

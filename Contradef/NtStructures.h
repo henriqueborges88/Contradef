@@ -558,7 +558,7 @@ typedef struct _IMAGE_SECTION_HEADER {
     uint16_t NumberOfLinenumbers;      // Número de números de linha
     uint32_t Characteristics;           // Características da seção
 } IMAGE_SECTION_HEADER;
-#define IMAGE_FIRST_SECTION(ntHeader) ((IMAGE_SECTION_HEADER *)((BYTE *)(ntHeader) + sizeof(IMAGE_NT_HEADERS)))
+//#define IMAGE_FIRST_SECTION(ntHeader) ((IMAGE_SECTION_HEADER *)((BYTE *)(ntHeader) + sizeof(IMAGE_NT_HEADERS)))
 #ifndef IMAGE_DOS_SIGNATURE
 #define IMAGE_DOS_SIGNATURE 0x5A4D      // 'MZ' em ASCII
 #endif
