@@ -1,0 +1,19 @@
+#pragma once
+#ifndef TRACE_DISASSEMBLY_H
+#define TRACE_DISASSEMBLY_H
+
+#include <fstream>
+#include <string>
+#include "pin.H"
+#include "InitParams.h"
+
+namespace TraceDisassembly {
+
+    extern std::ofstream disassemblyTraceOut;
+
+    VOID TraceInst(INS ins, VOID* v);
+    VOID Fini(INT32 code, VOID* v);
+    int Init(std::string pid, std::string filename);
+}
+
+#endif // TRACE_DISASSEMBLY_H
