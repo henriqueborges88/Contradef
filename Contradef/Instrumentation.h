@@ -38,11 +38,9 @@
 BOOL IsMainExecutable(ADDRINT address);
 ADDRINT GetRtnAddr(ADDRINT instAddress);
 std::string getFileName(const std::string& filePath);
-VOID PauseAtEntryPoint(ADDRINT entryAddress);
 VOID PauseAtAddress(ADDRINT address);
 VOID InstrumentInstructionSeq(INS ins, VOID* v);
 VOID InstrumentFunctionInterceptor(IMG img, VOID* v);
-VOID InitPauseAtEntryPoint(IMG img, VOID* v);
 VOID configOutput();
 VOID HandleExecutionCompletedEvent(const EventData* data, void* context);
 

@@ -13,5 +13,6 @@ ADDRINT GetRtnAddr(ADDRINT instAddress);
 VOID PauseAtAddress(ADDRINT address);
 std::string FormatAddress(ADDRINT address, RTN rtn, BOOL showSymbols = true, BOOL showFullImgName = false, BOOL showLines = true);
 bool IsStringInStrategyScope(const std::string& str);
+std::wstring GetMainExePath();
 
 #endif // INSTRUMENTATION_UTILS_H

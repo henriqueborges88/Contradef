@@ -504,9 +504,6 @@
     <ClCompile Include="SectionTracker.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="XteaSniffer.cpp">
-      <Filter>Arquivos de Origem</Filter>
-    </ClCompile>
     <ClCompile Include="TraceFcnCallM2.cpp">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
@@ -521,6 +518,36 @@
     </ClCompile>
     <ClCompile Include="DynExecTracker.cpp">
       <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonDef.cpp">
+      <Filter>Arquivos de Origem\Countermeasures</Filter>
+    </ClCompile>
+    <ClCompile Include="ContextMonitor.cpp">
+      <Filter>Arquivos de Origem</Filter>
+    </ClCompile>
+    <ClCompile Include="ObsidiumDef.cpp">
+      <Filter>Arquivos de Origem\Countermeasures</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemidaDef.h">
+      <Filter>Arquivos de Cabeçalho\Countermeasures</Filter>
+    </ClCompile>
+    <ClCompile Include="ThemidaDef.cpp">
+      <Filter>Arquivos de Origem\Countermeasures</Filter>
+    </ClCompile>
+    <ClCompile Include="InstCreateWindowExA.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetMessageA.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="SplashTarget.cpp">
+      <Filter>Arquivos de Origem\Countermeasures</Filter>
+    </ClCompile>
+    <ClCompile Include="InstPostQuitMessage.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
+    </ClCompile>
+    <ClCompile Include="InstGetModuleHandleExW.cpp">
+      <Filter>Arquivos de Origem\Strategies</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1010,9 +1037,6 @@
     <ClInclude Include="SectionTracker.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="XteaSniffer.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="TraceFcnCallM2.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
@@ -1027,6 +1051,30 @@
     </ClInclude>
     <ClInclude Include="DynExecTracker.h">
       <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonDef.h">
+      <Filter>Arquivos de Cabeçalho\Countermeasures</Filter>
+    </ClInclude>
+    <ClInclude Include="ContextMonitor.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="ObsidiumDef.h">
+      <Filter>Arquivos de Cabeçalho\Countermeasures</Filter>
+    </ClInclude>
+    <ClInclude Include="InstCreateWindowExA.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetMessageA.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="SplashTarget.h">
+      <Filter>Arquivos de Cabeçalho\Countermeasures</Filter>
+    </ClInclude>
+    <ClInclude Include="InstPostQuitMessage.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
+    </ClInclude>
+    <ClInclude Include="InstGetModuleHandleExW.h">
+      <Filter>Arquivos de Cabeçalho\Strategies</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,8 @@
 #include "InstructionSequenceDetector.h"
+#include "InstructionSequences.h"
 
+InstructionSequenceDetector seq_detector;
+InstructionSequenceDetector disassembly_seq_detector;
 
 std::vector<std::string> CreateVectorFromArgs(const char* first, ...) {
     std::vector<std::string> result;
@@ -421,4 +424,19 @@ std::deque<InstrumentedInstruction*> InstructionSequenceDetector::GetDisassemble
 {
     ThreadData* tdata = GetThreadData();
     return tdata->disassembled_instruction_queue;
+}
+
+VOID InstrumentInstructionSeq(INS ins, VOID* v)
+{
+    seq_detector.InstructionTrace(ins, &seq_detector, onCall);
+    disassembly_seq_detector.InstructionTrace(ins, &disassembly_seq_detector, onDisassembly);
+}
+
+int InitSeqDetector() {
+    // Iniciar detector de sequencia de instruções
+    AddSequences(seq_detector, disassembly_seq_detector);
+    seq_detector.Initialize();
+    disassembly_seq_detector.Initialize();
+    INS_AddInstrumentFunction(InstrumentInstructionSeq, 0);
+    return 1;
 }

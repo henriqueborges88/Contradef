@@ -35,6 +35,7 @@
 #include "InstNtEnumKey.h"
 #include "InstNtQueryValueKey.h"
 #include "InstGetModuleHandleW.h"
+#include "InstGetModuleHandleExW.h"
 #include "InstGetModuleHandleA.h"
 #include "InstGetModuleFileNameW.h"
 #include "InstGetModuleFileNameA.h"
@@ -148,6 +149,9 @@
 #include "InstCompareStringEx.h"
 #include "InstEnumSystemFirmwareTables.h"
 #include "InstRtlAllocateHeap.h"
+#include "InstCreateWindowExA.h"
+#include "InstGetMessageA.h"
+#include "InstPostQuitMessage.h"
 
 typedef void (*RTNFunction)(RTN, Notifier&);
 
@@ -164,5 +168,7 @@ public:
     bool HasStrategy(const std::string& name) const;
     void ExecuteAllStrategies(IMG img, Notifier& globalNotifier);
 };
+
+int InitFunctionInterceptor();
 
 #endif // FUNCTION_INTERCEPTOR_H

@@ -164,13 +164,13 @@ VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, 
     // -------------------------------
     // CONTRAMEDIDA: patch ANTES do dispatcher
     // -------------------------------
-    PatchInfo pi{};
-    if (PatchExceptionRecordIfNeeded(pExceptionRecord, pi)) {
-        g_patchInfo[key] = pi; // guardamos p/ log no AFTER
-    }
-    else if (pi.inspected) {
-        g_patchInfo[key] = pi; // inspecionado mas não precisou patch
-    }
+    //PatchInfo pi{};
+    //if (PatchExceptionRecordIfNeeded(pExceptionRecord, pi)) {
+    //    g_patchInfo[key] = pi; // guardamos p/ log no AFTER
+    //}
+    //else if (pi.inspected) {
+    //    g_patchInfo[key] = pi; // inspecionado mas não precisou patch
+    //}
 }
 
 VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT /*rtn*/, CONTEXT* /*ctx*/,
@@ -233,24 +233,24 @@ VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, A
 
         ss << "        Context*: 0x" << std::hex << args->pContext << std::dec << std::endl;
 
-        // Log da contramedida, se aplicável
-        auto pit = g_patchInfo.find(key);
-        if (pit != g_patchInfo.end() && pit->second.inspected) {
-            const PatchInfo& pi = pit->second;
-            if (pi.patched) {
-                ss << "    [Countermeasure] Patched exception: "
-                    << "Code 0x" << std::hex << pi.oldCode
-                    << "→0x" << pi.newCode
-                    << ", Flags 0x" << pi.oldFlags
-                    << "→0x" << pi.newFlags
-                    << ", Num " << std::dec << pi.oldNum
-                    << "→" << pi.newNum << std::endl;
-            }
-            else {
-                ss << "    [Countermeasure] No patch (whitelisted or continuable)" << std::endl;
-            }
-            g_patchInfo.erase(pit);
-        }
+        //// Log da contramedida, se aplicável
+        //auto pit = g_patchInfo.find(key);
+        //if (pit != g_patchInfo.end() && pit->second.inspected) {
+        //    const PatchInfo& pi = pit->second;
+        //    if (pi.patched) {
+        //        ss << "    [Countermeasure] Patched exception: "
+        //            << "Code 0x" << std::hex << pi.oldCode
+        //            << "→0x" << pi.newCode
+        //            << ", Flags 0x" << pi.oldFlags
+        //            << "→0x" << pi.newFlags
+        //            << ", Num " << std::dec << pi.oldNum
+        //            << "→" << pi.newNum << std::endl;
+        //    }
+        //    else {
+        //        ss << "    [Countermeasure] No patch (whitelisted or continuable)" << std::endl;
+        //    }
+        //    g_patchInfo.erase(pit);
+        //}
 
         // KiUserExceptionDispatcher é VOID — não há valor de retorno
         ss << "    Return: (void)" << std::endl;

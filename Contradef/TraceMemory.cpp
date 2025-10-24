@@ -2,6 +2,7 @@
 
 #include "TraceMemory.h"
 
+INT32 TraceMemory::enabled = 0;
 std::ofstream TraceMemory::memTraceOut;
 // Buffer de 512 KB para memTraceOut
 const std::size_t TraceMemory::bufferSize = 1024 * 1024 * 10;
@@ -12,11 +13,15 @@ PIN_MUTEX TraceMemory::fileMemTraceOutMutex;
 VOID* WriteEa[PIN_MAX_THREADS];
 
 VOID TraceMemory::CaptureWriteEa(THREADID threadid, VOID* addr) {
+    if (!KnobTraceMemory || !enabled) return;
+
     WriteEa[threadid] = addr;
 }
 
 VOID TraceMemory::WriteMemTraceOut(THREADID threadid, std::string* disasmStr, VOID* ea, UINT32 size)
 {
+    if (!KnobTraceMemory || !enabled) return;
+
     const ADDRINT address = reinterpret_cast<ADDRINT>(ea);
 
     const std::string numeric = GetNumericValueFromRef(ea, size);
@@ -49,6 +54,8 @@ VOID TraceMemory::WriteMemTraceOut(THREADID threadid, std::string* disasmStr, VO
 
 VOID TraceMemory::EmitWrite(ADDRINT addr, THREADID threadid, std::string* str, UINT32 size)
 {
+    if (!KnobTraceMemory || !enabled) return;
+
     VOID* ea = WriteEa[threadid];
 
     WriteMemTraceOut(threadid, str, ea, size);
@@ -56,13 +63,15 @@ VOID TraceMemory::EmitWrite(ADDRINT addr, THREADID threadid, std::string* str, U
 
 VOID TraceMemory::EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size)
 {
+    if (!KnobTraceMemory || !enabled) return;
+
     WriteMemTraceOut(threadid, str, ea, size);
 }
 
 
 VOID TraceMemory::InstTraceMemory(INS ins, VOID* v)
 {
-    if (!KnobTraceMemory) return;
+    if (!KnobTraceMemory || !enabled) return;
 
     ADDRINT addr = INS_Address(ins);
 
@@ -136,6 +145,13 @@ VOID TraceMemory::InstTraceMemory(INS ins, VOID* v)
 
 }
 
+void TraceMemory::enable() {
+    TraceMemory::enabled = 1;
+}
+void TraceMemory::disable() {
+    TraceMemory::enabled = 0;
+}
+
 VOID TraceMemory::Fini(INT32 code, VOID* v)
 {
     memTraceOut << std::flush;
@@ -149,7 +165,7 @@ int TraceMemory::Init(std::string pid, std::string filename)
     memTraceOut << std::hex << std::right;
     memTraceOut.setf(std::ios_base::showbase);
     memTraceOut.rdbuf()->pubsetbuf(&buffer[0], bufferSize);
-
+    enabled = 1;
     INS_AddInstrumentFunction(InstTraceMemory, 0);
     PIN_AddFiniFunction(Fini, 0);
 

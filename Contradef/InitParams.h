@@ -8,7 +8,6 @@
 // Apenas declarações, sem inicialização
 extern KNOB<std::string> KnobOutputFile;
 extern KNOB<std::string> KnobYaraRulesFile;
-extern KNOB<BOOL> KnobAllowAttachDebugger;
 extern KNOB<BOOL> KnobFunctionInterceptor;
 extern KNOB<BOOL> KnobTraceExternalCallTrace;
 extern KNOB<BOOL> KnobTraceMemory;

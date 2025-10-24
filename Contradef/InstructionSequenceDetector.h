@@ -190,4 +190,6 @@ private:
     VOID DisassembledInstruction(ADDRINT ip, InstrumentedInstruction* ins_instr);
 };
 
+int InitSeqDetector();
+
 #endif // INSTRUCTION_SEQUENCE_DETECTOR_H

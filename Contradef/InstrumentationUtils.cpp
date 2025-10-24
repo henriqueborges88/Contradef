@@ -139,3 +139,10 @@ bool IsStringInStrategyScope(const std::string& str) {
     }
     return false;
 }
+
+std::wstring GetMainExePath()
+{
+    wchar_t buf[MAX_PATH];
+    DWORD n = WindowsAPI::GetModuleFileNameW(NULL, buf, MAX_PATH); // NULL => módulo principal
+    return std::wstring(buf, buf + n);
+}

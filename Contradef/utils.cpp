@@ -721,3 +721,44 @@ static inline std::string ImgNameAt(ADDRINT addr) {
     PIN_UnlockClient();
     return n;
 }
+
+std::string GetContradefToolPath()
+{
+    using namespace WindowsAPI;
+    HMODULE hm = nullptr;
+
+    // Use um endereço dentro deste próprio módulo para obter o handle do módulo
+    if (!GetModuleHandleExA(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
+        GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+        reinterpret_cast<LPCSTR>(&GetContradefToolPath), &hm))
+        return "";
+
+    // Buffer elástico para o caminho
+    std::vector<char> buf(MAX_PATH);
+    for (;;)
+    {
+        DWORD n = GetModuleFileNameA(hm, &buf[0], static_cast<DWORD>(buf.size()));
+        if (n == 0) return "";
+        if (n < buf.size() - 1) { buf[n] = '\0'; return std::string(&buf[0], n); }
+        buf.resize(buf.size() * 2);
+    }
+}
+
+bool FileExistsA(const std::string& path) {
+    DWORD a = WindowsAPI::GetFileAttributesA(path.c_str());
+    return (a != INVALID_FILE_ATTRIBUTES) && !(a & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+std::string Dirname(const std::string& path) {
+    size_t pos = path.find_last_of("\\/");
+    if (pos == std::string::npos) return std::string();
+    return path.substr(0, pos);
+}
+
+std::string JoinPath(const std::string& dir, const std::string& leaf) {
+    if (dir.empty()) return leaf;
+    const char sep = '\\';
+    if (!dir.empty() && (dir.back() == '\\' || dir.back() == '/'))
+        return dir + leaf;
+    return dir + sep + leaf;
+}

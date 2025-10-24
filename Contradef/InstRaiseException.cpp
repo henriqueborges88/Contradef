@@ -1,7 +1,7 @@
 #include "InstRaiseException.h"
 
 // =================== Config ===================
-static const bool kEnableCountermeasure = true;
+static const bool kEnableCountermeasure = false;
 static const bool kAggressiveAV = false; // se true, também neutraliza 0xC0000005 quando for levantada via RaiseException.
 // =============================================
 

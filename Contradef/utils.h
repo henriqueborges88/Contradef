@@ -6,12 +6,13 @@
 
 namespace WindowsAPI
 {
-#include <Windows.h>
-#include <unistd.h>
-#include <wtypes.h>
-#include <tlhelp32.h>
-#include <psapi.h>
-#include <Winternl.h>
+    #include <Windows.h>
+    #include <unistd.h>
+    #include <wtypes.h>
+    #include <tlhelp32.h>
+    #include <psapi.h>
+    #include <Winternl.h>
+    #include <WinUser.h>
 }
 
 #include <iostream>
@@ -54,4 +55,8 @@ std::string getFileName(const std::string& filePath);
 std::string Hex(UINT64 v, UINT32 bytes);
 static inline std::string RtnNameAt(ADDRINT addr);
 static inline std::string ImgNameAt(ADDRINT addr);
+std::string GetContradefToolPath();
+bool FileExistsA(const std::string& path);
+std::string Dirname(const std::string& path);
+std::string JoinPath(const std::string& dir, const std::string& leaf);
 #endif // UTILS_H

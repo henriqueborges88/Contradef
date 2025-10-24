@@ -16,12 +16,15 @@ namespace TraceMemory {
     extern std::vector<char> buffer;
     extern std::ofstream memTraceOut;
     extern PIN_MUTEX fileMemTraceOutMutex;
+    extern INT32 enabled;
 
     void CaptureWriteEa(THREADID threadid, VOID* addr);
     void WriteMemTraceOut(THREADID threadid, std::string* str, VOID* ea, UINT32 size);
     void EmitWrite(ADDRINT addr, THREADID threadid, std::string* str, UINT32 size);
     void EmitRead(ADDRINT addr, THREADID threadid, std::string* str, VOID* ea, UINT32 size);
     void InstTraceMemory(INS ins, VOID* v);
+    void enable();
+    void disable();
 
     VOID Fini(INT32 code, VOID* v);
     int Init(std::string pid, std::string filename);

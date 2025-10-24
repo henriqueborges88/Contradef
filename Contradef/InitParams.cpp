@@ -6,9 +6,6 @@ KNOB<std::string> KnobOutputFile(KNOB_MODE_WRITEONCE, "pintool", "o", "contradef
 // Regra Yara
 KNOB<std::string> KnobYaraRulesFile(KNOB_MODE_WRITEONCE, "pintool", "yara", "", "specify file name for YARA rules ");
 
-// Attach debugger
-KNOB<BOOL> KnobAllowAttachDebugger(KNOB_MODE_WRITEONCE, "pintool", "ad", "0", "Allow attach debugger ");
-
 // Interceptador de Funções
 KNOB<BOOL> KnobFunctionInterceptor(KNOB_MODE_WRITEONCE, "pintool", "intercept_fcn", "0", "Activate function interceptor");
 
@@ -36,4 +33,4 @@ KNOB<BOOL> KnobEarlyOut(KNOB_MODE_WRITEONCE, "pintool", "early_out", "0", "Exit 
 KNOB<BOOL> KnobTraceDisassembly(KNOB_MODE_WRITEONCE, "pintool", "trace_dasm", "0", "Trace disassembly");
 
 // Ativa o detector de sequencia de instruções
-KNOB<BOOL> KnobSeqDetector(KNOB_MODE_WRITEONCE, "pintool", "detect_seq", "0", "Enables the instruction sequence detector");
+KNOB<BOOL> KnobSeqDetector(KNOB_MODE_WRITEONCE, "pintool", "detect_seq", "1", "Enables the instruction sequence detector");

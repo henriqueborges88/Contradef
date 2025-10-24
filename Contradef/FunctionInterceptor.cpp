@@ -1,5 +1,10 @@
 ﻿#include "FunctionInterceptor.h"
 #include "Notifier.h"
+#include "SectionTracker.h"
+
+static std::ofstream MainOutFile;
+Notifier globalNotifier;
+FunctionInterceptor fcnInterceptor; // As estratégias já estão adicionadas no Interceptor
 
 FunctionInterceptor::FunctionInterceptor() {
     // Contrutor
@@ -11,13 +16,53 @@ FunctionInterceptor::~FunctionInterceptor() {
     strategyMap.clear();  // Limpa o mapa de estratégias
 }
 
+VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
+	if (data->type != EventData::ExecutionCompleted) {
+		return;
+	}
+	if (!KnobFunctionInterceptor || !MainOutFile.is_open()) {
+		return;
+	}
+
+	auto executionEvent = static_cast<const ExecutionEventData*>(data);
+	auto executionOutputText = executionEvent->executionInformation.outputText;
+	MainOutFile << executionOutputText;
+	MainOutFile.flush();  // Esvazia o buffer de saída
+}
+
 void FunctionInterceptor::InitStrategies() {
 	if (IsStringInStrategyScope("Obsidium")) {
 		std::cout << "[CONTRADEF] Instrumentando o Obsidium" << std::endl;
+		strategyMap["CreateToolhelp32Snapshot"] = &InstCreateToolhelp32Snapshot::InstrumentFunction; // Precisa ser invocada para o correto funcionamento com o Obsidium
+		strategyMap["CreateFileW"] = &InstCreateFileW::InstrumentFunction;
+		strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+		strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+		strategyMap["RegOpenKeyA"] = &InstRegOpenKeyA::InstrumentFunction;
+		strategyMap["RegOpenKeyExA"] = &InstRegOpenKeyExA::InstrumentFunction;
+		strategyMap["RegQueryValueExA"] = &InstRegQueryValueExA::InstrumentFunction;
+		strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
+		strategyMap["GetSystemFirmwareTable"] = &InstGetSystemFirmwareTable::InstrumentFunction;
+
 	}
 
 	if (IsStringInStrategyScope("Themida")) {
 		std::cout << "[CONTRADEF] Instrumentando o Themida" << std::endl;
+		strategyMap["NtQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+		strategyMap["ZwQueryInformationProcess"] = &InstNtQueryInformationProcess::InstrumentFunction;
+		strategyMap["RegOpenKeyA"] = &InstRegOpenKeyA::InstrumentFunction;
+		strategyMap["RegOpenKeyExA"] = &InstRegOpenKeyExA::InstrumentFunction;
+		strategyMap["RegQueryValueExA"] = &InstRegQueryValueExA::InstrumentFunction;
+		strategyMap["CheckRemoteDebuggerPresent"] = &InstCheckRemoteDebuggerPresent::InstrumentFunction;
+		strategyMap["GetSystemFirmwareTable"] = &InstGetSystemFirmwareTable::InstrumentFunction;
+		strategyMap["CreateWindowExA"] = &InstCreateWindowExA::InstrumentFunction;
+		strategyMap["GetMessageA"] = &InstGetMessageA::InstrumentFunction;
+		strategyMap["PostQuitMessage"] = &InstPostQuitMessage::InstrumentFunction;
+		strategyMap["NtUserPostQuitMessage"] = &InstPostQuitMessage::InstrumentFunction;
+
+	}
+
+	if (!KnobFunctionInterceptor) {
+		return;
 	}
 
 	// Com Problema, não chama o after -> strategyMap["GetForegroundWindow"] = &InstGetForegroundWindow::InstrumentFunction; // <-----Verificar, o CB after não está sendo invocado, já tentei removendo os parametros. O CB After funciona no modo Probed
@@ -122,6 +167,7 @@ void FunctionInterceptor::InitStrategies() {
 	strategyMap["GetWriteWatch"] = &InstGetWriteWatch::InstrumentFunction;
 	strategyMap["GetModuleHandleA"] = &InstGetModuleHandleA::InstrumentFunction;
 	strategyMap["GetModuleHandleW"] = &InstGetModuleHandleW::InstrumentFunction;
+	strategyMap["GetModuleHandleExW"] = &InstGetModuleHandleExW::InstrumentFunction;
 	strategyMap["GetModuleFileNameExA"] = &InstGetModuleFileNameExA::InstrumentFunction;
 	strategyMap["GetModuleFileNameExW"] = &InstGetModuleFileNameExW::InstrumentFunction;
 	strategyMap["GetModuleFileNameA"] = &InstGetModuleFileNameA::InstrumentFunction;
@@ -200,6 +246,10 @@ void FunctionInterceptor::InitStrategies() {
 	strategyMap["RtlAllocateHeap"] = &InstRtlAllocateHeap::InstrumentFunction;
 	strategyMap["FindWindowA"] = &InstFindWindowA::InstrumentFunction;
 	strategyMap["LoadLibraryA"] = &InstLoadLibrary::InstrumentFunction;
+	strategyMap["CreateWindowExA"] = &InstCreateWindowExA::InstrumentFunction;
+	strategyMap["GetMessageA"] = &InstGetMessageA::InstrumentFunction;
+	strategyMap["PostQuitMessage"] = &InstPostQuitMessage::InstrumentFunction;
+	strategyMap["NtUserPostQuitMessage"] = &InstPostQuitMessage::InstrumentFunction;
 
 }
 
@@ -213,20 +263,6 @@ void FunctionInterceptor::ExecuteStrategy(const std::string& name, RTN rtn, Noti
 bool FunctionInterceptor::HasStrategy(const std::string& name) const {
     return strategyMap.find(name) != strategyMap.end();
 }
-// Somente para testes
-//static VOID EmitFcnCall(THREADID tid,
-//	ADDRINT instAddress,
-//	ADDRINT RetIp,
-//	string* str,
-//	ADDRINT retVal)
-//{
-//	if (IsMainExecutable(RetIp)) {
-//		if (*str != "IsBadReadPtr") {
-//			//std::cout << "Funcao: " << *str << std::endl << std::flush;
-//		}
-//	}
-//	//delete str;
-//}
 
 void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier) {
     ModuleRange range;
@@ -241,19 +277,6 @@ void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier
         RTN rtn = RTN_FindByAddress(IMG_LowAddress(img) + SYM_Value(sym));
         if (RTN_Valid(rtn)) {
 			std::string funcName = RTN_Name(rtn);
-
-			// Somente para testes
-			//RTN_Open(rtn);
-			//RTN_InsertCall(rtn, IPOINT_AFTER,
-			//	(AFUNPTR)EmitFcnCall,
-			//	IARG_THREAD_ID,
-			//	IARG_INST_PTR,
-			//	IARG_RETURN_IP,
-			//	IARG_PTR, new string(funcName),
-			//	IARG_FUNCRET_EXITPOINT_VALUE,
-			//	IARG_END);
-			//RTN_Close(rtn);
-
             for (const auto& pair : strategyMap) {
                 std::string strategyName = pair.first.c_str();
                 if (strategyName == funcName) {
@@ -264,4 +287,31 @@ void FunctionInterceptor::ExecuteAllStrategies(IMG img, Notifier& globalNotifier
         }
     }
 
+}
+
+
+VOID InstrumentFunctionInterceptor(IMG img, VOID* v) {
+	fcnInterceptor.ExecuteAllStrategies(img, globalNotifier);
+}
+
+int InitFunctionInterceptor() {
+	// Criando observadores dinamicamente com o contexto nulo
+	auto* executionCompleted = new Observer(HandleExecutionCompletedEvent, NULL);
+	// Anexa os observers ao notificador
+	globalNotifier.Attach(executionCompleted);
+
+	SectionTracker::Init(&globalNotifier);
+
+	if (KnobFunctionInterceptor) {
+		string pid = decstr(WindowsAPI::getpid());
+		string logsName = KnobOutputFile.Value();
+		string logfilename = logsName + "." + pid + ".FunctionInterceptor.cdf";
+		MainOutFile.open(logfilename.c_str(), std::ios::binary);
+		MainOutFile.imbue(std::locale(""));
+		MainOutFile << "\xEF\xBB\xBF"; // Adiciona BOM para indicar UTF-8
+	}
+
+	fcnInterceptor.InitStrategies();
+	IMG_AddInstrumentFunction(InstrumentFunctionInterceptor, 0);
+	return 1;
 }

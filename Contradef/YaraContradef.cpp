@@ -1,4 +1,7 @@
 #include "YaraContradef.h"
+
+static std::ofstream YaraOutFile;
+
 int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& OutFile, std::vector<std::string>& matched)
 {
     // Carregando a API do YARA de forma dinâmica para evitar erros ou conflitos da biblioteca windows.h com pin.h
@@ -108,4 +111,62 @@ int RunYara(std::string _rules_file, std::string _target_file, std::ofstream& Ou
     delete[] target_file;
 
     return 0;
+}
+
+static bool g_yaraInitialized = false;
+
+VOID initYara()
+{
+    if (g_yaraInitialized) return; // idempotente
+    g_yaraInitialized = true;
+
+    // 1) Resolver arquivo de regras
+    std::string rules_file = KnobYaraRulesFile.Value();
+
+    if (rules_file.empty()) {
+        // fallback: contradef.yar no diretório do pintool
+        const std::string toolPath = GetContradefToolPath();
+        const std::string toolDir = Dirname(toolPath);
+        const std::string candidate = JoinPath(toolDir, "contradef.yar");
+        if (FileExistsA(candidate)) {
+            rules_file = candidate;
+        }
+    }
+
+    if (rules_file.empty() || !FileExistsA(rules_file)) {
+        std::cerr << "[yara] Nenhum arquivo de regras encontrado (use -yara ou coloque contradef.yar na mesma pasta do pintool).\n";
+        return;
+    }
+
+    // 2) Preparar arquivo de log com BOM
+    const std::string baseLog = KnobOutputFile.Value().empty()
+        ? std::string("Contradef") : KnobOutputFile.Value();
+    const std::string pid = decstr(WindowsAPI::getpid());
+    const std::string logName = baseLog + "." + pid + ".Yara.cdf";
+
+    YaraOutFile.open(logName.c_str(), std::ios::binary | std::ios::out);
+    if (!YaraOutFile) {
+        std::cerr << "[yara] Falha ao abrir log: " << logName << "\n";
+        return;
+    }
+    // BOM UTF-8
+    YaraOutFile << "\xEF\xBB\xBF";
+
+    // 3) Alvo = executável principal
+    const std::string execName = WStringToString(GetMainExePath());
+
+    // 4) Rodar YARA (sua RunYara já inicializa/finaliza se necessário)
+    std::vector<std::string> matched;
+    RunYara(rules_file, execName, YaraOutFile, matched);
+
+    // 5) Atualizar strategyScope sem duplicatas
+    std::sort(matched.begin(), matched.end());
+    matched.erase(std::unique(matched.begin(), matched.end()), matched.end());
+    strategyScope.assign(matched.begin(), matched.end());
+
+    YaraOutFile.flush();
+
+    //std::cerr << "[yara] OK. regras=" << rules_file
+    //    << " | log=" << logName
+    //    << " | scopes=" << strategyScope.size() << "\n";
 }
