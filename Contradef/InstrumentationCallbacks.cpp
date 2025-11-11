@@ -55,40 +55,6 @@ VOID SequenceMatchPauseCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, Sequenc
     PauseAtAddress(ip);
 }
 
-VOID SequenceObsidiumBypassMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v)
-{
-    std::cout << "\n[CONTRADEF][CALLBACK] Obsidium bypass\n";
-    std::cout << "[CONTRADEF] APLICANDO CONTRAMEDIDA NO INDICE " << sequence.matchCount << std::endl;
-
-    PIN_SetContextReg(ctxt, REG_RAX, 0);
-
-    //SetZfToOne(ctxt);
-
-
-    //// Obter os flags atuais
-    //ADDRINT flags = PIN_GetContextReg(ctxt, REG_GFLAGS);
-
-    //// Verificar o valor atual do ZF
-    //BOOL zf_before = (flags & (1 << 6)) != 0;
-    ////std::cout << "1 - ZF ->" << zf_before << std::endl;
-
-    //if (zf_before == 0) {
-
-    //    // Para setar o ZF para 1:
-    //    flags |= (1 << 6); // Seta o bit 6 (ZF) para 1
-    //    std::cout << "[CONTRADEF] APLICANDO CONTRAMEDIDA NO INDICE " << sequence.matchCount << std::endl;
-
-    //    // Para setar o ZF para 0:
-    //    //flags &= ~(1 << 6); // Limpa o bit 6 (ZF) para 0
-
-    //    // Atualizar os flags
-    //    PIN_SetContextReg(ctxt, REG_GFLAGS, flags);
-
-    //}
-
-}
-
-
 
 VOID SequenceObsidiumBypassMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v)
 {
@@ -108,7 +74,7 @@ VOID SequenceObsidiumBypassMatchCallback2(THREADID tid, ADDRINT ip, CONTEXT* ctx
     PIN_RaiseException(ctxt, tid, &exc);
 }
 
-// Exemplo de alteração de floxo de execução
+// Exemplo de alteração de fluxo de execução
 VOID SequenceThemidaBypassMatchCallback(THREADID tid, ADDRINT ip, CONTEXT* ctxt, SequenceInstructions& sequence, VOID* v)
 {
     std::cout << "\n[CONTRADEF] Themida bypass\n";

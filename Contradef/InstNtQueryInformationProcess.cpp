@@ -184,7 +184,7 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         if (args->ProcessInformationClass == ProcessDebugFlags) {
             DWORD* debugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
             if (*debugFlags == 0) {
-                std::cout << "debugFlags\n";
+                //std::cout << "debugFlags\n";
                 *debugFlags = 1;
             }
         }

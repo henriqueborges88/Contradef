@@ -31,14 +31,6 @@ void AddSequences(InstructionSequenceDetector& seq_detector, InstructionSequence
 
 	if (IsStringInStrategyScope("Obsidium")) {
 	
-		// Tecnicas evasivas obsidium 1.8.5 Antidbi
-		std::vector<std::vector<std::string>> sequenceObsidiumBypass;
-		sequenceObsidiumBypass.push_back(CreateInstVector("jmp 0x7ff6f499d6e1"));
-		sequenceObsidiumBypass.push_back(CreateInstVector("test word ptr [r?i+0xa], 0x2"));
-		sequenceObsidiumBypass.push_back(CreateInstVector("jmp 0x7ff6f499d6eb", "jnb 0x7ff6f499d6eb", "jno 0x7ff6f499d6eb", "jb 0x7ff7bf17d3eb", "jo 0x7ff6cafbeb87"));
-		sequenceObsidiumBypass.push_back(CreateInstVector("jz 0x7ff6f499d2da"));
-		//seq_detector.AddInstructionSequence(sequenceObsidiumBypass, SequenceObsidiumBypassMatchCallback); // TODAS
-
 		// Antidbi - Simulando HW-BP (single step)
 		std::vector<std::vector<std::string>> sequenceObsidiumBypass2;
 		sequenceObsidiumBypass2.push_back(CreateInstVector("jmp 0x1b8d908404f"));
@@ -61,4 +53,5 @@ void AddSequences(InstructionSequenceDetector& seq_detector, InstructionSequence
 		//seq_detector.AddInstructionSequence(sequenceObsidiumBypass1, SequenceObsidiumBypassMatchCallback, nullptr);
 
 	}
+
 }

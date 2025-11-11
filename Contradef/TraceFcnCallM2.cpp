@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "InitParams.h"
 #include "utils.h"
+#include "TraceInstructions.h"
 
 namespace TraceFcnCallM2
 {
@@ -150,7 +151,7 @@ namespace TraceFcnCallM2
     static VOID EmitReturn(THREADID tid,
         ADDRINT retIp,   // endereço da instrução RET
         ADDRINT nextIp,  // aonde irá saltar
-        ADDRINT retVal,
+        ADDRINT* retVal,
         ADDRINT arg0, ADDRINT arg1, ADDRINT arg2,
         ADDRINT arg3, ADDRINT arg4, ADDRINT arg5)
     {
@@ -189,11 +190,11 @@ namespace TraceFcnCallM2
         PIN_LockClient();
         RTN rtnRetIp = RTN_FindByAddress(retIp);
         PIN_UnlockClient();
-
+        
         gOut << "Ret from   "
             << FormatAddress(retIp, rtnRetIp,
                 KnobSymbols, KnobFullImgName, KnobLines)
-            << "  [T" << std::dec << tid << "] Return value -> " << std::hex << retVal << getStringFromAddr(retVal)
+            << "  [T" << std::dec << tid << "] Return value -> " << std::hex << *retVal << getStringFromAddr(retValue)
             << "  (next " << nextIp << ", came-from " << callIp << ")\n";
         PIN_MutexUnlock(&gLock);
     }
@@ -305,7 +306,7 @@ namespace TraceFcnCallM2
                 IARG_THREAD_ID,
                 IARG_INST_PTR,                 // origem
                 IARG_BRANCH_TARGET_ADDR,       // destino
-                IARG_FUNCRET_EXITPOINT_VALUE,
+                IARG_FUNCRET_EXITPOINT_REFERENCE,
                 IARG_FUNCARG_CALLSITE_VALUE, 0,
                 IARG_FUNCARG_CALLSITE_VALUE, 1,
                 IARG_FUNCARG_CALLSITE_VALUE, 2,
