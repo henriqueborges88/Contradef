@@ -239,7 +239,7 @@ Contradef/
 Contradef has been used in the following research works. Publication titles are retained in their original language, with English translations for reference.
 
 1. **Henrique B. Campelo, Francisco S. S. Neto, and Eduardo L. Feitosa.** [Contradef: Uma Ferramenta de Instrumentação Binária Dinâmica para Análise de Malware Evasivo](https://doi.org/10.5753/sbseg_estendido.2025.10498). *Anais Estendidos do XXV Simpósio Brasileiro de Cibersegurança (SBSeg 2025)*, pp. 11–19, 2025. English title: *Contradef: A Dynamic Binary Instrumentation Tool for Evasive Malware Analysis*.
-2. **Henrique Borges Campelo.** [Detecção e Identificação de Comportamento Evasivo em Executáveis para Windows Usando Instrumentação Binária Dinâmica](https://tede.ufam.edu.br/handle/tede/11741). Master's dissertation, Graduate Program in Informatics, Universidade Federal do Amazonas (UFAM), 2026. English title: *Detection and Identification of Evasive Behavior in Windows Executables Using Dynamic Binary Instrumentation*.
+2. **Henrique Borges Campelo.** [Detecção e Identificação de Comportamento Evasivo em Executáveis para Windows Usando Instrumentação Binária Dinâmica](https://riu.ufam.edu.br/items/35108def-222a-4fe7-9342-fa52053a243d). Master's dissertation, Graduate Program in Informatics, Universidade Federal do Amazonas (UFAM), 2026. English title: *Detection and Identification of Evasive Behavior in Windows Executables Using Dynamic Binary Instrumentation*.
 
 To cite the tool's paper:
 
