@@ -1,8 +1,8 @@
 #include "InstRtlAddFunctionTable.h"
 
-std::map<CallContextKey, CallContext*> InstRtlAddFunctionTable::callContextMap;
+CallContextMap InstRtlAddFunctionTable::callContextMap;
 UINT32 InstRtlAddFunctionTable::imgCallId = 0;
-UINT32 InstRtlAddFunctionTable::fcnCallId = 0;
+CallSequenceNumber InstRtlAddFunctionTable::fcnCallId = 0;
 Notifier* InstRtlAddFunctionTable::globalNotifierPtr;
 
 VOID InstRtlAddFunctionTable::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -21,8 +21,8 @@ VOID InstRtlAddFunctionTable::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] RtlAddFunctionTable..." << std::endl;
@@ -46,10 +46,10 @@ VOID InstRtlAddFunctionTable::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -75,7 +75,6 @@ VOID InstRtlAddFunctionTable::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

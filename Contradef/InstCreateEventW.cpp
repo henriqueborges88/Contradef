@@ -2,9 +2,9 @@
 #include "HeapTracker.h"
 #include "SectionTracker.h"
 
-std::map<CallContextKey, CallContext*> InstCreateEventW::callContextMap;
+CallContextMap InstCreateEventW::callContextMap;
 UINT32 InstCreateEventW::imgCallId = 0;
-UINT32 InstCreateEventW::fcnCallId = 0;
+CallSequenceNumber InstCreateEventW::fcnCallId = 0;
 Notifier* InstCreateEventW::globalNotifierPtr;
 
 VOID InstCreateEventW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -24,8 +24,8 @@ VOID InstCreateEventW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instA
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -51,10 +51,10 @@ VOID InstCreateEventW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Handle do evento criado: " << std::hex << retVal << std::dec << std::endl;
@@ -69,7 +69,6 @@ VOID InstCreateEventW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

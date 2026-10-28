@@ -1,8 +1,8 @@
 #include "InstGetTickCount64.h"
 
-std::map<CallContextKey, CallContext*> InstGetTickCount64::callContextMap;
+CallContextMap InstGetTickCount64::callContextMap;
 UINT32 InstGetTickCount64::imgCallId = 0;
-UINT32 InstGetTickCount64::fcnCallId = 0;
+CallSequenceNumber InstGetTickCount64::fcnCallId = 0;
 Notifier* InstGetTickCount64::globalNotifierPtr;
 
 
@@ -19,8 +19,8 @@ VOID InstGetTickCount64::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, nullptr);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -32,15 +32,15 @@ VOID InstGetTickCount64::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         

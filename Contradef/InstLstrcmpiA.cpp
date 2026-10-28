@@ -1,8 +1,8 @@
 #include "InstLstrcmpiA.h"
 
-std::map<CallContextKey, CallContext*> InstLstrcmpiA::callContextMap;
+CallContextMap InstLstrcmpiA::callContextMap;
 UINT32 InstLstrcmpiA::imgCallId = 0;
-UINT32 InstLstrcmpiA::fcnCallId = 0;
+CallSequenceNumber InstLstrcmpiA::fcnCallId = 0;
 Notifier* InstLstrcmpiA::globalNotifierPtr = nullptr;
 
 /* ---------- BEFORE ---------- */
@@ -16,7 +16,7 @@ VOID InstLstrcmpiA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst, AD
     UINT32 ctxId = callId * 100 + fcnCallId;
 
     auto* cc = new CallContext(ctxId, tid, inst, args);
-    callContextMap[{ctxId, tid}] = cc;
+    SaveCallContext(callContextMap, {callId, tid}, cc);
 
     auto readStr = [](ADDRINT ptr) -> std::string {
         if (!ptr) return "NULL";
@@ -48,9 +48,9 @@ VOID InstLstrcmpiA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, ADD
     if (instrumentOnlyMain && !IsMainExecutable(*retIP)) return;
 
     UINT32 ctxId = callId * 100 + fcnCallId;
-    auto it = callContextMap.find({ ctxId, tid });
-    if (it != callContextMap.end()) {
-        CallContext* cc = it->second;
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
+        CallContext* cc = pendingCallContext;
         std::stringstream& s = cc->stringStream;
 
         int cmp = static_cast<int>(retValue);
@@ -67,7 +67,6 @@ VOID InstLstrcmpiA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, ADD
 
         delete reinterpret_cast<LstrcmpiAArgs*>(cc->functionArgs);
         delete cc;
-        callContextMap.erase(it);
     }
     fcnCallId++;
 }

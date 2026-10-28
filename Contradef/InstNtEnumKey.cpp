@@ -1,8 +1,8 @@
 #include "InstNtEnumKey.h"
 
-std::map<CallContextKey, CallContext*> InstNtEnumKey::callContextMap;
+CallContextMap InstNtEnumKey::callContextMap;
 UINT32 InstNtEnumKey::imgCallId = 0;
-UINT32 InstNtEnumKey::fcnCallId = 0;
+CallSequenceNumber InstNtEnumKey::fcnCallId = 0;
 Notifier* InstNtEnumKey::globalNotifierPtr;
 
 
@@ -48,8 +48,8 @@ VOID InstNtEnumKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddr
     stringStream << "        lpcClass: " << lpcClass << std::endl;
     stringStream << "        lpftLastWriteTime: " << lpftLastWriteTime << std::endl;
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -61,10 +61,10 @@ VOID InstNtEnumKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         
         stringStream << "    Return Value: " << retValue << std::endl;

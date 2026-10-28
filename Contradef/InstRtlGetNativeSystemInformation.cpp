@@ -4,9 +4,9 @@
 #include "SectionTracker.h"
 
 
-std::map<CallContextKey, CallContext*> InstRtlGetNativeSystemInformation::callContextMap;
+CallContextMap InstRtlGetNativeSystemInformation::callContextMap;
 UINT32 InstRtlGetNativeSystemInformation::imgCallId = 0;
-UINT32 InstRtlGetNativeSystemInformation::fcnCallId = 0;
+CallSequenceNumber InstRtlGetNativeSystemInformation::fcnCallId = 0;
 Notifier* InstRtlGetNativeSystemInformation::globalNotifierPtr;
 
 
@@ -55,8 +55,8 @@ VOID InstRtlGetNativeSystemInformation::CallbackBefore(THREADID tid, UINT32 call
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -83,10 +83,10 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
 
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         const RtlGetNativeSystemInformationArgs* args = reinterpret_cast<const RtlGetNativeSystemInformationArgs*>(callContext->functionArgs);
 
@@ -256,7 +256,6 @@ VOID InstRtlGetNativeSystemInformation::CallbackAfter(THREADID tid, UINT32 callI
 
         delete reinterpret_cast<RtlGetNativeSystemInformationArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

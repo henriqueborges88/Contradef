@@ -1,8 +1,8 @@
 #include "InstGetCurrentProcess.h"
 
-std::map<CallContextKey, CallContext*> InstGetCurrentProcess::callContextMap;
+CallContextMap InstGetCurrentProcess::callContextMap;
 UINT32 InstGetCurrentProcess::imgCallId = 0;
-UINT32 InstGetCurrentProcess::fcnCallId = 0;
+CallSequenceNumber InstGetCurrentProcess::fcnCallId = 0;
 Notifier* InstGetCurrentProcess::globalNotifierPtr;
 
 VOID InstGetCurrentProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress) {
@@ -15,8 +15,8 @@ VOID InstGetCurrentProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, nullptr);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando a chamada
     std::stringstream& stringStream = callContext->stringStream;
@@ -36,10 +36,10 @@ VOID InstGetCurrentProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Current process handle: " << std::hex << retVal << std::dec << std::endl;
@@ -51,7 +51,6 @@ VOID InstGetCurrentProcess::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

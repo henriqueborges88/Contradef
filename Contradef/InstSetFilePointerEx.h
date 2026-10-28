@@ -38,10 +38,10 @@ public:
 
 private:
     // Mapa para armazenar o contexto das chamadas
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     // Identificadores únicos para chamadas
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     // Ponteiro para o notificador global
     static Notifier* globalNotifierPtr;
 

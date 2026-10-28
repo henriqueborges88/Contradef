@@ -1,8 +1,8 @@
 #include "InstNtQueryKey.h"
 
-std::map<CallContextKey, CallContext*> InstNtQueryKey::callContextMap;
+CallContextMap InstNtQueryKey::callContextMap;
 UINT32 InstNtQueryKey::imgCallId = 0;
-UINT32 InstNtQueryKey::fcnCallId = 0;
+CallSequenceNumber InstNtQueryKey::fcnCallId = 0;
 Notifier* InstNtQueryKey::globalNotifierPtr = nullptr;
 
 BOOL ReturnsNameString(ULONG cls)
@@ -35,7 +35,7 @@ VOID InstNtQueryKey::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst, A
     UINT32 ctxId = callId * 100 + fcnCallId;
 
     auto* cc = new CallContext(ctxId, tid, inst, args);
-    callContextMap[{ctxId, tid}] = cc;
+    SaveCallContext(callContextMap, {callId, tid}, cc);
 
     //std::stringstream& ss = cc->stringStream;
     //ss << "\n[+] NtQueryKey...\n"
@@ -64,15 +64,15 @@ VOID InstNtQueryKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, AD
 
     UINT32 ctxId = callId * 100 + fcnCallId;
 
-    auto it = callContextMap.find({ ctxId, tid });
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
 
         PIN_LockClient();
         RTN rtnCurrent = RTN_FindByAddress(inst);
         IMG img = IMG_FindByAddress(inst);
         PIN_UnlockClient();
 
-        CallContext* cc = it->second;
+        CallContext* cc = pendingCallContext;
 
         const NtQueryKeyArgs* args = reinterpret_cast<NtQueryKeyArgs*>(cc->functionArgs);
     
@@ -144,7 +144,6 @@ VOID InstNtQueryKey::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, AD
 
         delete args;
         delete cc;
-        callContextMap.erase(it);
     }
     fcnCallId++;
 }

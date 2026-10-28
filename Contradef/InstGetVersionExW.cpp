@@ -1,8 +1,8 @@
 #include "InstGetVersionExW.h"
 
-std::map<CallContextKey, CallContext*> InstGetVersionExW::callContextMap;
+CallContextMap InstGetVersionExW::callContextMap;
 UINT32 InstGetVersionExW::imgCallId = 0;
-UINT32 InstGetVersionExW::fcnCallId = 0;
+CallSequenceNumber InstGetVersionExW::fcnCallId = 0;
 Notifier* InstGetVersionExW::globalNotifierPtr;
 
 VOID InstGetVersionExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -19,8 +19,8 @@ VOID InstGetVersionExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] GetVersionExW..." << std::endl;
@@ -46,10 +46,10 @@ VOID InstGetVersionExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -73,7 +73,6 @@ VOID InstGetVersionExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
         delete reinterpret_cast<GetVersionExWArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

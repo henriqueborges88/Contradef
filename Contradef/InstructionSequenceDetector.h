@@ -101,6 +101,11 @@ struct SequenceInstructions {
             instruction_sequences.push_back(orLst);
         }
     }
+    ~SequenceInstructions() {
+        for (auto& alternatives : instruction_sequences)
+            for (auto* instruction : alternatives) delete instruction;
+    }
+
 };
 
 
@@ -170,6 +175,10 @@ private:
     {
         std::deque<InstrumentedInstruction*> instruction_queue;
         std::deque<InstrumentedInstruction*> disassembled_instruction_queue;
+
+        ~ThreadData() {
+            for (auto* instruction : disassembled_instruction_queue) delete instruction;
+        }
     };
 
     // Key para o Thread-Local Storage

@@ -1,9 +1,9 @@
 #include "InstQueryDosDeviceW.h"
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstQueryDosDeviceW::callContextMap;
+CallContextMap InstQueryDosDeviceW::callContextMap;
 UINT32 InstQueryDosDeviceW::imgCallId = 0;
-UINT32 InstQueryDosDeviceW::fcnCallId = 0;
+CallSequenceNumber InstQueryDosDeviceW::fcnCallId = 0;
 Notifier* InstQueryDosDeviceW::globalNotifierPtr;
 
 // Callback executado antes da chamada da função QueryDosDeviceW
@@ -26,8 +26,8 @@ VOID InstQueryDosDeviceW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     // Criação e armazenamento do contexto da chamada
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Construção da mensagem de log
     std::stringstream& stringStream = callContext->stringStream;
@@ -65,13 +65,13 @@ VOID InstQueryDosDeviceW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
     // Criação do ID único para o contexto da chamada
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
+    CallContextKey key = { callId, tid };
 
     // Busca do contexto da chamada no mapa
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Conversão do valor de retorno para DWORD
@@ -111,7 +111,6 @@ VOID InstQueryDosDeviceW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
 
     }
 

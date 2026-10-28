@@ -4,9 +4,9 @@
 A fun��o GetForegroundWindow n�o possui argumentos. Ela simplesmente retorna o identificador da janela atualmente em primeiro plano. Por isso, o m�todo CallbackBefore apenas registra a chamada da fun��o, e o CallbackAfter registra o valor de retorno.
 */
 
-std::map<CallContextKey, CallContext*> InstGetForegroundWindow::callContextMap;
+CallContextMap InstGetForegroundWindow::callContextMap;
 UINT32 InstGetForegroundWindow::imgCallId = 0;
-UINT32 InstGetForegroundWindow::fcnCallId = 0;
+CallSequenceNumber InstGetForegroundWindow::fcnCallId = 0;
 Notifier* InstGetForegroundWindow::globalNotifierPtr;
 
 
@@ -22,8 +22,8 @@ VOID InstGetForegroundWindow::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, NULL);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -35,15 +35,15 @@ VOID InstGetForegroundWindow::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         

@@ -222,6 +222,8 @@ namespace TraceFcnCall {
 
     int Init(std::string pid, std::string filename)
     {
+    const BOOL mutexInitialized = PIN_MutexInit(&traceFcnMutex);
+    ASSERTX(mutexInitialized);
 
         if (KnobTraceExternalCallTrace)
         {

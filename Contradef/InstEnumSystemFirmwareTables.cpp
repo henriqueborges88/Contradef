@@ -1,8 +1,8 @@
 #include "InstEnumSystemFirmwareTables.h"
 
-std::map<CallContextKey, CallContext*> InstEnumSystemFirmwareTables::callContextMap;
+CallContextMap InstEnumSystemFirmwareTables::callContextMap;
 UINT32 InstEnumSystemFirmwareTables::imgCallId = 0;
-UINT32 InstEnumSystemFirmwareTables::fcnCallId = 0;
+CallSequenceNumber InstEnumSystemFirmwareTables::fcnCallId = 0;
 Notifier* InstEnumSystemFirmwareTables::globalNotifierPtr = nullptr;
 
 VOID InstEnumSystemFirmwareTables::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT*,
@@ -21,7 +21,7 @@ VOID InstEnumSystemFirmwareTables::CallbackBefore(THREADID tid, UINT32 callId, A
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* ctx = new CallContext(callCtxId, tid, instAddress, args);
-    callContextMap[{callCtxId, tid}] = ctx;
+    SaveCallContext(callContextMap, {callId, tid}, ctx);
 
     std::stringstream& s = ctx->stringStream;
     s << "\n[+] EnumSystemFirmwareTables...\n"
@@ -47,9 +47,9 @@ VOID InstEnumSystemFirmwareTables::CallbackAfter(THREADID tid, UINT32 callId, AD
     if (instrumentOnlyMain && !IsMainExecutable(*returnAddress)) return;
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    auto it = callContextMap.find({ callCtxId, tid });
-    if (it != callContextMap.end()) {
-        CallContext* ctx = it->second;
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
+        CallContext* ctx = pendingCallContext;
         std::stringstream& s = ctx->stringStream;
 
         DWORD bytesReturned = static_cast<DWORD>(retValue);
@@ -74,7 +74,6 @@ VOID InstEnumSystemFirmwareTables::CallbackAfter(THREADID tid, UINT32 callId, AD
 
         delete reinterpret_cast<EnumSystemFirmwareTablesArgs*>(ctx->functionArgs);
         delete ctx;
-        callContextMap.erase(it);
     }
     fcnCallId++;
 }

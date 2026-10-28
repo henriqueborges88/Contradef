@@ -1,19 +1,19 @@
 #include "InstRtlAllocateHeap.h"
 
-std::map<CallContextKey, CallContext*> InstRtlAllocateHeap::callContextMap;
+CallContextMap InstRtlAllocateHeap::callContextMap;
 UINT32 InstRtlAllocateHeap::imgCallId = 0;
-UINT32 InstRtlAllocateHeap::fcnCallId = 0;
+CallSequenceNumber InstRtlAllocateHeap::fcnCallId = 0;
 Notifier* InstRtlAllocateHeap::globalNotifierPtr = nullptr;
 
 VOID InstRtlAllocateHeap::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst, ADDRINT rtn, CONTEXT*, ADDRINT retIP, ADDRINT HeapHandle, ADDRINT Flags, ADDRINT Size)
 {
     if (instrumentOnlyMain && !IsMainExecutable(retIP)) return;
 
-    RtlAllocateHeapArgs args{ HeapHandle, Flags, Size };
+    auto* args = new RtlAllocateHeapArgs{ HeapHandle, Flags, Size };
 
     UINT32 ctxId = callId * 100 + fcnCallId;
-    auto* cc = new CallContext(ctxId, tid, inst, &args);
-    callContextMap[{ctxId, tid}] = cc;
+    auto* cc = new CallContext(ctxId, tid, inst, args);
+    SaveCallContext(callContextMap, {callId, tid}, cc);
 
     std::stringstream& ss = cc->stringStream;
     ss << "\n[+] RtlAllocateHeap...\n"
@@ -37,9 +37,9 @@ VOID InstRtlAllocateHeap::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
     if (instrumentOnlyMain && !IsMainExecutable(*retIP)) return;
 
     UINT32 ctxId = callId * 100 + fcnCallId;
-    auto it = callContextMap.find({ ctxId, tid });
-    if (it != callContextMap.end()) {
-        CallContext* cc = it->second;
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
+        CallContext* cc = pendingCallContext;
         std::stringstream& ss = cc->stringStream;
 
         ss << "    Returned pointer (allocated address): 0x"
@@ -62,8 +62,8 @@ VOID InstRtlAllocateHeap::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         // Notifica os observers
         globalNotifierPtr->NotifyAll(&executionEvent);
 
-        //delete cc;
-        callContextMap.erase(it);
+        delete static_cast<RtlAllocateHeapArgs*>(cc->functionArgs);
+        delete cc;
     }
     fcnCallId++;
 }

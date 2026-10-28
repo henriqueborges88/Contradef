@@ -3,6 +3,7 @@
 #define CALL_CONTEXT_H
 
 #include "pin.H"
+#include <sstream>
 #include "EventData.h"
 #include "Observer.h"
 #include "Notifier.h"
@@ -28,6 +29,8 @@ struct CallContext {
     // Construtor para inicializar o contexto com IDs
     CallContext(UINT32 cid, THREADID tid, ADDRINT rtnAddr, VOID* args) : callId(cid), threadId(tid), rtnAddress(rtnAddr), functionArgs(args) {}
 };
+
+#include "CallContextStorage.h"
 
 STATIC bool instrumentOnlyMain = TRUE;
 

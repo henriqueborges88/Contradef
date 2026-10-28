@@ -1,8 +1,8 @@
 #include "InstNtUserBuildHwndList.h"
 
-std::map<CallContextKey, CallContext*> InstNtUserBuildHwndList::callContextMap;
+CallContextMap InstNtUserBuildHwndList::callContextMap;
 UINT32 InstNtUserBuildHwndList::imgCallId = 0;
-UINT32 InstNtUserBuildHwndList::fcnCallId = 0;
+CallSequenceNumber InstNtUserBuildHwndList::fcnCallId = 0;
 Notifier* InstNtUserBuildHwndList::globalNotifierPtr;
 
 
@@ -28,8 +28,8 @@ VOID InstNtUserBuildHwndList::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -42,15 +42,15 @@ VOID InstNtUserBuildHwndList::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstNtUserBuildHwndListArgs* args = reinterpret_cast<InstNtUserBuildHwndListArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

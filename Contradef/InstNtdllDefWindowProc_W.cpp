@@ -1,8 +1,8 @@
 #include "InstNtdllDefWindowProc_W.h"
 
-std::map<CallContextKey, CallContext*> InstNtdllDefWindowProc_W::callContextMap;
+CallContextMap InstNtdllDefWindowProc_W::callContextMap;
 UINT32 InstNtdllDefWindowProc_W::imgCallId = 0;
-UINT32 InstNtdllDefWindowProc_W::fcnCallId = 0;
+CallSequenceNumber InstNtdllDefWindowProc_W::fcnCallId = 0;
 Notifier* InstNtdllDefWindowProc_W::globalNotifierPtr;
 
 VOID InstNtdllDefWindowProc_W::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -22,8 +22,8 @@ VOID InstNtdllDefWindowProc_W::CallbackBefore(THREADID tid, UINT32 callId, ADDRI
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] NtdllDefWindowProc_W..." << std::endl;
@@ -48,10 +48,10 @@ VOID InstNtdllDefWindowProc_W::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         
@@ -75,7 +75,6 @@ VOID InstNtdllDefWindowProc_W::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
 
         delete reinterpret_cast<NtdllDefWindowProc_WArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -3,9 +3,9 @@
 #include <algorithm>
 #include "SplashTarget.h"
 
-std::map<CallContextKey, CallContext*> InstGetMessageA::callContextMap;
+CallContextMap InstGetMessageA::callContextMap;
 UINT32 InstGetMessageA::imgCallId = 0;
-UINT32 InstGetMessageA::fcnCallId = 0;
+CallSequenceNumber InstGetMessageA::fcnCallId = 0;
 Notifier* InstGetMessageA::globalNotifierPtr = nullptr;
 
 // --- Resolução dinâmica de USER32 ---
@@ -149,8 +149,8 @@ VOID InstGetMessageA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 // ---------- AFTER ----------
@@ -164,16 +164,16 @@ VOID InstGetMessageA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
 
-    if (it != callContextMap.end()) {
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         const GetMessageAArgs* args = reinterpret_cast<GetMessageAArgs*>(callContext->functionArgs);
         std::stringstream& ss = callContext->stringStream;
 
@@ -271,7 +271,6 @@ VOID InstGetMessageA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,8 +1,8 @@
 #include "InstFindWindowW.h"
 
-std::map<CallContextKey, CallContext*> InstFindWindowW::callContextMap;
+CallContextMap InstFindWindowW::callContextMap;
 UINT32 InstFindWindowW::imgCallId = 0;
-UINT32 InstFindWindowW::fcnCallId = 0;
+CallSequenceNumber InstFindWindowW::fcnCallId = 0;
 Notifier* InstFindWindowW::globalNotifierPtr;
 
 
@@ -43,8 +43,8 @@ VOID InstFindWindowW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     stringStream << "        lpClassName: " << ansiClassName << std::endl;
     stringStream << "        lpWindowName: " << ansiWindowName << std::endl;
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -56,10 +56,10 @@ VOID InstFindWindowW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         stringStream << "    Return Value: " << retValue << std::endl;

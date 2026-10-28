@@ -1,8 +1,8 @@
 #include "InstExitProcess.h"
 
-std::map<CallContextKey, CallContext*> InstExitProcess::callContextMap;
+CallContextMap InstExitProcess::callContextMap;
 UINT32 InstExitProcess::imgCallId = 0;
-UINT32 InstExitProcess::fcnCallId = 0;
+CallSequenceNumber InstExitProcess::fcnCallId = 0;
 Notifier* InstExitProcess::globalNotifierPtr;
 
 VOID InstExitProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT uExitCode) {
@@ -18,8 +18,6 @@ VOID InstExitProcess::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
 
     // Preparando a saída de informações relevantes para o ExitProcess
     std::stringstream stringStream;

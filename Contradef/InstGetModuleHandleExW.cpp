@@ -1,8 +1,8 @@
 #include "InstGetModuleHandleExW.h"
 
-std::map<CallContextKey, CallContext*> InstGetModuleHandleExW::callContextMap;
+CallContextMap InstGetModuleHandleExW::callContextMap;
 UINT32 InstGetModuleHandleExW::imgCallId = 0;
-UINT32 InstGetModuleHandleExW::fcnCallId = 0;
+CallSequenceNumber InstGetModuleHandleExW::fcnCallId = 0;
 Notifier* InstGetModuleHandleExW::globalNotifierPtr = nullptr;
 
 VOID InstGetModuleHandleExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT /*rtn*/, CONTEXT* /*ctx*/,
@@ -23,8 +23,8 @@ VOID InstGetModuleHandleExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstGetModuleHandleExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT /*rtn*/, CONTEXT* /*ctx*/,
@@ -37,16 +37,16 @@ VOID InstGetModuleHandleExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         const GetModuleHandleExWArgs* args = reinterpret_cast<GetModuleHandleExWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 
@@ -81,7 +81,6 @@ VOID InstGetModuleHandleExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

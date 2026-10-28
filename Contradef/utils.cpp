@@ -472,7 +472,7 @@ std::wstring ConvertAddrToWideStringSafe(ADDRINT addr, size_t maxLen) {
     std::vector<wchar_t> buffer(length + 1, L'\0');
 
     // Use &buffer[0] no lugar de buffer.data() — compatível com C++11
-    size_t copied = PIN_SafeCopy(&buffer[0], reinterpret_cast<void*>(addr), (length + 1) * sizeof(wchar_t));
+    size_t copied = PIN_SafeCopy(&buffer[0], reinterpret_cast<void*>(addr), length * sizeof(wchar_t));
     if (copied >= length * sizeof(wchar_t)) {
         result = std::wstring(&buffer[0]);
     }

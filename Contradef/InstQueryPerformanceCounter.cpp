@@ -1,8 +1,8 @@
 #include "InstQueryPerformanceCounter.h"
 
-std::map<CallContextKey, CallContext*> InstQueryPerformanceCounter::callContextMap;
+CallContextMap InstQueryPerformanceCounter::callContextMap;
 UINT32 InstQueryPerformanceCounter::imgCallId = 0;
-UINT32 InstQueryPerformanceCounter::fcnCallId = 0;
+CallSequenceNumber InstQueryPerformanceCounter::fcnCallId = 0;
 Notifier* InstQueryPerformanceCounter::globalNotifierPtr;
 
 
@@ -22,8 +22,8 @@ VOID InstQueryPerformanceCounter::CallbackBefore(THREADID tid, UINT32 callId, AD
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstQueryPerformanceCounter::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT retValue, ADDRINT* returnAddress,
@@ -35,15 +35,15 @@ VOID InstQueryPerformanceCounter::CallbackAfter(THREADID tid, UINT32 callId, ADD
 
     // Instrumentar função
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar parâmetros
         const InstQueryPerformanceCounterArgs* args = reinterpret_cast<InstQueryPerformanceCounterArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

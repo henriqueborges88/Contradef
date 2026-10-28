@@ -1,8 +1,8 @@
 #include "InstGetEnvironmentVariableA.h"
 
-std::map<CallContextKey, CallContext*> InstGetEnvironmentVariableA::callContextMap;
+CallContextMap InstGetEnvironmentVariableA::callContextMap;
 UINT32 InstGetEnvironmentVariableA::imgCallId = 0;
-UINT32 InstGetEnvironmentVariableA::fcnCallId = 0;
+CallSequenceNumber InstGetEnvironmentVariableA::fcnCallId = 0;
 Notifier* InstGetEnvironmentVariableA::globalNotifierPtr;
 
 VOID InstGetEnvironmentVariableA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -21,8 +21,8 @@ VOID InstGetEnvironmentVariableA::CallbackBefore(THREADID tid, UINT32 callId, AD
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -57,10 +57,10 @@ VOID InstGetEnvironmentVariableA::CallbackAfter(THREADID tid, UINT32 callId, ADD
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         DWORD result = static_cast<DWORD>(retVal);
@@ -92,7 +92,6 @@ VOID InstGetEnvironmentVariableA::CallbackAfter(THREADID tid, UINT32 callId, ADD
 
         delete reinterpret_cast<GetEnvironmentVariableAArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

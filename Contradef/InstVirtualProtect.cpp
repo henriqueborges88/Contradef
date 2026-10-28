@@ -1,9 +1,9 @@
 #include "InstVirtualProtect.h"
 #include "NtStructures.h"
 
-std::map<CallContextKey, CallContext*> InstVirtualProtect::callContextMap;
+CallContextMap InstVirtualProtect::callContextMap;
 UINT32 InstVirtualProtect::imgCallId = 0;
-UINT32 InstVirtualProtect::fcnCallId = 0;
+CallSequenceNumber InstVirtualProtect::fcnCallId = 0;
 Notifier* InstVirtualProtect::globalNotifierPtr;
 
 VOID InstVirtualProtect::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpAddress, ADDRINT dwSize, ADDRINT flNewProtect, ADDRINT lpflOldProtect) {
@@ -22,8 +22,8 @@ VOID InstVirtualProtect::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros de VirtualProtect e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -48,10 +48,10 @@ VOID InstVirtualProtect::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         const VirtualProtectArgs* args = reinterpret_cast<const VirtualProtectArgs*>(callContext->functionArgs);
 

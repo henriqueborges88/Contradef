@@ -39,9 +39,9 @@ private:
     static ADDRINT TARGET_MEMORY_ADDRESS;
     static LONG retVal;
     static DWORD InstNtQueryInformationProcess::NtGlobalFlag;
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
     static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT ProcessHandle, ADDRINT ProcessInformationClass, ADDRINT ProcessInformation, ADDRINT ProcessInformationLength, ADDRINT ReturnLength);

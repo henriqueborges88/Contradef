@@ -1,9 +1,9 @@
 #include "InstSetFilePointerEx.h"
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstSetFilePointerEx::callContextMap;
+CallContextMap InstSetFilePointerEx::callContextMap;
 UINT32 InstSetFilePointerEx::imgCallId = 0;
-UINT32 InstSetFilePointerEx::fcnCallId = 0;
+CallSequenceNumber InstSetFilePointerEx::fcnCallId = 0;
 Notifier* InstSetFilePointerEx::globalNotifierPtr;
 
 // Callback executado antes da chamada da função SetFilePointerEx
@@ -35,8 +35,8 @@ VOID InstSetFilePointerEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     // Criação e armazenamento do contexto da chamada
     auto* callContext = new CallContext(callCtxId, tid, instAddress, &args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Construção da mensagem de log
     std::stringstream& stringStream = callContext->stringStream;
@@ -65,13 +65,13 @@ VOID InstSetFilePointerEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
     // Criação do ID único para o contexto da chamada
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
+    CallContextKey key = { callId, tid };
 
     // Busca do contexto da chamada no mapa
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Conversão do valor de retorno para BOOL
@@ -108,7 +108,6 @@ VOID InstSetFilePointerEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
         // Limpeza: remove e deleta o contexto da chamada
         delete callContext;
-        callContextMap.erase(it);
 
     }
 

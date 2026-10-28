@@ -149,9 +149,9 @@ public:
     static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     static Notifier* globalNotifierPtr;
     static VOID CheckPrintConditions(CallContext* callContext);
     static VOID InterpretKeyValueInformationFull(BYTE* keyValueInformation, std::stringstream& stringStream);

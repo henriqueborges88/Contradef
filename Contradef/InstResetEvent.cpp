@@ -1,8 +1,8 @@
 #include "InstResetEvent.h"
 
-std::map<CallContextKey, CallContext*> InstResetEvent::callContextMap;
+CallContextMap InstResetEvent::callContextMap;
 UINT32 InstResetEvent::imgCallId = 0;
-UINT32 InstResetEvent::fcnCallId = 0;
+CallSequenceNumber InstResetEvent::fcnCallId = 0;
 Notifier* InstResetEvent::globalNotifierPtr;
 
 VOID InstResetEvent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -19,8 +19,8 @@ VOID InstResetEvent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAdd
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -42,10 +42,10 @@ VOID InstResetEvent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddr
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         if (retVal != 0) {
@@ -65,7 +65,6 @@ VOID InstResetEvent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddr
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

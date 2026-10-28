@@ -5,9 +5,9 @@
 #include <cctype>
 #include <algorithm>
 
-std::map<CallContextKey, CallContext*> InstRegQueryValueExA::callContextMap;
+CallContextMap InstRegQueryValueExA::callContextMap;
 UINT32 InstRegQueryValueExA::imgCallId = 0;
-UINT32 InstRegQueryValueExA::fcnCallId = 0;
+CallSequenceNumber InstRegQueryValueExA::fcnCallId = 0;
 Notifier* InstRegQueryValueExA::globalNotifierPtr;
 
 /* =========================================================================================
@@ -159,8 +159,8 @@ VOID InstRegQueryValueExA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx,
@@ -173,9 +173,9 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
         // Só usamos o lock para IMG/RTN lookups
         PIN_LockClient();
@@ -183,7 +183,7 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         const auto* args = reinterpret_cast<InstRegQueryValueExAArgs*>(callContext->functionArgs);
         std::stringstream& ss = callContext->stringStream;
 
@@ -269,7 +269,6 @@ VOID InstRegQueryValueExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

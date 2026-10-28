@@ -1,8 +1,8 @@
 #include "InstVirtualFree.h"
 
-std::map<CallContextKey, CallContext*> InstVirtualFree::callContextMap;
+CallContextMap InstVirtualFree::callContextMap;
 UINT32 InstVirtualFree::imgCallId = 0;
-UINT32 InstVirtualFree::fcnCallId = 0;
+CallSequenceNumber InstVirtualFree::fcnCallId = 0;
 Notifier* InstVirtualFree::globalNotifierPtr;
 
 VOID InstVirtualFree::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -21,8 +21,8 @@ VOID InstVirtualFree::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] VirtualFree..." << std::endl;
@@ -46,10 +46,10 @@ VOID InstVirtualFree::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -75,7 +75,6 @@ VOID InstVirtualFree::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

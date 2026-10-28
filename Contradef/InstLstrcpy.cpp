@@ -1,8 +1,8 @@
 #include "InstLstrcpy.h"
 
-std::map<CallContextKey, CallContext*> InstLstrcpy::callContextMap;
+CallContextMap InstLstrcpy::callContextMap;
 UINT32 InstLstrcpy::imgCallId = 0;
-UINT32 InstLstrcpy::fcnCallId = 0;
+CallSequenceNumber InstLstrcpy::fcnCallId = 0;
 Notifier* InstLstrcpy::globalNotifierPtr;
 
 VOID InstLstrcpy::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpString1, ADDRINT lpString2) {
@@ -37,8 +37,8 @@ VOID InstLstrcpy::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddres
     stringStream << "        lpString1: " << sString1 << std::endl;
     stringStream << "        lpString2: " << sString2 << std::endl;
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstLstrcpy::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT retValue, ADDRINT* returnAddress, ADDRINT lpString1, ADDRINT lpString2) {
@@ -48,11 +48,11 @@ VOID InstLstrcpy::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         
         stringStream << "    Return Value: " << retValue << std::endl;

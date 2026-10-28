@@ -1,9 +1,9 @@
 #include "InstWaitForSingleObject.h"
 
 
-std::map<CallContextKey, CallContext*> InstWaitForSingleObject::callContextMap;
+CallContextMap InstWaitForSingleObject::callContextMap;
 UINT32 InstWaitForSingleObject::imgCallId = 0;
-UINT32 InstWaitForSingleObject::fcnCallId = 0;
+CallSequenceNumber InstWaitForSingleObject::fcnCallId = 0;
 Notifier* InstWaitForSingleObject::globalNotifierPtr;
 
 VOID InstWaitForSingleObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -21,8 +21,8 @@ VOID InstWaitForSingleObject::CallbackBefore(THREADID tid, UINT32 callId, ADDRIN
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] WaitForSingleObject..." << std::endl;
@@ -52,10 +52,10 @@ VOID InstWaitForSingleObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
         return;
     }
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         stringStream << std::endl << "[+] [RETURN] WaitForSingleObject..." << std::endl;
         stringStream << "    Return Value: ";
@@ -86,7 +86,6 @@ VOID InstWaitForSingleObject::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

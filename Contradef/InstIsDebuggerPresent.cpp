@@ -1,9 +1,9 @@
 #include "InstIsDebuggerPresent.h"
 
 
-std::map<CallContextKey, CallContext*> InstIsDebuggerPresent::callContextMap;
+CallContextMap InstIsDebuggerPresent::callContextMap;
 UINT32 InstIsDebuggerPresent::imgCallId = 0;
-UINT32 InstIsDebuggerPresent::fcnCallId = 0;
+CallSequenceNumber InstIsDebuggerPresent::fcnCallId = 0;
 Notifier* InstIsDebuggerPresent::globalNotifierPtr;
 
 
@@ -19,8 +19,8 @@ VOID InstIsDebuggerPresent::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, NULL);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -32,15 +32,15 @@ VOID InstIsDebuggerPresent::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         

@@ -22,7 +22,7 @@ VOID configOutput() {
 EXCEPT_HANDLING_RESULT ExceptionHandler(THREADID tid, EXCEPTION_INFO* pExceptInfo, PHYSICAL_CONTEXT* pPhysCtxt, VOID* v) {
     //std::cerr << "Exception caught in thread " << tid << ": " << PIN_ExceptionToString(pExceptInfo) << std::endl;
     //exit(1);
-    return EXCEPT_HANDLING_RESULT::EHR_HANDLED;
+    return EXCEPT_HANDLING_RESULT::EHR_CONTINUE_SEARCH;
     // Pode-se modificar o contexto ou apenas registrar o erro
 }
 

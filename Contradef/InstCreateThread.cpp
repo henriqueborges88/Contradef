@@ -1,9 +1,9 @@
 #include "InstCreateThread.h"
 #include "NtStructures.h"
 
-std::map<CallContextKey, CallContext*> InstCreateThread::callContextMap;
+CallContextMap InstCreateThread::callContextMap;
 UINT32 InstCreateThread::imgCallId = 0;
-UINT32 InstCreateThread::fcnCallId = 0;
+CallSequenceNumber InstCreateThread::fcnCallId = 0;
 Notifier* InstCreateThread::globalNotifierPtr;
 
 VOID InstCreateThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -29,8 +29,8 @@ VOID InstCreateThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instA
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -60,10 +60,10 @@ VOID InstCreateThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Se lpThreadId não for NULL, podemos ler o valor do Thread ID criado
@@ -86,7 +86,6 @@ VOID InstCreateThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,8 +1,8 @@
 #include "InstLCMapStringEx.h"
 
-std::map<CallContextKey, CallContext*> InstLCMapStringEx::callContextMap;
+CallContextMap InstLCMapStringEx::callContextMap;
 UINT32 InstLCMapStringEx::imgCallId = 0;
-UINT32 InstLCMapStringEx::fcnCallId = 0;
+CallSequenceNumber InstLCMapStringEx::fcnCallId = 0;
 Notifier* InstLCMapStringEx::globalNotifierPtr;
 
 VOID InstLCMapStringEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -27,8 +27,8 @@ VOID InstLCMapStringEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] LCMapStringEx..." << std::endl;
@@ -91,10 +91,10 @@ VOID InstLCMapStringEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         int result = static_cast<int>(retValue);
@@ -132,7 +132,6 @@ VOID InstLCMapStringEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
         delete reinterpret_cast<LCMapStringExArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

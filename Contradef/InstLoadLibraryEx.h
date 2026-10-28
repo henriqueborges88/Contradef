@@ -29,9 +29,9 @@ public:
     static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     static Notifier* globalNotifierPtr;
     static BOOL InstLoadLibraryEx::wideVersion;
     static VOID CheckPrintConditions(CallContext* callContext);

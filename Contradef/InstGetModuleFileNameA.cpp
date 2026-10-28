@@ -1,8 +1,8 @@
 #include "InstGetModuleFileNameA.h"
 
-std::map<CallContextKey, CallContext*> InstGetModuleFileNameA::callContextMap;
+CallContextMap InstGetModuleFileNameA::callContextMap;
 UINT32 InstGetModuleFileNameA::imgCallId = 0;
-UINT32 InstGetModuleFileNameA::fcnCallId = 0;
+CallSequenceNumber InstGetModuleFileNameA::fcnCallId = 0;
 Notifier* InstGetModuleFileNameA::globalNotifierPtr;
 
 
@@ -39,8 +39,8 @@ VOID InstGetModuleFileNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
     stringStream << "        lpFilename: " << ansiStringLpFilename << std::endl;
     stringStream << "        nSize: " << nSize << std::endl;
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -52,10 +52,10 @@ VOID InstGetModuleFileNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         

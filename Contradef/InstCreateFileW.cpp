@@ -1,8 +1,8 @@
 #include "InstCreateFileW.h"
 
-std::map<CallContextKey, CallContext*> InstCreateFileW::callContextMap;
+CallContextMap InstCreateFileW::callContextMap;
 UINT32 InstCreateFileW::imgCallId = 0;
-UINT32 InstCreateFileW::fcnCallId = 0;
+CallSequenceNumber InstCreateFileW::fcnCallId = 0;
 Notifier* InstCreateFileW::globalNotifierPtr;
 
 VOID InstCreateFileW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpFileName, ADDRINT dwDesiredAccess, ADDRINT dwShareMode, ADDRINT lpSecurityAttributes, ADDRINT dwCreationDisposition, ADDRINT dwFlagsAndAttributes, ADDRINT hTemplateFile) {
@@ -30,8 +30,8 @@ VOID InstCreateFileW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os par�metros de CreateFileW e o endere�o da fun��o chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -57,10 +57,10 @@ VOID InstCreateFileW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         const CreateFileWArgs* args = reinterpret_cast<CreateFileWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
 

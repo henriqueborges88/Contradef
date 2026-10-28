@@ -160,6 +160,8 @@ VOID TraceMemory::Fini(INT32 code, VOID* v)
 
 int TraceMemory::Init(std::string pid, std::string filename)
 {
+    const BOOL mutexInitialized = PIN_MutexInit(&fileMemTraceOutMutex);
+    ASSERTX(mutexInitialized);
     filename += "." + pid + ".TraceMemory.cdf";
     memTraceOut.open(filename.c_str(), std::ios::out | std::ios::binary);
     memTraceOut << std::hex << std::right;

@@ -1,8 +1,8 @@
 #include "InstWriteFile.h"
 
-std::map<CallContextKey, CallContext*> InstWriteFile::callContextMap;
+CallContextMap InstWriteFile::callContextMap;
 UINT32 InstWriteFile::imgCallId = 0;
-UINT32 InstWriteFile::fcnCallId = 0;
+CallSequenceNumber InstWriteFile::fcnCallId = 0;
 Notifier* InstWriteFile::globalNotifierPtr;
 
 namespace GetHandleInfo {
@@ -97,8 +97,8 @@ VOID InstWriteFile::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddr
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
     
     std::string handleType = GetHandleInfo::GetHandleDetails((WindowsAPI::HANDLE)hFile);
 
@@ -134,10 +134,10 @@ VOID InstWriteFile::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -174,7 +174,6 @@ VOID InstWriteFile::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddre
 
         delete reinterpret_cast<WriteFileArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

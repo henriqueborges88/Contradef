@@ -41,10 +41,9 @@ BOOL IsMainExecutable(ADDRINT address) {
 BOOL IsFromUnknownImg(ADDRINT address) {
     PIN_LockClient();
     IMG img = IMG_FindByAddress(address);
-    if (IMG_Valid(img)) {
-        return FALSE;
-    }
-    return TRUE;
+    const BOOL unknown = !IMG_Valid(img);
+    PIN_UnlockClient();
+    return unknown;
 }
 
 ADDRINT GetRtnAddr(ADDRINT instAddress) {

@@ -1,9 +1,9 @@
 #include "InstDeviceIoControl.h"
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstDeviceIoControl::callContextMap;
+CallContextMap InstDeviceIoControl::callContextMap;
 UINT32 InstDeviceIoControl::imgCallId = 0;
-UINT32 InstDeviceIoControl::fcnCallId = 0;
+CallSequenceNumber InstDeviceIoControl::fcnCallId = 0;
 Notifier* InstDeviceIoControl::globalNotifierPtr;
 
 // Callback executado antes da chamada da função DeviceIoControl
@@ -32,8 +32,8 @@ VOID InstDeviceIoControl::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     // Criação e armazenamento do contexto da chamada
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Construção da mensagem de log
     std::stringstream& stringStream = callContext->stringStream;
@@ -101,13 +101,13 @@ VOID InstDeviceIoControl::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
     // Criação do ID único para o contexto da chamada
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
+    CallContextKey key = { callId, tid };
 
     // Busca do contexto da chamada no mapa
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Conversão do valor de retorno para BOOL
@@ -147,7 +147,6 @@ VOID InstDeviceIoControl::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         // Limpeza: remove e deleta o contexto da chamada
         delete reinterpret_cast<DeviceIoControlArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
 
     }
 

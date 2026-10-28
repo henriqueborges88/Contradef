@@ -1,8 +1,8 @@
 #include "InstCloseHandle.h"
 
-std::map<CallContextKey, CallContext*> InstCloseHandle::callContextMap;
+CallContextMap InstCloseHandle::callContextMap;
 UINT32 InstCloseHandle::imgCallId = 0;
-UINT32 InstCloseHandle::fcnCallId = 0;
+CallSequenceNumber InstCloseHandle::fcnCallId = 0;
 Notifier* InstCloseHandle::globalNotifierPtr = nullptr;
 
 /* ---------- BEFORE ---------- */
@@ -21,7 +21,7 @@ VOID InstCloseHandle::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst, 
     UINT32 ctxId = callId * 100 + fcnCallId;
 
     auto* cc = new CallContext(ctxId, tid, inst, &args);
-    callContextMap[{ctxId, tid}] = cc;
+    SaveCallContext(callContextMap, {callId, tid}, cc);
 
     std::stringstream& ss = cc->stringStream;
     ss << "\n[+] CloseHandle...\n"
@@ -46,9 +46,9 @@ VOID InstCloseHandle::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, A
     }
 
     UINT32 ctxId = callId * 100 + fcnCallId;
-    auto it = callContextMap.find({ ctxId, tid });
-    if (it != callContextMap.end()) {
-        CallContext* cc = it->second;
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
+        CallContext* cc = pendingCallContext;
         std::stringstream& ss = cc->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -74,7 +74,6 @@ VOID InstCloseHandle::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, A
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete cc;
-        callContextMap.erase(it);
     }
     fcnCallId++;
 }

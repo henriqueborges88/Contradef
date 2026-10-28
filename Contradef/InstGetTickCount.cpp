@@ -4,9 +4,9 @@
 A fun��o GetTickCount n�o possui argumentos de entrada. Ela retorna o n�mero de milissegundos desde que o sistema foi iniciado. Portanto, a estrutura InstGetTickCountArgs � mantida vazia.
 */
 
-std::map<CallContextKey, CallContext*> InstGetTickCount::callContextMap;
+CallContextMap InstGetTickCount::callContextMap;
 UINT32 InstGetTickCount::imgCallId = 0;
-UINT32 InstGetTickCount::fcnCallId = 0;
+CallSequenceNumber InstGetTickCount::fcnCallId = 0;
 Notifier* InstGetTickCount::globalNotifierPtr;
 
 
@@ -23,8 +23,8 @@ VOID InstGetTickCount::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instA
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, NULL);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -36,15 +36,15 @@ VOID InstGetTickCount::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         std::stringstream& stringStream = callContext->stringStream;
         

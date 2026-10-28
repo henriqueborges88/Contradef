@@ -1,8 +1,8 @@
 ﻿#include "InstRtlInstallFunctionTableCallback.h"
 
-std::map<CallContextKey, CallContext*> InstRtlInstallFunctionTableCallback::callContextMap;
+CallContextMap InstRtlInstallFunctionTableCallback::callContextMap;
 UINT32 InstRtlInstallFunctionTableCallback::imgCallId = 0;
-UINT32 InstRtlInstallFunctionTableCallback::fcnCallId = 0;
+CallSequenceNumber InstRtlInstallFunctionTableCallback::fcnCallId = 0;
 Notifier* InstRtlInstallFunctionTableCallback::globalNotifierPtr;
 
 VOID InstRtlInstallFunctionTableCallback::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -24,8 +24,8 @@ VOID InstRtlInstallFunctionTableCallback::CallbackBefore(THREADID tid, UINT32 ca
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -52,10 +52,10 @@ VOID InstRtlInstallFunctionTableCallback::CallbackAfter(THREADID tid, UINT32 cal
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: " << std::hex << retVal << std::dec << std::endl;
@@ -70,7 +70,6 @@ VOID InstRtlInstallFunctionTableCallback::CallbackAfter(THREADID tid, UINT32 cal
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

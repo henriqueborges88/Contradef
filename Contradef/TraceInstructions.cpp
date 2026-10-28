@@ -672,6 +672,8 @@ VOID TraceInstructions::EmitDirectCall(THREADID threadid, ADDRINT instAddress, s
     if (!enabled) return;
     if (!Emit(threadid)) return;
 
+    PIN_MutexLock(&fileOutMutex);
+
     if (tailCall)
     {
         // A tail call is like an implicit return followed by an immediate call
@@ -682,7 +684,6 @@ VOID TraceInstructions::EmitDirectCall(THREADID threadid, ADDRINT instAddress, s
         callStack.push(instAddress);
     }
 
-    PIN_MutexLock(&fileOutMutex);
     Indent();
 
     out << *str << " [T" << std::dec << threadid << std::hex << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", " << arg5 << ", " << arg6 << ", ...)" << '\n';
@@ -701,18 +702,15 @@ VOID TraceInstructions::EmitIndirectCall(THREADID threadid, ADDRINT instAddress,
 
     if (target == 0) return;
 
-    callStack.push(instAddress);
-
-    PIN_MutexLock(&fileOutMutex);
-
-    Indent();
-    out << *str;
-
     PIN_LockClient();
     RTN rtnTarget = RTN_FindByAddress(target);
-    PIN_UnlockClient();
     string s = FormatAddress(target, rtnTarget, KnobSymbols, KnobFullImgName, KnobLines);
-    
+    PIN_UnlockClient();
+
+    PIN_MutexLock(&fileOutMutex);
+    callStack.push(instAddress);
+    Indent();
+    out << *str;
     out << s << " [T" << std::dec << threadid << std::hex << "] (" << arg0 << ", " << arg1 << ", " << arg2 << ", " << arg3 << ", " << arg4 << ", " << arg5 << ", " << arg6 << ", ...)" << '\n';
     indent++;
 
@@ -994,6 +992,8 @@ VOID TraceInstructions::Fini(INT32 code, VOID* v)
 
 int TraceInstructions::Init(string pid, std::string filename)
 {
+    const BOOL mutexInitialized = PIN_MutexInit(&fileOutMutex);
+    ASSERTX(mutexInitialized);
     filename += "." + pid + ".TraceInstructions.cdf";
     out.open(filename.c_str(), std::ios::out | std::ios::binary);
     out << std::hex << std::right;

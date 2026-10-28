@@ -14,15 +14,36 @@ namespace TraceFcnCallM2
     static PIN_MUTEX       gLock;
     static INT32           gEnabled = 0;
 
-    static std::stack<ADDRINT> gCallStack;
-    static INT32          gIndent = 0;          // para formatação “árvore”
+    struct TraceThreadState {
+        std::stack<ADDRINT> calls;
+        INT32 indent = 0;
+    };
+    static TLS_KEY gThreadKey;
+
+    static TraceThreadState& ThreadState(THREADID tid)
+    {
+        auto* state = static_cast<TraceThreadState*>(PIN_GetThreadData(gThreadKey, tid));
+        if (!state) {
+            state = new TraceThreadState();
+            const BOOL stored = PIN_SetThreadData(gThreadKey, state, tid);
+            ASSERTX(stored);
+        }
+        return *state;
+    }
+
+    static VOID ThreadFini(THREADID tid, const CONTEXT*, INT32, VOID*)
+    {
+        delete static_cast<TraceThreadState*>(PIN_GetThreadData(gThreadKey, tid));
+        PIN_SetThreadData(gThreadKey, nullptr, tid);
+    }
+
     BOOL enableIdent = true;
     /* ----- helpers -------------------------------------------- */
     static inline bool IsOn(void) { return gEnabled != 0; }
 
-    static VOID Indent()
+    static VOID Indent(INT32 indent)
     {
-        for (INT32 i = 0; i < gIndent; ++i) gOut << "| ";
+        for (INT32 i = 0; i < indent; ++i) gOut << "| ";
     }
 
     static inline bool WantCall(ADDRINT src, ADDRINT dst)
@@ -90,8 +111,9 @@ namespace TraceFcnCallM2
         ADDRINT arg0, ADDRINT arg1, ADDRINT arg2,
         ADDRINT arg3, ADDRINT arg4, ADDRINT arg5) {
 
+        auto& state = ThreadState(tid);
         PIN_MutexLock(&gLock);
-        Indent();
+        Indent(state.indent);
 
         PIN_LockClient();
         RTN rtnIp = RTN_FindByAddress(ip);
@@ -107,7 +129,7 @@ namespace TraceFcnCallM2
             << "  [T" << tid << "] ("
             << std::hex << arg0 << getStringFromAddr(arg0) << ", " << arg1 << getStringFromAddr(arg1) << ", " << arg2 << getStringFromAddr(arg2) << ", "
             << arg3 << getStringFromAddr(arg3) << ", " << arg4 << getStringFromAddr(arg4) << ", " << arg5 << getStringFromAddr(arg5) << ", ...)\n";
-        if (enableIdent) ++gIndent;
+        if (enableIdent) ++state.indent;
         PIN_MutexUnlock(&gLock);
 
     }
@@ -122,15 +144,9 @@ namespace TraceFcnCallM2
     {
         if (!IsOn() || !WantCall(ip, target)) return;
 
-        if (isTail)
-        {
-            if (enableIdent && gIndent) --gIndent;
-        }
-        else
-        {
-            gCallStack.push(ip);
-        }
-        gCallStack.push(ip);
+        auto& state = ThreadState(tid);
+        if (isTail && enableIdent && state.indent) --state.indent;
+        state.calls.push(ip);
 
         LogFuncCall(tid, ip, target, isTail, arg0, arg1, arg2, arg3, arg4, arg5);
     }
@@ -142,7 +158,7 @@ namespace TraceFcnCallM2
     {
         if (!IsOn() || !WantCall(ip, target)) return;
 
-        gCallStack.push(ip);
+        ThreadState(tid).calls.push(ip);
 
         LogFuncCall(tid, ip, target, false, arg0, arg1, arg2, arg3, arg4, arg5);
     }
@@ -172,21 +188,22 @@ namespace TraceFcnCallM2
 
         if (!WantRet(retIp, nextIp)) return;
 
-        //if (gCallStack.empty())
+        //if (ThreadState(tid).calls.empty())
         //    return;                     // RET interno nas dlls chamadas – descarta-se para considerer ret apenas para o main
 
         /*  estamos a gravar só para chamadas registadas,
             logo a pilha está consistente                       */
-        if (enableIdent && gIndent) --gIndent;
+        auto& state = ThreadState(tid);
+        if (enableIdent && state.indent) --state.indent;
 
         ADDRINT callIp = 0;
-        if (!gCallStack.empty()) {
-            callIp = gCallStack.top();
-            gCallStack.pop();
+        if (!state.calls.empty()) {
+            callIp = state.calls.top();
+            state.calls.pop();
         }
 
         PIN_MutexLock(&gLock);
-        Indent();
+        Indent(state.indent);
         PIN_LockClient();
         RTN rtnRetIp = RTN_FindByAddress(retIp);
         PIN_UnlockClient();
@@ -194,7 +211,7 @@ namespace TraceFcnCallM2
         gOut << "Ret from   "
             << FormatAddress(retIp, rtnRetIp,
                 KnobSymbols, KnobFullImgName, KnobLines)
-            << "  [T" << std::dec << tid << "] Return value -> " << std::hex << *retVal << getStringFromAddr(retValue)
+            << "  [T" << std::dec << tid << "] Return value -> " << std::hex << *retVal << getStringFromAddr(*retVal)
             << "  (next " << nextIp << ", came-from " << callIp << ")\n";
         PIN_MutexUnlock(&gLock);
     }
@@ -336,7 +353,11 @@ namespace TraceFcnCallM2
         gOut.open(filename.c_str());
         gOut << std::hex << std::right << std::showbase;
 
-        PIN_MutexInit(&gLock);
+        const BOOL mutexInitialized = PIN_MutexInit(&gLock);
+        ASSERTX(mutexInitialized);
+        gThreadKey = PIN_CreateThreadDataKey(nullptr);
+        ASSERTX(gThreadKey != INVALID_TLS_KEY);
+        PIN_AddThreadFiniFunction(ThreadFini, nullptr);
 
         TRACE_AddInstrumentFunction(Trace, nullptr);
         if (true || IsStringInStrategyScope("Themida")) {

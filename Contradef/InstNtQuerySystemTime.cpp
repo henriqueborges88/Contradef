@@ -1,8 +1,8 @@
 #include "InstNtQuerySystemTime.h"
 
-std::map<CallContextKey, CallContext*> InstNtQuerySystemTime::callContextMap;
+CallContextMap InstNtQuerySystemTime::callContextMap;
 UINT32 InstNtQuerySystemTime::imgCallId = 0;
-UINT32 InstNtQuerySystemTime::fcnCallId = 0;
+CallSequenceNumber InstNtQuerySystemTime::fcnCallId = 0;
 Notifier* InstNtQuerySystemTime::globalNotifierPtr;
 
 
@@ -22,8 +22,8 @@ VOID InstNtQuerySystemTime::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -35,15 +35,15 @@ VOID InstNtQuerySystemTime::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstNtQuerySystemTimeArgs* args = reinterpret_cast<InstNtQuerySystemTimeArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

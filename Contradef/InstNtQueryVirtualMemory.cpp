@@ -1,8 +1,8 @@
 #include "InstNtQueryVirtualMemory.h"
 
-std::map<CallContextKey, CallContext*> InstNtQueryVirtualMemory::callContextMap;
+CallContextMap InstNtQueryVirtualMemory::callContextMap;
 UINT32 InstNtQueryVirtualMemory::imgCallId = 0;
-UINT32 InstNtQueryVirtualMemory::fcnCallId = 0;
+CallSequenceNumber InstNtQueryVirtualMemory::fcnCallId = 0;
 Notifier* InstNtQueryVirtualMemory::globalNotifierPtr;
 
 
@@ -28,8 +28,8 @@ VOID InstNtQueryVirtualMemory::CallbackBefore(THREADID tid, UINT32 callId, ADDRI
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -43,15 +43,15 @@ VOID InstNtQueryVirtualMemory::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstNtQueryVirtualMemoryArgs* args = reinterpret_cast<InstNtQueryVirtualMemoryArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

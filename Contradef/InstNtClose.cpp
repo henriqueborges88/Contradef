@@ -1,8 +1,8 @@
 #include "InstNtClose.h"
 
-std::map<CallContextKey, CallContext*> InstNtClose::callContextMap;
+CallContextMap InstNtClose::callContextMap;
 UINT32 InstNtClose::imgCallId = 0;
-UINT32 InstNtClose::fcnCallId = 0;
+CallSequenceNumber InstNtClose::fcnCallId = 0;
 Notifier* InstNtClose::globalNotifierPtr;
 
 VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT  rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -22,8 +22,8 @@ VOID InstNtClose::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddres
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -36,15 +36,15 @@ VOID InstNtClose::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstNtCloseArgs* args = reinterpret_cast<InstNtCloseArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

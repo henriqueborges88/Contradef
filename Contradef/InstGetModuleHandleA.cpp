@@ -11,9 +11,9 @@ Para o Themida:
 */
 #include "InstGetModuleHandleA.h"
 
-std::map<CallContextKey, CallContext*> InstGetModuleHandleA::callContextMap;
+CallContextMap InstGetModuleHandleA::callContextMap;
 UINT32 InstGetModuleHandleA::imgCallId = 0;
-UINT32 InstGetModuleHandleA::fcnCallId = 0;
+CallSequenceNumber InstGetModuleHandleA::fcnCallId = 0;
 Notifier* InstGetModuleHandleA::globalNotifierPtr;
 
 
@@ -50,8 +50,8 @@ VOID InstGetModuleHandleA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
     
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros de GetModuleHandleA e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -74,10 +74,10 @@ VOID InstGetModuleHandleA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const GetModuleHandleAArgs* args = reinterpret_cast<GetModuleHandleAArgs*>(callContext->functionArgs);
 

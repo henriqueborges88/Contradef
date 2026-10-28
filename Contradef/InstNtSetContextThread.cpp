@@ -1,8 +1,8 @@
 #include "InstNtSetContextThread.h"
 
-std::map<CallContextKey, CallContext*> InstNtSetContextThread::callContextMap;
+CallContextMap InstNtSetContextThread::callContextMap;
 UINT32 InstNtSetContextThread::imgCallId = 0;
-UINT32 InstNtSetContextThread::fcnCallId = 0;
+CallSequenceNumber InstNtSetContextThread::fcnCallId = 0;
 Notifier* InstNtSetContextThread::globalNotifierPtr;
 
 
@@ -24,8 +24,8 @@ VOID InstNtSetContextThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -38,15 +38,15 @@ VOID InstNtSetContextThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstNtSetContextThreadArgs* args = reinterpret_cast<InstNtSetContextThreadArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

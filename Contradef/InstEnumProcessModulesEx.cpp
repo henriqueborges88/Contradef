@@ -1,8 +1,8 @@
 #include "InstEnumProcessModulesEx.h"
 
-std::map<CallContextKey, CallContext*> InstEnumProcessModulesEx::callContextMap;
+CallContextMap InstEnumProcessModulesEx::callContextMap;
 UINT32 InstEnumProcessModulesEx::imgCallId = 0;
-UINT32 InstEnumProcessModulesEx::fcnCallId = 0;
+CallSequenceNumber InstEnumProcessModulesEx::fcnCallId = 0;
 Notifier* InstEnumProcessModulesEx::globalNotifierPtr;
 
 
@@ -26,8 +26,8 @@ VOID InstEnumProcessModulesEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRI
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstEnumProcessModulesEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT retValue, ADDRINT* returnAddress,
@@ -39,15 +39,15 @@ VOID InstEnumProcessModulesEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRIN
 
     // Instrumentar função
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar parâmetros
         const InstEnumProcessModulesExArgs* args = reinterpret_cast<InstEnumProcessModulesExArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

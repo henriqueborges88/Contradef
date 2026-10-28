@@ -1,9 +1,9 @@
 #include "InstGetFileSizeEx.h"
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstGetFileSizeEx::callContextMap;
+CallContextMap InstGetFileSizeEx::callContextMap;
 UINT32 InstGetFileSizeEx::imgCallId = 0;
-UINT32 InstGetFileSizeEx::fcnCallId = 0;
+CallSequenceNumber InstGetFileSizeEx::fcnCallId = 0;
 Notifier* InstGetFileSizeEx::globalNotifierPtr;
 
 // Callback executado antes da chamada da função GetFileSizeEx
@@ -25,8 +25,8 @@ VOID InstGetFileSizeEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
     // Criação e armazenamento do contexto da chamada
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Construção da mensagem de log
     std::stringstream& stringStream = callContext->stringStream;
@@ -53,13 +53,13 @@ VOID InstGetFileSizeEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
     // Criação do ID único para o contexto da chamada
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
+    CallContextKey key = { callId, tid };
 
     // Busca do contexto da chamada no mapa
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Conversão do valor de retorno para BOOL
@@ -98,7 +98,6 @@ VOID InstGetFileSizeEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         // Limpeza: remove e deleta o contexto da chamada
         delete reinterpret_cast<GetFileSizeExArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
 
     }
 

@@ -1,8 +1,8 @@
 #include "InstGetWindowTextA.h"
 
-std::map<CallContextKey, CallContext*> InstGetWindowTextA::callContextMap;
+CallContextMap InstGetWindowTextA::callContextMap;
 UINT32 InstGetWindowTextA::imgCallId = 0;
-UINT32 InstGetWindowTextA::fcnCallId = 0;
+CallSequenceNumber InstGetWindowTextA::fcnCallId = 0;
 Notifier* InstGetWindowTextA::globalNotifierPtr;
 
 
@@ -40,8 +40,8 @@ VOID InstGetWindowTextA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
     stringStream << "        lpString: " << ansiStringlpString << std::endl;
     stringStream << "        nMaxCount: " << nMaxCount << std::endl;
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -53,10 +53,10 @@ VOID InstGetWindowTextA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
         stringStream << "    Return Value: " << retValue << std::endl;
         stringStream << "[*] Completed" << std::endl << std::endl;

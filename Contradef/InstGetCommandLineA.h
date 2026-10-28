@@ -23,9 +23,9 @@ public:
     static VOID HandleTraceEvent(const EventData* data, void* context);
 
 private:
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     static Notifier* globalNotifierPtr;
 
     // Como GetCommandLineA não possui parâmetros, o CallbackBefore não precisa registrar nada além do contexto

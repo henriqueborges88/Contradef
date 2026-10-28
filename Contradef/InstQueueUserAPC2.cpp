@@ -1,8 +1,8 @@
 #include "InstQueueUserAPC2.h"
 
-std::map<CallContextKey, CallContext*> InstQueueUserAPC2::callContextMap;
+CallContextMap InstQueueUserAPC2::callContextMap;
 UINT32 InstQueueUserAPC2::imgCallId = 0;
-UINT32 InstQueueUserAPC2::fcnCallId = 0;
+CallSequenceNumber InstQueueUserAPC2::fcnCallId = 0;
 Notifier* InstQueueUserAPC2::globalNotifierPtr;
 
 VOID InstQueueUserAPC2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -21,8 +21,8 @@ VOID InstQueueUserAPC2::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] QueueUserAPC2..." << std::endl;
@@ -46,10 +46,10 @@ VOID InstQueueUserAPC2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -75,7 +75,6 @@ VOID InstQueueUserAPC2::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

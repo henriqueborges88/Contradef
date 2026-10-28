@@ -1,4 +1,5 @@
 #include "InstNtQueryInformationProcess.h"
+#include "SafeMemory.h"
 
 /*
 A fun��o NtQueryInformationProcess � uma chamada de sistema do Windows, e a instrumenta��o para ela pode ser mais complexa do que para fun��es de API padr�o.
@@ -66,9 +67,9 @@ Outras estruturas: https://www.cin.ufpe.br/~frsn/arquivos/GnuWin32/include/ddk/n
 LONG InstNtQueryInformationProcess::retVal;
 ADDRINT InstNtQueryInformationProcess::TARGET_MEMORY_ADDRESS;
 DWORD InstNtQueryInformationProcess::NtGlobalFlag = -1;
-std::map<CallContextKey, CallContext*> InstNtQueryInformationProcess::callContextMap;
+CallContextMap InstNtQueryInformationProcess::callContextMap;
 UINT32 InstNtQueryInformationProcess::imgCallId = 0;
-UINT32 InstNtQueryInformationProcess::fcnCallId = 0;
+CallSequenceNumber InstNtQueryInformationProcess::fcnCallId = 0;
 Notifier* InstNtQueryInformationProcess::globalNotifierPtr;
 
 
@@ -91,8 +92,8 @@ VOID InstNtQueryInformationProcess::CallbackBefore(THREADID tid, UINT32 callId, 
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] NtQueryInformationProcess..." << std::endl;
@@ -118,11 +119,11 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         
         std::stringstream& stringStream = callContext->stringStream;
 
@@ -163,33 +164,15 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
         // Outro Processamento
         const NtQueryInformationProcessArgs* args = reinterpret_cast<NtQueryInformationProcessArgs*>(callContext->functionArgs);
 
-        //CONTRAMEDIDAS
-        if (args->ProcessInformationClass == ProcessDebugPort) {
-            DWORD* debugPort = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            if (*debugPort != 0) {
-                //std::cout << "debugPort\n";
-                //*debugPort = 0;
+        // Preserve the debug-flags countermeasure only for successful queries.
+        if (status == 0 && args->ProcessInformationClass == ProcessDebugFlags) {
+            DWORD debugFlags = 0;
+            if (ReadTargetValue(args->ProcessInformation, args->ProcessInformationLength, debugFlags)
+                && debugFlags == 0) {
+                const DWORD noDebugFlags = 1;
+                WriteTargetValue(args->ProcessInformation, args->ProcessInformationLength, noDebugFlags);
             }
         }
-
-        if (args->ProcessInformationClass == ProcessDebugObjectHandle) {
-            HANDLE* debugHandle = reinterpret_cast<HANDLE*>(args->ProcessInformation);
-
-            if (*debugHandle != 0) {
-                //std::cout << "debugHandle "<< *debugHandle;
-                //*debugHandle = 0;
-            }
-        }
-
-        if (args->ProcessInformationClass == ProcessDebugFlags) {
-            DWORD* debugFlags = reinterpret_cast<DWORD*>(args->ProcessInformation);
-            if (*debugFlags == 0) {
-                //std::cout << "debugFlags\n";
-                *debugFlags = 1;
-            }
-        }
-
-
 
         if (false && ProcessInformationClass == ProcessBasicInformation) { // desativado
             // Verifica se ProcessInformation � um ponteiro v�lido
@@ -222,7 +205,6 @@ VOID InstNtQueryInformationProcess::CallbackAfter(THREADID tid, UINT32 callId, A
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
 
     }
     

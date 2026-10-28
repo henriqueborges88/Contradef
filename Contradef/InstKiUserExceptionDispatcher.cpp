@@ -1,8 +1,8 @@
 #include "InstKiUserExceptionDispatcher.h"
 
-std::map<CallContextKey, CallContext*> InstKiUserExceptionDispatcher::callContextMap;
+CallContextMap InstKiUserExceptionDispatcher::callContextMap;
 UINT32 InstKiUserExceptionDispatcher::imgCallId = 0;
-UINT32 InstKiUserExceptionDispatcher::fcnCallId = 0;
+CallSequenceNumber InstKiUserExceptionDispatcher::fcnCallId = 0;
 Notifier* InstKiUserExceptionDispatcher::globalNotifierPtr = nullptr;
 
 // ------------------------------------------------------------
@@ -158,8 +158,8 @@ VOID InstKiUserExceptionDispatcher::CallbackBefore(THREADID tid, UINT32 callId, 
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // -------------------------------
     // CONTRAMEDIDA: patch ANTES do dispatcher
@@ -184,15 +184,15 @@ VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, A
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         const KiUserExceptionDispatcherArgs* args =
             reinterpret_cast<KiUserExceptionDispatcherArgs*>(callContext->functionArgs);
 
@@ -235,8 +235,8 @@ VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, A
 
         //// Log da contramedida, se aplicável
         //auto pit = g_patchInfo.find(key);
-        //if (pit != g_patchInfo.end() && pit->second.inspected) {
-        //    const PatchInfo& pi = pit->second;
+        //if (pit != g_patchInfo.end() && ppendingCallContext.inspected) {
+        //    const PatchInfo& pi = ppendingCallContext;
         //    if (pi.patched) {
         //        ss << "    [Countermeasure] Patched exception: "
         //            << "Code 0x" << std::hex << pi.oldCode
@@ -262,7 +262,6 @@ VOID InstKiUserExceptionDispatcher::CallbackAfter(THREADID tid, UINT32 callId, A
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

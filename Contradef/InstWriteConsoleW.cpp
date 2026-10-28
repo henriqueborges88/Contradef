@@ -1,8 +1,8 @@
 #include "InstWriteConsoleW.h"
 
-std::map<CallContextKey, CallContext*> InstWriteConsoleW::callContextMap;
+CallContextMap InstWriteConsoleW::callContextMap;
 UINT32 InstWriteConsoleW::imgCallId = 0;
-UINT32 InstWriteConsoleW::fcnCallId = 0;
+CallSequenceNumber InstWriteConsoleW::fcnCallId = 0;
 Notifier* InstWriteConsoleW::globalNotifierPtr;
 
 VOID InstWriteConsoleW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hConsoleOutput, ADDRINT lpBuffer, ADDRINT nNumberOfCharsToWrite, ADDRINT lpNumberOfCharsWritten, ADDRINT lpReserved) {
@@ -22,8 +22,8 @@ VOID InstWriteConsoleW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
     std::stringstream& stringStream = callContext->stringStream;
     std::wstring wsBuffer = ConvertAddrToWideString(lpBuffer);
     PIN_LockClient();
@@ -48,10 +48,10 @@ VOID InstWriteConsoleW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         const WriteConsoleWArgs* args = reinterpret_cast<WriteConsoleWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;
         stringStream << "    Return Value: " << retValue << std::endl;

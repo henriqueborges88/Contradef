@@ -28,9 +28,9 @@ public:
     static VOID InstrumentFunction(RTN rtn, Notifier& globalNotifier);
 
 private:
-    static std::map<CallContextKey, CallContext*> callContextMap;
+    static CallContextMap callContextMap;
     static UINT32 imgCallId;
-    static UINT32 fcnCallId;
+    static CallSequenceNumber fcnCallId;
     static Notifier* globalNotifierPtr;
     static unsigned long InstVirtualQuery::show_module(WindowsAPI::MEMORY_BASIC_INFORMATION info, std::stringstream& stringStream);
     static VOID CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,

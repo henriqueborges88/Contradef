@@ -1,8 +1,8 @@
 #include "InstSleepEx.h"
 
-std::map<CallContextKey, CallContext*> InstSleepEx::callContextMap;
+CallContextMap InstSleepEx::callContextMap;
 UINT32 InstSleepEx::imgCallId = 0;
-UINT32 InstSleepEx::fcnCallId = 0;
+CallSequenceNumber InstSleepEx::fcnCallId = 0;
 Notifier* InstSleepEx::globalNotifierPtr;
 
 VOID InstSleepEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -20,8 +20,8 @@ VOID InstSleepEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddres
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] SleepEx..." << std::endl;
@@ -44,10 +44,10 @@ VOID InstSleepEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         DWORD result = static_cast<DWORD>(retValue);
@@ -79,7 +79,6 @@ VOID InstSleepEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress
 
         delete reinterpret_cast<SleepExArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,8 +1,8 @@
 #include "InstGetModuleFileNameW.h"
 
-std::map<CallContextKey, CallContext*> InstGetModuleFileNameW::callContextMap;
+CallContextMap InstGetModuleFileNameW::callContextMap;
 UINT32 InstGetModuleFileNameW::imgCallId = 0;
-UINT32 InstGetModuleFileNameW::fcnCallId = 0;
+CallSequenceNumber InstGetModuleFileNameW::fcnCallId = 0;
 Notifier* InstGetModuleFileNameW::globalNotifierPtr;
 
 VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT hModule, ADDRINT lpFilename, ADDRINT nSize) {
@@ -20,8 +20,8 @@ VOID InstGetModuleFileNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros de GetModuleFileNameW e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -46,10 +46,10 @@ VOID InstGetModuleFileNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         std::wstring wsFilename = ConvertAddrToWideString(lpFilename);

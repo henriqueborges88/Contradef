@@ -1,8 +1,8 @@
 #include "InstCreateToolhelp32Snapshot.h"
 
-std::map<CallContextKey, CallContext*> InstCreateToolhelp32Snapshot::callContextMap;
+CallContextMap InstCreateToolhelp32Snapshot::callContextMap;
 UINT32 InstCreateToolhelp32Snapshot::imgCallId = 0;
-UINT32 InstCreateToolhelp32Snapshot::fcnCallId = 0;
+CallSequenceNumber InstCreateToolhelp32Snapshot::fcnCallId = 0;
 Notifier* InstCreateToolhelp32Snapshot::globalNotifierPtr;
 
 VOID InstCreateToolhelp32Snapshot::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -20,8 +20,8 @@ VOID InstCreateToolhelp32Snapshot::CallbackBefore(THREADID tid, UINT32 callId, A
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] CreateToolhelp32Snapshot..." << std::endl;
@@ -44,10 +44,10 @@ VOID InstCreateToolhelp32Snapshot::CallbackAfter(THREADID tid, UINT32 callId, AD
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         HANDLE result = reinterpret_cast<HANDLE>(retValue);
@@ -71,7 +71,6 @@ VOID InstCreateToolhelp32Snapshot::CallbackAfter(THREADID tid, UINT32 callId, AD
 
         delete reinterpret_cast<CreateToolhelp32SnapshotArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,8 +1,8 @@
 #include "InstPostQuitMessage.h"
 
-std::map<CallContextKey, CallContext*> InstPostQuitMessage::callContextMap;
+CallContextMap InstPostQuitMessage::callContextMap;
 UINT32 InstPostQuitMessage::imgCallId = 0;
-UINT32 InstPostQuitMessage::fcnCallId = 0;
+CallSequenceNumber InstPostQuitMessage::fcnCallId = 0;
 Notifier* InstPostQuitMessage::globalNotifierPtr = nullptr;
 
 VOID InstPostQuitMessage::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT /*rtn*/, CONTEXT* /*ctx*/,

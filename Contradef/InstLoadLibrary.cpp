@@ -1,8 +1,8 @@
 #include "InstLoadLibrary.h"
 
-std::map<CallContextKey, CallContext*> InstLoadLibrary::callContextMap;
+CallContextMap InstLoadLibrary::callContextMap;
 UINT32 InstLoadLibrary::imgCallId = 0;
-UINT32 InstLoadLibrary::fcnCallId = 0;
+CallSequenceNumber InstLoadLibrary::fcnCallId = 0;
 Notifier* InstLoadLibrary::globalNotifierPtr;
 
 
@@ -39,8 +39,8 @@ VOID InstLoadLibrary::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     stringStream << "    Parameters: " << std::endl;
     stringStream << "        lpLibFileName: " << libFileName << std::endl;
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -53,10 +53,10 @@ VOID InstLoadLibrary::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
 
         std::stringstream& stringStream = callContext->stringStream;
 

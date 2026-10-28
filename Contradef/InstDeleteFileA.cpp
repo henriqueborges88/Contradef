@@ -1,8 +1,8 @@
 #include "InstDeleteFileA.h"
 
-std::map<CallContextKey, CallContext*> InstDeleteFileA::callContextMap;
+CallContextMap InstDeleteFileA::callContextMap;
 UINT32 InstDeleteFileA::imgCallId = 0;
-UINT32 InstDeleteFileA::fcnCallId = 0;
+CallSequenceNumber InstDeleteFileA::fcnCallId = 0;
 Notifier* InstDeleteFileA::globalNotifierPtr;
 
 VOID InstDeleteFileA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress, ADDRINT lpFileName) {
@@ -18,8 +18,8 @@ VOID InstDeleteFileA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Obtendo o nome do arquivo e o endereço da função chamante
     std::stringstream stringStream;
@@ -42,10 +42,10 @@ VOID InstDeleteFileA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: " << retValue << std::endl;

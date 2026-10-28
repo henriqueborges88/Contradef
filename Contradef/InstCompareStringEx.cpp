@@ -1,8 +1,8 @@
 #include "InstCompareStringEx.h"
 
-std::map<CallContextKey, CallContext*> InstCompareStringEx::callContextMap;
+CallContextMap InstCompareStringEx::callContextMap;
 UINT32 InstCompareStringEx::imgCallId = 0;
-UINT32 InstCompareStringEx::fcnCallId = 0;
+CallSequenceNumber InstCompareStringEx::fcnCallId = 0;
 Notifier* InstCompareStringEx::globalNotifierPtr;
 
 VOID InstCompareStringEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -26,8 +26,8 @@ VOID InstCompareStringEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] CompareStringEx..." << std::endl;
@@ -93,10 +93,10 @@ VOID InstCompareStringEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         int result = static_cast<int>(retValue);
@@ -120,7 +120,6 @@ VOID InstCompareStringEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

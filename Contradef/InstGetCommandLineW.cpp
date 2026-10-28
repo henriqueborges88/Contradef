@@ -1,8 +1,8 @@
 #include "InstGetCommandLineW.h"
 
-std::map<CallContextKey, CallContext*> InstGetCommandLineW::callContextMap;
+CallContextMap InstGetCommandLineW::callContextMap;
 UINT32 InstGetCommandLineW::imgCallId = 0;
-UINT32 InstGetCommandLineW::fcnCallId = 0;
+CallSequenceNumber InstGetCommandLineW::fcnCallId = 0;
 Notifier* InstGetCommandLineW::globalNotifierPtr;
 
 VOID InstGetCommandLineW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress) {
@@ -13,8 +13,8 @@ VOID InstGetCommandLineW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, nullptr);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] GetCommandLineW..." << std::endl;
@@ -34,10 +34,10 @@ VOID InstGetCommandLineW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Valor de retorno é um LPWSTR (wchar_t*)
@@ -65,7 +65,6 @@ VOID InstGetCommandLineW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

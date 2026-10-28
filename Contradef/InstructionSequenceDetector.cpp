@@ -90,14 +90,14 @@ BOOL InstMatch(const InstrumentedInstruction& queue_inst, const InstructionToMat
 }
 
 InstructionSequenceDetector::InstructionSequenceDetector()
-    : max_sequence_length(0)
+    : tls_key(INVALID_TLS_KEY), max_sequence_length(0)
 {
-    tls_key = PIN_CreateThreadDataKey(NULL);
 }
 
 InstructionSequenceDetector::~InstructionSequenceDetector()
 {
-    // Nada a destruir explicitamente
+    for (auto& entry : instructionCache) delete entry.second;
+    for (auto* sequence : instruction_sequences) delete sequence;
 }
 
 void InstructionSequenceDetector::AddInstructionSequence(const std::vector<std::vector<std::string>>& sequence, SeqMatchCallbackFunc matchCallBack, VOID* v, int matchOcurrenceIndex, int matchOcurrenceIndexEnd)
@@ -171,11 +171,16 @@ VOID InstructionSequenceDetector::Instruction(ADDRINT ip, CONTEXT* ctxt, Instrum
 
 VOID InstructionSequenceDetector::DisassembledInstruction(ADDRINT ip, InstrumentedInstruction* ins_instr)
 {
+    if (max_sequence_length == 0) {
+        delete ins_instr;
+        return;
+    }
     ThreadData* tdata = GetThreadData();
 
     // Adicionar a instrução atual à fila (com limite fixo de tamanho)
     ins_instr->instAddr = ip;
     if (tdata->disassembled_instruction_queue.size() == max_sequence_length) {
+        delete tdata->disassembled_instruction_queue.front();
         tdata->disassembled_instruction_queue.pop_front();
     }
     tdata->disassembled_instruction_queue.push_back(ins_instr);
@@ -370,14 +375,17 @@ VOID InstructionSequenceDetector::InstructionTrace(INS ins, VOID* v, CaptureMode
 
 VOID InstructionSequenceDetector::ThreadStartImpl(THREADID tid, CONTEXT* ctxt, INT32 flags)
 {
+    if (PIN_GetThreadData(tls_key, tid)) return;
     ThreadData* tdata = new ThreadData();
-    PIN_SetThreadData(tls_key, tdata, tid);
+    const BOOL stored = PIN_SetThreadData(tls_key, tdata, tid);
+    ASSERTX(stored);
 }
 
 VOID InstructionSequenceDetector::ThreadFiniImpl(THREADID tid, const CONTEXT* ctxt, INT32 code)
 {
     ThreadData* tdata = static_cast<ThreadData*>(PIN_GetThreadData(tls_key, tid));
     delete tdata;
+    PIN_SetThreadData(tls_key, nullptr, tid);
 }
 
 VOID InstructionSequenceDetector::ThreadStart(THREADID tid, CONTEXT* ctxt, INT32 flags, VOID* v)
@@ -402,6 +410,8 @@ VOID InstructionSequenceDetector::ThreadFini(THREADID tid, const CONTEXT* ctxt, 
 
 void InstructionSequenceDetector::Initialize()
 {
+    tls_key = PIN_CreateThreadDataKey(nullptr);
+    ASSERTX(tls_key != INVALID_TLS_KEY);
     // Registrar as funções de callback estáticas
     PIN_AddThreadStartFunction(ThreadStart, this);
     PIN_AddThreadFiniFunction(ThreadFini, this);
@@ -411,6 +421,11 @@ InstructionSequenceDetector::ThreadData* InstructionSequenceDetector::GetThreadD
 {
     THREADID tid = PIN_ThreadId();
     ThreadData* tdata = static_cast<ThreadData*>(PIN_GetThreadData(tls_key, tid));
+    if (!tdata) {
+        tdata = new ThreadData();
+        const BOOL stored = PIN_SetThreadData(tls_key, tdata, tid);
+        ASSERTX(stored);
+    }
     return tdata;
 }
 

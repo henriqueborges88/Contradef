@@ -1,8 +1,8 @@
 #include "InstRegOpenKeyW.h"
 
-std::map<CallContextKey, CallContext*> InstRegOpenKeyW::callContextMap;
+CallContextMap InstRegOpenKeyW::callContextMap;
 UINT32 InstRegOpenKeyW::imgCallId = 0;
-UINT32 InstRegOpenKeyW::fcnCallId = 0;
+CallSequenceNumber InstRegOpenKeyW::fcnCallId = 0;
 Notifier* InstRegOpenKeyW::globalNotifierPtr;
 
 
@@ -40,8 +40,8 @@ VOID InstRegOpenKeyW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAd
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
 
     
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -53,15 +53,15 @@ VOID InstRegOpenKeyW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAdd
 
     // Instrumentar fun�ao
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         // Registrar Parámetros
         const InstRegOpenKeyWArgs* args = reinterpret_cast<InstRegOpenKeyWArgs*>(callContext->functionArgs);
         std::stringstream& stringStream = callContext->stringStream;

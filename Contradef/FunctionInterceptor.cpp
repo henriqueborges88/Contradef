@@ -26,6 +26,7 @@ VOID HandleExecutionCompletedEvent(const EventData* data, void* context) {
 
 	auto executionEvent = static_cast<const ExecutionEventData*>(data);
 	auto executionOutputText = executionEvent->executionInformation.outputText;
+	CallContextLockGuard guard;
 	MainOutFile << executionOutputText;
 	MainOutFile.flush();  // Esvazia o buffer de saída
 }
@@ -295,6 +296,7 @@ VOID InstrumentFunctionInterceptor(IMG img, VOID* v) {
 }
 
 int InitFunctionInterceptor() {
+    InitCallContextStorage();
 	// Criando observadores dinamicamente com o contexto nulo
 	auto* executionCompleted = new Observer(HandleExecutionCompletedEvent, NULL);
 	// Anexa os observers ao notificador

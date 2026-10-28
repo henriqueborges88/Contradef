@@ -1,8 +1,8 @@
 #include "InstGetComputerNameA.h"
 
-std::map<CallContextKey, CallContext*> InstGetComputerNameA::callContextMap;
+CallContextMap InstGetComputerNameA::callContextMap;
 UINT32 InstGetComputerNameA::imgCallId = 0;
-UINT32 InstGetComputerNameA::fcnCallId = 0;
+CallSequenceNumber InstGetComputerNameA::fcnCallId = 0;
 Notifier* InstGetComputerNameA::globalNotifierPtr;
 
 VOID InstGetComputerNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -18,8 +18,8 @@ VOID InstGetComputerNameA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] GetComputerNameA..." << std::endl;
@@ -42,10 +42,10 @@ VOID InstGetComputerNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -89,7 +89,6 @@ VOID InstGetComputerNameA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
         delete reinterpret_cast<GetComputerNameAArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

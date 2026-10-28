@@ -1,8 +1,8 @@
 #include "InstGetProcAddress.h"
 
-std::map<CallContextKey, CallContext*> InstGetProcAddress::callContextMap;
+CallContextMap InstGetProcAddress::callContextMap;
 UINT32 InstGetProcAddress::imgCallId = 0;
-UINT32 InstGetProcAddress::fcnCallId = 0;
+CallSequenceNumber InstGetProcAddress::fcnCallId = 0;
 Notifier* InstGetProcAddress::globalNotifierPtr;
 
 VOID InstGetProcAddress::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -19,8 +19,8 @@ VOID InstGetProcAddress::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT ins
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] GetProcAddress..." << std::endl;
@@ -52,10 +52,10 @@ VOID InstGetProcAddress::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         {
@@ -81,7 +81,6 @@ VOID InstGetProcAddress::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst
 
         delete reinterpret_cast<GetProcAddressArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

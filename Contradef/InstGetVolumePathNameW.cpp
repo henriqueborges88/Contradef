@@ -1,9 +1,9 @@
 #include "InstGetVolumePathNameW.h"
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstGetVolumePathNameW::callContextMap;
+CallContextMap InstGetVolumePathNameW::callContextMap;
 UINT32 InstGetVolumePathNameW::imgCallId = 0;
-UINT32 InstGetVolumePathNameW::fcnCallId = 0;
+CallSequenceNumber InstGetVolumePathNameW::fcnCallId = 0;
 Notifier* InstGetVolumePathNameW::globalNotifierPtr;
 
 // Callback executado antes da chamada da função GetVolumePathNameW
@@ -26,8 +26,8 @@ VOID InstGetVolumePathNameW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT
 
     // Criação e armazenamento do contexto da chamada
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Construção da mensagem de log
     std::stringstream& stringStream = callContext->stringStream;
@@ -72,13 +72,13 @@ VOID InstGetVolumePathNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
 
     // Criação do ID único para o contexto da chamada
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
+    CallContextKey key = { callId, tid };
 
     // Busca do contexto da chamada no mapa
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Conversão do valor de retorno para BOOL
@@ -123,7 +123,6 @@ VOID InstGetVolumePathNameW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT 
         // Limpeza: remove e deleta o contexto da chamada
         delete reinterpret_cast<GetVolumePathNameWArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
 
     }
 }

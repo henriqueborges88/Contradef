@@ -412,6 +412,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallContext.h" />
+    <ClInclude Include="CallContextStorage.h" />
+    <ClInclude Include="SafeMemory.h" />
     <ClInclude Include="CallStackManager.h" />
     <ClInclude Include="CommonDef.h" />
     <ClInclude Include="ContextMonitor.h" />

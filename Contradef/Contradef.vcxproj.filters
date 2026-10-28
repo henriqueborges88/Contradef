@@ -563,6 +563,12 @@
     <ClInclude Include="CallContext.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
+    <ClInclude Include="CallContextStorage.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="SafeMemory.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
     <ClInclude Include="Observer.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>

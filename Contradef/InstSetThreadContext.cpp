@@ -1,9 +1,9 @@
 #include "InstSetThreadContext.h"
 #include "NtStructures.h"
 
-std::map<CallContextKey, CallContext*> InstSetThreadContext::callContextMap;
+CallContextMap InstSetThreadContext::callContextMap;
 UINT32 InstSetThreadContext::imgCallId = 0;
-UINT32 InstSetThreadContext::fcnCallId = 0;
+CallSequenceNumber InstSetThreadContext::fcnCallId = 0;
 Notifier* InstSetThreadContext::globalNotifierPtr;
 
 
@@ -39,8 +39,8 @@ VOID InstSetThreadContext::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream stringStream;
     stringStream << std::endl << "[+] SetThreadContext..." << std::endl;
@@ -152,10 +152,10 @@ VOID InstSetThreadContext::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: " << retVal << std::endl;
@@ -176,7 +176,6 @@ VOID InstSetThreadContext::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
         delete reinterpret_cast<SetThreadContextArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,8 +1,8 @@
 #include "InstRegEnumKeyExW.h"
 
-std::map<CallContextKey, CallContext*> InstRegEnumKeyExW::callContextMap;
+CallContextMap InstRegEnumKeyExW::callContextMap;
 UINT32 InstRegEnumKeyExW::imgCallId = 0;
-UINT32 InstRegEnumKeyExW::fcnCallId = 0;
+CallSequenceNumber InstRegEnumKeyExW::fcnCallId = 0;
 Notifier* InstRegEnumKeyExW::globalNotifierPtr;
 
 VOID InstRegEnumKeyExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -26,8 +26,8 @@ VOID InstRegEnumKeyExW::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] RegEnumKeyExW..." << std::endl;
@@ -54,10 +54,10 @@ VOID InstRegEnumKeyExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
         return;
     }
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         LONG result = static_cast<LONG>(retValue);
@@ -91,7 +91,6 @@ VOID InstRegEnumKeyExW::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instA
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -2,9 +2,9 @@
 #include "ThemidaDef.h"
 #include "SplashTarget.h"
 
-std::map<CallContextKey, CallContext*> InstCreateWindowExA::callContextMap;
+CallContextMap InstCreateWindowExA::callContextMap;
 UINT32 InstCreateWindowExA::imgCallId = 0;
-UINT32 InstCreateWindowExA::fcnCallId = 0;
+CallSequenceNumber InstCreateWindowExA::fcnCallId = 0;
 Notifier* InstCreateWindowExA::globalNotifierPtr = nullptr;
 
 // --- USER32/KERNEL32 dinamicamente ---
@@ -352,8 +352,8 @@ VOID InstCreateWindowExA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
     UINT32 callCtxId = callId * 100 + fcnCallId;
 
     auto* callContext = new CallContext(callCtxId, tid, rtnAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 }
 
 VOID InstCreateWindowExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT /*rtn*/, CONTEXT* /*ctx*/,
@@ -368,16 +368,16 @@ VOID InstCreateWindowExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
 
-    if (it != callContextMap.end()) {
+    if (pendingCallContext != nullptr) {
         PIN_LockClient();
         IMG img = IMG_FindByAddress(instAddress);
         RTN rtnCurrent = RTN_FindByAddress(instAddress);
         PIN_UnlockClient();
 
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         const CreateWindowExAArgs* args = reinterpret_cast<CreateWindowExAArgs*>(callContext->functionArgs);
         std::stringstream& ss = callContext->stringStream;
 
@@ -472,7 +472,6 @@ VOID InstCreateWindowExA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

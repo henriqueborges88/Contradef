@@ -1,8 +1,8 @@
 #include "InstReadFile.h"
 
-std::map<CallContextKey, CallContext*> InstReadFile::callContextMap;
+CallContextMap InstReadFile::callContextMap;
 UINT32 InstReadFile::imgCallId = 0;
-UINT32 InstReadFile::fcnCallId = 0;
+CallSequenceNumber InstReadFile::fcnCallId = 0;
 Notifier* InstReadFile::globalNotifierPtr;
 
 VOID InstReadFile::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -23,8 +23,8 @@ VOID InstReadFile::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddre
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] ReadFile..." << std::endl;
@@ -50,10 +50,10 @@ VOID InstReadFile::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddres
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         BOOL result = static_cast<BOOL>(retValue);
@@ -86,7 +86,6 @@ VOID InstReadFile::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAddres
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

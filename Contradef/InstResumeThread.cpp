@@ -1,8 +1,8 @@
 #include "InstResumeThread.h"
 
-std::map<CallContextKey, CallContext*> InstResumeThread::callContextMap;
+CallContextMap InstResumeThread::callContextMap;
 UINT32 InstResumeThread::imgCallId = 0;
-UINT32 InstResumeThread::fcnCallId = 0;
+CallSequenceNumber InstResumeThread::fcnCallId = 0;
 Notifier* InstResumeThread::globalNotifierPtr;
 
 VOID InstResumeThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -22,8 +22,8 @@ VOID InstResumeThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instA
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -45,10 +45,10 @@ VOID InstResumeThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         if (retVal == (ADDRINT)-1) {
@@ -68,7 +68,6 @@ VOID InstResumeThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT instAd
 
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

@@ -1,9 +1,9 @@
 #include "InstSleep.h"
 
 /* ---------- variáveis estáticas ---------- */
-std::map<CallContextKey, CallContext*> InstSleep::callContextMap;
+CallContextMap InstSleep::callContextMap;
 UINT32 InstSleep::imgCallId = 0;
-UINT32 InstSleep::fcnCallId = 0;
+CallSequenceNumber InstSleep::fcnCallId = 0;
 Notifier* InstSleep::globalNotifierPtr = nullptr;
 
 /* ---------- BEFORE ---------- */
@@ -17,7 +17,7 @@ VOID InstSleep::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT inst, ADDRIN
     UINT32 ctxId = callId * 100 + fcnCallId;
 
     auto* cc = new CallContext(ctxId, tid, inst, args);
-    callContextMap[{ctxId, tid}] = cc;
+    SaveCallContext(callContextMap, {callId, tid}, cc);
 
     std::stringstream& ss = cc->stringStream;
     ss << "\n[+] Sleep...\n"
@@ -39,9 +39,9 @@ VOID InstSleep::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, ADDRINT
     if (instrumentOnlyMain && !IsMainExecutable(*returnAddress)) return;
 
     UINT32 ctxId = callId * 100 + fcnCallId;
-    auto it = callContextMap.find({ ctxId, tid });
-    if (it != callContextMap.end()) {
-        CallContext* cc = it->second;
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, { callId, tid });
+    if (pendingCallContext != nullptr) {
+        CallContext* cc = pendingCallContext;
         std::stringstream& ss = cc->stringStream;
 
         // Sleep é VOID — apenas indicamos conclusão
@@ -53,7 +53,6 @@ VOID InstSleep::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT inst, ADDRINT
 
         delete reinterpret_cast<SleepArgs*>(cc->functionArgs);
         delete cc;
-        callContextMap.erase(it);
     }
     fcnCallId++;
 }

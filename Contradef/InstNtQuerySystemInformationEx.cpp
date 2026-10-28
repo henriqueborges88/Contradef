@@ -1,8 +1,8 @@
 #include "InstNtQuerySystemInformationEx.h"
 
-std::map<CallContextKey, CallContext*> InstNtQuerySystemInformationEx::callContextMap;
+CallContextMap InstNtQuerySystemInformationEx::callContextMap;
 UINT32 InstNtQuerySystemInformationEx::imgCallId = 0;
-UINT32 InstNtQuerySystemInformationEx::fcnCallId = 0;
+CallSequenceNumber InstNtQuerySystemInformationEx::fcnCallId = 0;
 Notifier* InstNtQuerySystemInformationEx::globalNotifierPtr;
 
 VOID InstNtQuerySystemInformationEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress,
@@ -25,8 +25,8 @@ VOID InstNtQuerySystemInformationEx::CallbackBefore(THREADID tid, UINT32 callId,
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando os parâmetros e o endereço da função chamante
     std::stringstream& stringStream = callContext->stringStream;
@@ -54,10 +54,10 @@ VOID InstNtQuerySystemInformationEx::CallbackAfter(THREADID tid, UINT32 callId, 
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: 0x" << std::hex << retVal << std::dec << std::endl;
@@ -71,7 +71,6 @@ VOID InstNtQuerySystemInformationEx::CallbackAfter(THREADID tid, UINT32 callId, 
         const NtQuerySystemInformationExArgs* args = reinterpret_cast<NtQuerySystemInformationExArgs*>(callContext->functionArgs);
         delete args;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

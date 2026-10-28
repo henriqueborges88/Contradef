@@ -1,8 +1,8 @@
 #include "InstGetCurrentThread.h"
 
-std::map<CallContextKey, CallContext*> InstGetCurrentThread::callContextMap;
+CallContextMap InstGetCurrentThread::callContextMap;
 UINT32 InstGetCurrentThread::imgCallId = 0;
-UINT32 InstGetCurrentThread::fcnCallId = 0;
+CallSequenceNumber InstGetCurrentThread::fcnCallId = 0;
 Notifier* InstGetCurrentThread::globalNotifierPtr;
 
 VOID InstGetCurrentThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress) {
@@ -15,8 +15,8 @@ VOID InstGetCurrentThread::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
 
     auto* callContext = new CallContext(callCtxId, tid, instAddress, nullptr);
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     // Registrando a chamada
     std::stringstream& stringStream = callContext->stringStream;
@@ -36,10 +36,10 @@ VOID InstGetCurrentThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Current thread handle: " << std::hex << retVal << std::dec << std::endl;
@@ -51,7 +51,6 @@ VOID InstGetCurrentThread::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

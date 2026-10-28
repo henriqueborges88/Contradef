@@ -5,9 +5,9 @@ static const bool kEnableCountermeasure = false;
 static const bool kAggressiveAV = false; // se true, também neutraliza 0xC0000005 quando for levantada via RaiseException.
 // =============================================
 
-std::map<CallContextKey, CallContext*> InstRaiseException::callContextMap;
+CallContextMap InstRaiseException::callContextMap;
 UINT32 InstRaiseException::imgCallId = 0;
-UINT32 InstRaiseException::fcnCallId = 0;
+CallSequenceNumber InstRaiseException::fcnCallId = 0;
 Notifier* InstRaiseException::globalNotifierPtr;
 
 static inline bool IsCodeToKeep(DWORD code) {
@@ -48,8 +48,8 @@ VOID InstRaiseException::CallbackBefore(
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& ss = callContext->stringStream;
     ss << "\n[+] RaiseException...\n"
@@ -126,10 +126,10 @@ VOID InstRaiseException::CallbackAfter(
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& ss = callContext->stringStream;
 
         // RaiseException é VOID
@@ -154,7 +154,6 @@ VOID InstRaiseException::CallbackAfter(
 
         delete a;
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

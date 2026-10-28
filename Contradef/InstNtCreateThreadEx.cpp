@@ -1,8 +1,8 @@
 #include "InstNtCreateThreadEx.h"
 
-std::map<CallContextKey, CallContext*> InstNtCreateThreadEx::callContextMap;
+CallContextMap InstNtCreateThreadEx::callContextMap;
 UINT32 InstNtCreateThreadEx::imgCallId = 0;
-UINT32 InstNtCreateThreadEx::fcnCallId = 0;
+CallSequenceNumber InstNtCreateThreadEx::fcnCallId = 0;
 Notifier* InstNtCreateThreadEx::globalNotifierPtr;
 
 
@@ -58,8 +58,8 @@ VOID InstNtCreateThreadEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT i
     stringStream << "        MaximumStackSize: " << MaximumStackSize << std::endl;
     stringStream << "        AttributeList: " << AttributeList << std::endl;
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -74,11 +74,11 @@ VOID InstNtCreateThreadEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT in
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
         IMG img = IMG_FindByAddress(instAddress);
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: " << retValue << std::endl;

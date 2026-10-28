@@ -1,8 +1,8 @@
 #include "InstNtCreateProcessEx.h"
 
-std::map<CallContextKey, CallContext*> InstNtCreateProcessEx::callContextMap;
+CallContextMap InstNtCreateProcessEx::callContextMap;
 UINT32 InstNtCreateProcessEx::imgCallId = 0;
-UINT32 InstNtCreateProcessEx::fcnCallId = 0;
+CallSequenceNumber InstNtCreateProcessEx::fcnCallId = 0;
 Notifier* InstNtCreateProcessEx::globalNotifierPtr;
 
 
@@ -54,8 +54,8 @@ VOID InstNtCreateProcessEx::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT 
     stringStream << "        ExceptionPort: " << ExceptionPort << std::endl;
     stringStream << "        CreateFlags: " << CreateFlags << std::endl;
 
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     }
 
@@ -69,10 +69,10 @@ VOID InstNtCreateProcessEx::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT i
 
     // Instrumentar fun��o
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         stringStream << "    Return Value: " << retValue << std::endl;

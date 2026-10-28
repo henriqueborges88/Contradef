@@ -1,8 +1,8 @@
 #include "InstGetCommandLineA.h"
 
-std::map<CallContextKey, CallContext*> InstGetCommandLineA::callContextMap;
+CallContextMap InstGetCommandLineA::callContextMap;
 UINT32 InstGetCommandLineA::imgCallId = 0;
-UINT32 InstGetCommandLineA::fcnCallId = 0;
+CallSequenceNumber InstGetCommandLineA::fcnCallId = 0;
 Notifier* InstGetCommandLineA::globalNotifierPtr;
 
 VOID InstGetCommandLineA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT instAddress, ADDRINT rtn, CONTEXT* ctx, ADDRINT returnAddress) {
@@ -14,8 +14,8 @@ VOID InstGetCommandLineA::CallbackBefore(THREADID tid, UINT32 callId, ADDRINT in
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, nullptr);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& stringStream = callContext->stringStream;
     stringStream << std::endl << "[+] GetCommandLineA..." << std::endl;
@@ -36,10 +36,10 @@ VOID InstGetCommandLineA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end()) {
-        CallContext* callContext = it->second;
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr) {
+        CallContext* callContext = pendingCallContext;
         std::stringstream& stringStream = callContext->stringStream;
 
         // Valor de retorno é um LPSTR (char*), se não for NULL, podemos tentar ler a string
@@ -70,7 +70,6 @@ VOID InstGetCommandLineA::CallbackAfter(THREADID tid, UINT32 callId, ADDRINT ins
         globalNotifierPtr->NotifyAll(&executionEvent);
 
         delete callContext;
-        callContextMap.erase(it);
     }
 
     fcnCallId++;

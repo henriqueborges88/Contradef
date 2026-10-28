@@ -6,9 +6,9 @@
 #include <algorithm>
 
 // Inicialização das variáveis estáticas
-std::map<CallContextKey, CallContext*> InstGetSystemFirmwareTable::callContextMap;
+CallContextMap InstGetSystemFirmwareTable::callContextMap;
 UINT32 InstGetSystemFirmwareTable::imgCallId = 0;
-UINT32 InstGetSystemFirmwareTable::fcnCallId = 0;
+CallSequenceNumber InstGetSystemFirmwareTable::fcnCallId = 0;
 Notifier* InstGetSystemFirmwareTable::globalNotifierPtr;
 
 /* =========================================================================================
@@ -109,8 +109,8 @@ VOID InstGetSystemFirmwareTable::CallbackBefore(THREADID tid, UINT32 callId, ADD
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
     auto* callContext = new CallContext(callCtxId, tid, instAddress, args);
-    CallContextKey key = { callCtxId, tid };
-    callContextMap[key] = callContext;
+    CallContextKey key = { callId, tid };
+    SaveCallContext(callContextMap, key, callContext);
 
     std::stringstream& ss = callContext->stringStream;
     ss << std::endl << "[+] GetSystemFirmwareTable..." << std::endl;
@@ -134,11 +134,11 @@ VOID InstGetSystemFirmwareTable::CallbackAfter(THREADID tid, UINT32 callId, ADDR
     }
 
     UINT32 callCtxId = callId * 100 + fcnCallId;
-    CallContextKey key = { callCtxId, tid };
-    auto it = callContextMap.find(key);
-    if (it != callContextMap.end())
+    CallContextKey key = { callId, tid };
+    CallContext* pendingCallContext = TakeCallContext(callContextMap, key);
+    if (pendingCallContext != nullptr)
     {
-        CallContext* callContext = it->second;
+        CallContext* callContext = pendingCallContext;
         std::stringstream& ss = callContext->stringStream;
         GetSystemFirmwareTableArgs* args = static_cast<GetSystemFirmwareTableArgs*>(callContext->functionArgs);
 
@@ -201,7 +201,6 @@ VOID InstGetSystemFirmwareTable::CallbackAfter(THREADID tid, UINT32 callId, ADDR
 
         delete reinterpret_cast<GetSystemFirmwareTableArgs*>(callContext->functionArgs);
         delete callContext;
-        callContextMap.erase(it);
     }
 }
 
